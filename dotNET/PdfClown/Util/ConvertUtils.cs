@@ -144,8 +144,25 @@ namespace PdfClown.Util
             return Bytes;
         }
 
-        public static byte[] IntToByteArray(int data)
-        { return new byte[] { (byte)(data >> 24), (byte)(data >> 16), (byte)(data >> 8), (byte)data }; }
+        public static byte[] IntToByteArray(int data, bool compact = false)
+        {
+            if (compact)
+            {
+                if (data < 1 << 8)
+                {
+                    return new byte[] { (byte)data };
+                }
+                else if (data < 1 << 16)
+                {
+                    return new byte[] { (byte)(data >> 8), (byte)data };
+                }
+                else if (data < 1 << 24)
+                {
+                    return new byte[] { (byte)(data >> 16), (byte)(data >> 8), (byte)data };
+                }
+            }
+            return new byte[] { (byte)(data >> 24), (byte)(data >> 16), (byte)(data >> 8), (byte)data };
+        }
 
         public static byte[] NumberToByteArray(int data, int length, ByteOrderEnum byteOrder)
         {

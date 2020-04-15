@@ -37,8 +37,7 @@ namespace PdfClown.Documents.Contents.Objects
       operation [PDF:1.6:5.3.2].</summary>
     */
     [PDF(VersionEnum.PDF10)]
-    public sealed class ShowAdjustedText
-      : ShowText
+    public sealed class ShowAdjustedText : ShowText
     {
         #region static
         #region fields
@@ -53,10 +52,12 @@ namespace PdfClown.Documents.Contents.Objects
             If the element is a byte array (encoded text), this operator shows the text glyphs.
             If it is a number (glyph adjustment), the operator adjusts the next glyph position by that amount.</param>
         */
-        public ShowAdjustedText(IList<object> value) : base(OperatorKeyword, (PdfDirectObject)new PdfArray())
+        public ShowAdjustedText(IList<object> value)
+            : base(OperatorKeyword, (PdfDirectObject)new PdfArray())
         { Value = value; }
 
-        internal ShowAdjustedText(IList<PdfDirectObject> operands) : base(OperatorKeyword, operands)
+        internal ShowAdjustedText(IList<PdfDirectObject> operands)
+            : base(OperatorKeyword, operands)
         { }
         #endregion
 
@@ -80,26 +81,24 @@ namespace PdfClown.Documents.Contents.Objects
             set => Value = new List<object>() { (object)value };
         }
 
-        public override IList<object> Value
+        public override IEnumerable<object> Value
         {
             get
             {
-                var value = new List<object>();
                 foreach (PdfDirectObject element in ((PdfArray)operands[0]))
                 {
                     //TODO:horrible workaround to the lack of generic covariance...
-                    if (element is IPdfNumber)
+                    if (element is IPdfNumber pdfNumber)
                     {
-                        value.Add(((IPdfNumber)element).RawValue);
+                        yield return pdfNumber.RawValue;
                     }
-                    else if (element is PdfString)
+                    else if (element is PdfString pdfString)
                     {
-                        value.Add(((PdfString)element).RawValue);
+                        yield return pdfString.RawValue;
                     }
                     else
                         throw new NotSupportedException("Element type " + element.GetType().Name + " not supported.");
                 }
-                return value;
             }
             set
             {

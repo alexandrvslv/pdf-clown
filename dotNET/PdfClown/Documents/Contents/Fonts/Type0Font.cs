@@ -39,8 +39,7 @@ namespace PdfClown.Documents.Contents.Fonts
       * OpenFont/CFF (in case "CFF" table's Top DICT has CIDFont operators).
     */
     [PDF(VersionEnum.PDF12)]
-    public sealed class Type0Font
-      : CompositeFont
+    public sealed class Type0Font : CompositeFont
     {
         #region constructors
         internal Type0Font(Document context, OpenFontParser parser) : base(context, parser)
@@ -49,5 +48,8 @@ namespace PdfClown.Documents.Contents.Fonts
         internal Type0Font(PdfDirectObject baseObject) : base(baseObject)
         { }
         #endregion
+
+
+        
     }
 }

@@ -133,8 +133,10 @@ namespace PdfClown.Objects
         public static readonly PdfName CenterWindow = new PdfName("CenterWindow");
         public static readonly PdfName CMYK = new PdfName("CMYK");
         public static readonly PdfName Ch = new PdfName("Ch");
+        public static readonly PdfName CharSet = new PdfName("CharSet");
         public static readonly PdfName CIDFontType0 = new PdfName("CIDFontType0");
         public static readonly PdfName CIDFontType2 = new PdfName("CIDFontType2");
+        public static readonly PdfName CIDSet = new PdfName("CIDSet");
         public static readonly PdfName CIDSystemInfo = new PdfName("CIDSystemInfo");
         public static readonly PdfName CIDToGIDMap = new PdfName("CIDToGIDMap");
         public static readonly PdfName Circle = new PdfName("Circle");
@@ -203,6 +205,7 @@ namespace PdfClown.Objects
         public static readonly PdfName Dur = new PdfName("Dur");
         public static readonly PdfName DV = new PdfName("DV");
         public static readonly PdfName DW = new PdfName("DW");
+        public static readonly PdfName DW2 = new PdfName("DW2");
         public static readonly PdfName E = new PdfName("E");
         public static readonly PdfName EF = new PdfName("EF");
         public static readonly PdfName EmbeddedFile = new PdfName("EmbeddedFile");
@@ -222,6 +225,7 @@ namespace PdfClown.Objects
         public static readonly PdfName F = new PdfName("F");
         public static readonly PdfName Fade = new PdfName("Fade");
         public static readonly PdfName FB = new PdfName("FB");
+        public static readonly PdfName FD = new PdfName("FD");
         public static readonly PdfName FDecodeParms = new PdfName("FDecodeParms");
         public static readonly PdfName Ff = new PdfName("Ff");
         public static readonly PdfName FFilter = new PdfName("FFilter");
@@ -255,6 +259,7 @@ namespace PdfClown.Objects
         public static readonly PdfName FontFile3 = new PdfName("FontFile3");
         public static readonly PdfName FontName = new PdfName("FontName");
         public static readonly PdfName FontFamily = new PdfName("FontFamily");
+        public static readonly PdfName FontStretch = new PdfName("FontStretch");
         public static readonly PdfName ForComment = new PdfName("ForComment");
         public static readonly PdfName Form = new PdfName("Form");
         public static readonly PdfName ForPublicRelease = new PdfName("ForPublicRelease");
@@ -362,6 +367,7 @@ namespace PdfClown.Objects
         public static readonly PdfName Matte = new PdfName("Matte");
         public static readonly PdfName max = new PdfName("max");
         public static readonly PdfName MaxLen = new PdfName("MaxLen");
+        public static readonly PdfName MaxWidth = new PdfName("MaxWidth");
         public static readonly PdfName MCD = new PdfName("MCD");
         public static readonly PdfName MCS = new PdfName("MCS");
         public static readonly PdfName MediaBox = new PdfName("MediaBox");
@@ -538,8 +544,10 @@ namespace PdfClown.Objects
         public static readonly PdfName StandardEncoding = new PdfName("StandardEncoding");
         public static readonly PdfName State = new PdfName("State");
         public static readonly PdfName StemV = new PdfName("StemV");
+        public static readonly PdfName StemH = new PdfName("StemH");
         public static readonly PdfName StrikeOut = new PdfName("StrikeOut");
         public static readonly PdfName StructParent = new PdfName("StructParent");
+        public static readonly PdfName Style = new PdfName("Style");
         public static readonly PdfName Subj = new PdfName("Subj");
         public static readonly PdfName Subject = new PdfName("Subject");
         public static readonly PdfName SubmitForm = new PdfName("SubmitForm");
@@ -603,6 +611,7 @@ namespace PdfClown.Objects
         public static readonly PdfName ViewState = new PdfName("ViewState");
         public static readonly PdfName VisiblePages = new PdfName("VisiblePages");
         public static readonly PdfName W = new PdfName("W");
+        public static readonly PdfName W2 = new PdfName("W2");
         public static readonly PdfName FontWeight = new PdfName("FontWeight");
         public static readonly PdfName WhitePoint = new PdfName("WhitePoint");
         public static readonly PdfName Widget = new PdfName("Widget");
@@ -617,6 +626,7 @@ namespace PdfClown.Objects
         public static readonly PdfName XML = new PdfName("XML");
         public static readonly PdfName XObject = new PdfName("XObject");
         public static readonly PdfName XRef = new PdfName("XRef");
+        public static readonly PdfName XHeight = new PdfName("XHeight");
         public static readonly PdfName XStep = new PdfName("XStep");
         public static readonly PdfName XYZ = new PdfName("XYZ");
         public static readonly PdfName Yes = new PdfName("Yes");
@@ -627,7 +637,7 @@ namespace PdfClown.Objects
 #pragma warning restore 0108
 
         private static readonly byte[] NamePrefixChunk = tokens::Encoding.Pdf.Encode(tokens.Keyword.NamePrefix);
-        
+
 
 
         #endregion

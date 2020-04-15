@@ -110,8 +110,9 @@ namespace PdfClown.Files
                   : XRefModeEnum.Plain);
                 if (trailer.ContainsKey(PdfName.Encrypt)) // Encrypted file.
                 {
-                    throw new NotImplementedException("Encrypted files are currently not supported.");
                     var encript = trailer.Resolve(PdfName.Encrypt);
+                    throw new NotImplementedException("Encrypted files are currently not supported.");
+                   
                 }
             }
             catch (Exception)

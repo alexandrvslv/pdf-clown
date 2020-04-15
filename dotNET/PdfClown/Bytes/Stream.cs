@@ -71,11 +71,11 @@ namespace PdfClown.Bytes
             set => stream.Position = value;
         }
 
-        public void Read(byte[] data)
-        { stream.Read(data, 0, data.Length); }
+        public int Read(byte[] data)
+        { return stream.Read(data, 0, data.Length); }
 
-        public void Read(byte[] data, int offset, int count)
-        { stream.Read(data, offset, count); }
+        public int Read(byte[] data, int offset, int count)
+        { return stream.Read(data, offset, count); }
 
         public int ReadByte()
         { return stream.ReadByte(); }

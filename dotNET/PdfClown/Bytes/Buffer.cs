@@ -131,6 +131,7 @@ namespace PdfClown.Bytes
         private ByteOrderEnum byteOrder = ByteOrderEnum.BigEndian;
 
         private bool dirty;
+        private int mark;
         #endregion
 
         #region constructors
@@ -227,12 +228,6 @@ namespace PdfClown.Bytes
             NotifyChange();
         }
 
-        public bool Dirty
-        {
-            get => dirty;
-            set => dirty = value;
-        }
-
         public byte[] Encode(Filter filter, PdfDictionary parameters)
         { return filter.Encode(data, 0, length, parameters); }
 
@@ -297,6 +292,12 @@ namespace PdfClown.Bytes
         { stream.Write(data, 0, length); }
 
         #region IInputStream
+        public bool Dirty
+        {
+            get => dirty;
+            set => dirty = value;
+        }
+
         public ByteOrderEnum ByteOrder
         {
             get => byteOrder;
@@ -305,15 +306,24 @@ namespace PdfClown.Bytes
 
         /* int GetHashCode() uses inherited implementation. */
 
-        public long Position => position;
-
-        public void Read(byte[] data)
-        { Read(data, 0, data.Length); }
-
-        public void Read(byte[] data, int offset, int length)
+        public long Position
         {
+            get => position;
+            private set => position = (int)value;
+        }
+
+        public int Read(byte[] data)
+        { return Read(data, 0, data.Length); }
+
+        public int Read(byte[] data, int offset, int length)
+        {
+            if (position + length > Length)
+            {
+                length = (int)(Length - position);
+            }
             Array.Copy(this.data, position, data, offset, length);
             position += length;
+            return length;
         }
 
         public byte[] ReadNullTermitaded()
@@ -459,6 +469,16 @@ namespace PdfClown.Bytes
 
         public void Skip(long offset)
         { Seek(position + offset); }
+
+        public int Mark()
+        {
+            return mark = position;
+        }
+
+        public void Reset()
+        {
+            Seek(mark);
+        }
 
         #region IDataWrapper
         public byte[] ToByteArray()

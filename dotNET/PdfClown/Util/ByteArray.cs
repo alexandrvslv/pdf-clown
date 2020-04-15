@@ -38,9 +38,17 @@ namespace PdfClown.Util
     public class ByteArray : IComparable<ByteArray>
     {
         public readonly byte[] Data; //TODO: yes, I know it's risky (temporary simplification)...
+        public ByteArray(byte b0) : this(new byte[] { b0 })
+        { }
+
+        public ByteArray(byte b0, byte b1) : this(new byte[] { b0, b1 })
+        { }
 
         public ByteArray(byte[] data)
-        { Array.Copy(data, this.Data = new byte[data.Length], data.Length); }
+        {
+            Data = data;
+        }
+        //TODO Check remove copy{ Array.Copy(data, this.Data = new byte[data.Length], data.Length); }
 
         public int CompareTo(ByteArray other)
         {

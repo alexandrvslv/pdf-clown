@@ -102,18 +102,20 @@ namespace PdfClown.Documents.Contents
 
             public long Position => basePosition + stream.Position;
 
-            public void Read(byte[] data)
-            { Read(data, 0, data.Length); }
+            public int Read(byte[] data)
+            { return Read(data, 0, data.Length); }
 
-            public void Read(byte[] data, int offset, int length)
+            public int Read(byte[] data, int offset, int length)
             {
+                int total = 0;
                 while (length > 0 && EnsureStream())
                 {
                     int readLength = Math.Min(length, (int)(stream.Length - stream.Position));
-                    stream.Read(data, offset, readLength);
+                    total += stream.Read(data, offset, readLength);
                     offset += readLength;
                     length -= readLength;
                 }
+                return total;
             }
 
             public int ReadByte()

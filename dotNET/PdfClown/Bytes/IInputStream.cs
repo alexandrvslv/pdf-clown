@@ -55,7 +55,7 @@ namespace PdfClown.Bytes
           <remarks>This operation causes the stream pointer to advance after the read data.</remarks>
           <param name="data">Target byte array.</param>
         */
-        void Read(byte[] data);
+        int Read(byte[] data);
 
         /**
           <summary>Reads a sequence of bytes.</summary>
@@ -64,7 +64,7 @@ namespace PdfClown.Bytes
           <param name="offset">Location in the byte array at which storing begins.</param>
           <param name="length">Number of bytes to read.</param>
         */
-        void Read(byte[] data, int offset, int length);
+        int Read(byte[] data, int offset, int length);
 
         /**
           <summary>Reads a byte.</summary>

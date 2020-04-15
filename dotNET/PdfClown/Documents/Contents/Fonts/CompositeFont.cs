@@ -47,6 +47,7 @@ namespace PdfClown.Documents.Contents.Fonts
     [PDF(VersionEnum.PDF12)]
     public abstract class CompositeFont : Font
     {
+        private CMap ucs2CMap;
         #region static
         #region interface
         #region public
@@ -95,12 +96,11 @@ namespace PdfClown.Documents.Contents.Fonts
             PdfDataObject encodingObject = BaseDataObject.Resolve(PdfName.Encoding);
 
             // CMap [PDF:1.6:5.6.4].
-            IDictionary<ByteArray, int> cmap = CMap.Get(encodingObject);
+            var cmap = CMap.Get(encodingObject);
 
             // 1. Unicode.
-            if (codes == null)
+            if (encodingObject.)
             {
-                codes = new BiDictionary<ByteArray, int>();
                 if (encodingObject is PdfName
                   && !(encodingObject.Equals(PdfName.IdentityH)
                     || encodingObject.Equals(PdfName.IdentityV)))
@@ -111,27 +111,13 @@ namespace PdfClown.Documents.Contents.Fonts
                       (Unicode value to CID) corresponding to the font's one (character code to CID);
                       CIDs are the bridge from character codes to Unicode values.
                     */
-                    BiDictionary<ByteArray, int> ucs2CMap;
-                    {
-                        PdfDictionary cidSystemInfo = (PdfDictionary)CIDFontDictionary.Resolve(PdfName.CIDSystemInfo);
-                        String registry = (String)((PdfTextString)cidSystemInfo[PdfName.Registry]).Value;
-                        String ordering = (String)((PdfTextString)cidSystemInfo[PdfName.Ordering]).Value;
-                        String ucs2CMapName = registry + "-" + ordering + "-" + "UCS2";
-                        ucs2CMap = new BiDictionary<ByteArray, int>(CMap.Get(ucs2CMapName));
-                    }
-                    if (ucs2CMap.Count > 0)
-                    {
-                        foreach (KeyValuePair<ByteArray, int> cmapEntry in cmap)
-                        {
-                            var value = ucs2CMap.GetKey(cmapEntry.Value);
-                            if (value != null)
-                            {
-                                codes[cmapEntry.Key] = ConvertUtils.ByteArrayToInt(value.Data);
-                            }
-                        }
-                    }
+                    PdfDictionary cidSystemInfo = (PdfDictionary)CIDFontDictionary.Resolve(PdfName.CIDSystemInfo);
+                    String registry = (String)((PdfTextString)cidSystemInfo[PdfName.Registry]).Value;
+                    String ordering = (String)((PdfTextString)cidSystemInfo[PdfName.Ordering]).Value;
+                    String ucs2CMapName = registry + "-" + ordering + "-" + "UCS2";
+                    ucs2CMap = CMap.Get(ucs2CMapName);
                 }
-                if (codes.Count == 0)
+                if (!cmap.HasUnicodeMappings)
                 {
                     /*
                       NOTE: In case no clue is available to determine the Unicode resolution map,
@@ -302,11 +288,11 @@ namespace PdfClown.Documents.Contents.Fonts
                 foreach (KeyValuePair<int, int> glyphIndexEntry in glyphIndexes.ToList())
                 {
                     int glyphIndex = glyphIndexEntry.Value;
-                    ByteArray charCode = new ByteArray(new byte[]
+                    var charCode = new byte[]
                       {
-              (byte)((glyphIndex >> 8) & 0xFF),
-              (byte)(glyphIndex & 0xFF)
-                      });
+                          (byte)((glyphIndex >> 8) & 0xFF),
+                          (byte)(glyphIndex & 0xFF)
+                      };
 
                     // Checking for multiple Unicode codepoints which map to the same glyph index...
                     /*
@@ -489,6 +475,33 @@ namespace PdfClown.Documents.Contents.Fonts
                 fontDescriptor[PdfName.FontFile2] = File.Register(new PdfStream(new bytes::Buffer(parser.FontData.ToByteArray())));
             }
             return File.Register(fontDescriptor);
+        }
+
+
+        public override int ToUnicode(int code)
+        {
+            // try to use a ToUnicode CMap
+            var unicode = base.ToUnicode(code);
+            if (unicode > -1)
+            {
+                return unicode;
+            }
+
+            if (ucs2CMap != null)
+            {
+                // if the font is composite and uses a predefined cmap (excluding Identity-H/V) then
+                // or if its descendant font uses Adobe-GB1/CNS1/Japan1/Korea1
+
+                // a) Map the character code to a character identifier (CID) according to the font?s CMap
+                int cid = cmap.ToCID(code);
+
+                // e) Map the CID according to the CMap from step d), producing a Unicode value
+                return ucs2CMap.ToUnicode(cid);
+            }
+            else
+            {
+                return -1;
+            }
         }
         #endregion
         #endregion

@@ -35,7 +35,7 @@ namespace PdfClown.Documents.Contents.Fonts
       <summary>Predefined encodings [PDF:1.6:5.5.5,D].</summary>
     */
     // TODO: This hierarchy is going to be superseded by PdfClown.Tokens.Encoding.
-    internal class Encoding
+    public class Encoding
     {
         #region static
         #region fields
@@ -60,9 +60,17 @@ namespace PdfClown.Documents.Contents.Fonts
         { return Encodings[name]; }
         #endregion
         #endregion
+        public Encoding()
+        { }
+
+        public Encoding(Dictionary<ByteArray, string> codeToName)
+        {
+            names = codeToName;
+        }
 
         #region dynamic
         #region fields
+        private readonly Dictionary<ByteArray, string> names = new Dictionary<ByteArray, string>();
         private readonly Dictionary<ByteArray, int> codes = new Dictionary<ByteArray, int>();
         #endregion
 
@@ -70,14 +78,25 @@ namespace PdfClown.Documents.Contents.Fonts
         #region public
         public Dictionary<ByteArray, int> GetCodes()
         { return new Dictionary<ByteArray, int>(codes); }
+
+        public int GetUnicode(ByteArray key)
+        { return codes.TryGetValue(key, out var unicode) ? unicode : 0; }
+
+        public virtual string GetName(ByteArray key)
+        { return names.TryGetValue(key, out var name) ? name : null; }
         #endregion
 
         #region protected
         protected void Put(int charCode, string charName)
-        { Put(charCode, GlyphMapping.Default.NameToCode(charName).Value); }
+        {
+            names[new ByteArray((byte)charCode)] = charName;
+            Put(charCode, GlyphMapping.Default.NameToCode(charName).Value);
+        }
 
         protected void Put(int charCode, int unicode)
-        { codes[new ByteArray(new byte[] { (byte)charCode })] = unicode; }
+        {
+            codes[new ByteArray((byte)charCode)] = unicode;
+        }
         #endregion
         #endregion
         #endregion

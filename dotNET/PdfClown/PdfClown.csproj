@@ -20,7 +20,9 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
+  </PropertyGroup> 
+
+
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -161,6 +163,30 @@
   <PropertyGroup>
     <RestoreSources>../FreeImage.NETCore/Package;$(RestoreSources);</RestoreSources>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="Documents\Contents\Fonts\CFF\CFFCharset.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFDataInput.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CharStringCommand.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CharStringHandler.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\DataInput.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\Type1CharString.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\Type1CharStringParser.cs" />
+    <None Include="Documents\Contents\Fonts\CIDFont\CIDFont.cs" />
+    <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType0.cs" />
+    <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType2.cs" />
+    <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType2Embedder.cs" />
+    <None Include="Documents\Contents\Fonts\CIDFont\CIDSystemInfo.cs" />
+    <None Include="Documents\Contents\Fonts\CMap\CIDRange.cs" />
+    <None Include="Documents\Contents\Fonts\CMap\CodespaceRange.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\DamagedFontException.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\PfbParser.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\Token.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\Type1CharStringReader.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\Type1Font.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\Type1Lexer.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\Type1Parser.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
     <PackageReference Include="SkiaSharp" Version="1.68.1.1" />

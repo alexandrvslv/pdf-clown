@@ -40,8 +40,7 @@ namespace PdfClown.Tokens
     /**
       <summary>PDF file reader.</summary>
     */
-    public sealed class Reader
-      : IDisposable
+    public sealed class Reader : IDisposable
     {
         #region types
         public sealed class FileInfo

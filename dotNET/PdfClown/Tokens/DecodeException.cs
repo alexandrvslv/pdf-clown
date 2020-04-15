@@ -30,8 +30,7 @@ namespace PdfClown.Tokens
     /**
       <summary>Exception thrown in case of missing code-to-character mapping.</summary>
     */
-    public class DecodeException
-      : Exception
+    public class DecodeException : Exception
     {
         #region dynamic
         #region fields
@@ -40,10 +39,8 @@ namespace PdfClown.Tokens
         #endregion
 
         #region constructors
-        public DecodeException(
-          byte[] bytes,
-          int index
-          ) : base(String.Format("Missing character mapping for byte sequence starting with {0:X2} at position {1}", bytes[index], index))
+        public DecodeException(byte[] bytes, int index)
+            : base(String.Format("Missing character mapping for byte sequence starting with {0:X2} at position {1}", bytes[index], index))
         {
             this.bytes = bytes;
             this.index = index;

@@ -79,10 +79,10 @@ namespace PdfClown.Objects
         public Rectangle(double left, double top, double width, double height)
             : this(new PdfArray(new PdfDirectObject[]
               {
-            PdfReal.Get(left), // Left (X).
-            PdfReal.Get(top - height), // Bottom (Y).
-            PdfReal.Get(left + width), // Right.
-            PdfReal.Get(top) // Top.
+                  PdfReal.Get(left), // Left (X).
+                  PdfReal.Get(top - height), // Bottom (Y).
+                  PdfReal.Get(left + width), // Right.
+                  PdfReal.Get(top) // Top.
               }
               )
             )

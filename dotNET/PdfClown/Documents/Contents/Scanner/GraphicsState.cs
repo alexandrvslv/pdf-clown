@@ -195,6 +195,37 @@ namespace PdfClown.Documents.Contents
             return initialCtm;
         }
 
+        public SKPaint CreateStrokePaint()
+        {
+            if (!RenderModeStroke)
+                return null;
+            var paint = StrokeColorSpace?.GetPaint(StrokeColor, StrokeAlpha);
+            if (paint != null)
+            {
+                paint.TextSize = (float)FontSize;
+                paint.TextScaleX = (float)Scale;
+                paint.Style = SKPaintStyle.Stroke;
+                paint.StrokeWidth = (float)LineWidth;
+                paint.StrokeCap = LineCap.ToSkia();
+                paint.StrokeJoin = LineJoin.ToSkia();
+                paint.StrokeMiter = (float)MiterLimit;
+            }
+            return paint;
+        }
+
+        public SKPaint CreateFillPaint()
+        {
+            if (!RenderModeFill)
+                return null;
+            var paint = FillColorSpace?.GetPaint(FillColor, FillAlpha);
+            if (paint != null)
+            {
+                paint.TextSize = (float)FontSize;
+                paint.TextScaleX = (float)Scale;
+            }
+            return paint;
+        }
+
         public static SKMatrix GetRotationMatrix(SKSize canvasSize, RotationEnum rotation)
         {
             switch (rotation)

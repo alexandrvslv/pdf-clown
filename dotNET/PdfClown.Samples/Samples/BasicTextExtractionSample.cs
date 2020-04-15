@@ -51,9 +51,7 @@ namespace PdfClown.Samples.CLI
           NOTE: Page contents are represented by a sequence of content objects,
           possibly nested into multiple levels.
         */
-        private void Extract(
-          ContentScanner level
-          )
+        private void Extract(ContentScanner level)
         {
             if (level == null)
                 return;
@@ -67,8 +65,7 @@ namespace PdfClown.Samples.CLI
                     // Extract the current text chunk, decoding it!
                     Console.WriteLine(font.Decode(((ShowText)content).Text));
                 }
-                else if (content is Text
-                  || content is ContainerObject)
+                else if (content is Text || content is ContainerObject)
                 {
                     // Scan the inner level!
                     Extract(level.ChildLevel);

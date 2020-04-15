@@ -45,16 +45,9 @@ namespace PdfClown.Documents.Contents.Fonts
         #endregion
 
         #region delegates
-        public delegate int GetOutCodeDelegate(
-          KeyValuePair<ByteArray, int> entry
-          );
+        public delegate int GetOutCodeDelegate(KeyValuePair<ByteArray, int> entry);
 
-        private delegate bytes::IBuffer BuildEntryDelegate<T>(
-          T entry,
-          bytes::IBuffer buffer,
-          GetOutCodeDelegate outCodeFunction,
-          string outCodeFormat
-          );
+        private delegate bytes::IBuffer BuildEntryDelegate<T>(T entry, bytes::IBuffer buffer, GetOutCodeDelegate outCodeFunction, string outCodeFormat);
         #endregion
 
         #region static
@@ -72,12 +65,7 @@ namespace PdfClown.Documents.Contents.Fonts
           <param name="outCodeFunction"></param>
           <returns>Buffer containing the serialized CMap.</returns>
         */
-        public static bytes::IBuffer Build(
-          EntryTypeEnum entryType,
-          string cmapName,
-          SortedDictionary<ByteArray, int> codes,
-          GetOutCodeDelegate outCodeFunction
-          )
+        public static bytes::IBuffer Build(EntryTypeEnum entryType, string cmapName, SortedDictionary<ByteArray, int> codes, GetOutCodeDelegate outCodeFunction)
         {
             bytes::IBuffer buffer = new bytes::Buffer();
 
@@ -224,12 +212,7 @@ namespace PdfClown.Documents.Contents.Fonts
             { cidChars.Add(lastEntry); }
         }
 
-        private static bytes::IBuffer BuildCharEntry(
-          KeyValuePair<ByteArray, int> cidChar,
-          bytes::IBuffer buffer,
-          GetOutCodeDelegate outCodeFunction,
-          string outCodeFormat
-          )
+        private static bytes::IBuffer BuildCharEntry(KeyValuePair<ByteArray, int> cidChar, bytes::IBuffer buffer, GetOutCodeDelegate outCodeFunction, string outCodeFormat)
         {
             return buffer.Append("<").Append(ConvertUtils.ByteArrayToHex(cidChar.Key.Data)).Append("> ")
               .Append(String.Format(outCodeFormat, outCodeFunction(cidChar))).Append("\n");
@@ -261,12 +244,7 @@ namespace PdfClown.Documents.Contents.Fonts
             buffer.Append("end").Append(entryType.Tag()).Append(operatorSuffix).Append("\n");
         }
 
-        private static bytes::IBuffer BuildRangeEntry(
-          KeyValuePair<ByteArray, int>[] cidRange,
-          bytes::IBuffer buffer,
-          GetOutCodeDelegate outCodeFunction,
-          string outCodeFormat
-          )
+        private static bytes::IBuffer BuildRangeEntry(KeyValuePair<ByteArray, int>[] cidRange, bytes::IBuffer buffer, GetOutCodeDelegate outCodeFunction, string outCodeFormat)
         {
             return buffer.Append("<").Append(ConvertUtils.ByteArrayToHex(cidRange[0].Key.Data)).Append("> <")
               .Append(ConvertUtils.ByteArrayToHex(cidRange[1].Key.Data)).Append("> ")
@@ -279,9 +257,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
     internal static class EntryTypeEnumExtension
     {
-        public static string Tag(
-          this CMapBuilder.EntryTypeEnum entryType
-          )
+        public static string Tag(this CMapBuilder.EntryTypeEnum entryType)
         {
             switch (entryType)
             {

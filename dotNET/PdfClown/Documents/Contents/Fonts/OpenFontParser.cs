@@ -53,9 +53,9 @@ namespace PdfClown.Documents.Contents.Fonts
               <summary>Whether the encoding is custom (symbolic font).</summary>
             */
             public bool IsCustomEncoding;//TODO:verify whether it can be replaced by the 'symbolic' variable!!!
-                                         /**
-                                           <summary>Unit normalization coefficient.</summary>
-                                         */
+            /**
+              <summary>Unit normalization coefficient.</summary>
+            */
             public float UnitNorm;
             /*
               Font Header ('head' table).
@@ -67,9 +67,9 @@ namespace PdfClown.Documents.Contents.Fonts
             public short XMax;
             public short YMax;
             public int MacStyle; // USHORT.
-                                 /*
-                                   Horizontal Header ('hhea' table).
-                                 */
+            /*
+              Horizontal Header ('hhea' table).
+            */
             public short Ascender;
             public short Descender;
             public short LineGap;
@@ -80,9 +80,9 @@ namespace PdfClown.Documents.Contents.Fonts
             public short CaretSlopeRise;
             public short CaretSlopeRun;
             public int NumberOfHMetrics; // USHORT.
-                                         /*
-                                           OS/2 table ('OS/2' table).
-                                         */
+            /*
+              OS/2 table ('OS/2' table).
+            */
             public short STypoAscender;
             public short STypoDescender;
             public short STypoLineGap;
@@ -366,11 +366,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
             // Delta for all character codes in segment.
             short[] deltas = new short[segmentCount];
-            for (
-              int index = 0;
-              index < segmentCount;
-              index++
-              )
+            for (int index = 0; index < segmentCount; index++)
             { deltas[index] = FontData.ReadShort(); }
 
             // Offsets into glyph index array.
@@ -387,11 +383,7 @@ namespace PdfClown.Documents.Contents.Fonts
               - 8 // Number of single-word header fields (8 fields: format, length, language, segCountX2, searchRange, entrySelector, rangeShift, reservedPad).
               - segmentCount * 4; // Number of single-word items in the arrays describing the segments (4 arrays of segmentCount items).
             int[] glyphIds = new int[glyphIndexCount]; // USHORT.
-            for (
-              int index = 0;
-              index < glyphIds.Length;
-              index++
-              )
+            for (int index = 0; index < glyphIds.Length; index++)
             { glyphIds[index] = FontData.ReadUnsignedShort(); }
 
             GlyphIndexes = new Dictionary<int, int>(glyphIndexCount);
@@ -554,11 +546,11 @@ namespace PdfClown.Documents.Contents.Fonts
                 // Get the type of information contained in the subtable!
                 int coverage = FontData.ReadUnsignedShort(); // USHORT.
                                                              // Is it a format-0 subtable?
-                                                             /*
-                                                               NOTE: coverage bits 8-15 (format of the subtable) MUST be all zeros
-                                                               (representing format 0).
-                                                             */
-                                                             //
+                /*
+                  NOTE: coverage bits 8-15 (format of the subtable) MUST be all zeros
+                  (representing format 0).
+                */
+                //
                 if ((coverage & 0xff00) == 0x0000)
                 {
                     int pairCount = FontData.ReadUnsignedShort(); // USHORT.

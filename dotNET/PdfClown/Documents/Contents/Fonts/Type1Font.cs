@@ -117,10 +117,6 @@ namespace PdfClown.Documents.Contents.Fonts
             var name = fontDescription.Resolve(PdfName.FontName)?.ToString();
             var buffer = stream.GetBody(true);
 
-            //var lenght1 = stream.Header[PdfName.Length1] as PdfInteger;
-            //var lenght2 = stream.Header[PdfName.Length2] as PdfInteger;
-            //var lenght3 = stream.Header[PdfName.Length3] as PdfInteger;
-            //var bytes = buffer.GetByteArray(lenght1.IntValue, lenght2.IntValue + lenght3.IntValue);
             //System.IO.File.WriteAllBytes($"export{name}_part2.psc", bytes);
             var bytes = buffer.ToByteArray();
             var typeface = (SKTypeface)null;
@@ -128,24 +124,35 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 typeface = SKFontManager.Default.CreateTypeface(data);
             }
-#if DEBUG
-            name = Regex.Replace(name, @"[\/?:*""><|]+", "", RegexOptions.Compiled);
-            try { System.IO.File.WriteAllBytes($"export_{name}.psc", bytes); }
-            catch { }
-            //if (typeface == null)
-            //{
-            //    using (var manifestStream = typeof(Type1Font).Assembly.GetManifestResourceStream(name + ".otf"))
-            //    {
-            //        if (manifestStream != null)
-            //        {
-            //            typeface = SKFontManager.Default.CreateTypeface(manifestStream);
-            //        }
-            //    }
-            //}
-#endif
 
             if (typeface == null)
             {
+#if DEBUG
+                name = Regex.Replace(name, @"[\/?:*""><|]+", "", RegexOptions.Compiled);
+                try { System.IO.File.WriteAllBytes($"export_{name}.psc", bytes); }
+                catch { }
+                //if (typeface == null)
+                //{
+                //    using (var manifestStream = typeof(Type1Font).Assembly.GetManifestResourceStream(name + ".otf"))
+                //    {
+                //        if (manifestStream != null)
+                //        {
+                //            typeface = SKFontManager.Default.CreateTypeface(manifestStream);
+                //        }
+                //    }
+                //}
+#endif
+                if (stream.Header[PdfName.Subtype] == PdfName.Type1C)
+                {
+
+                }
+                else
+                {
+                    var lenght1 = stream.Header[PdfName.Length1] as PdfInteger;
+                    var lenght2 = stream.Header[PdfName.Length2] as PdfInteger;
+                    var lenght3 = stream.Header[PdfName.Length3] as PdfInteger;
+                    var bytes2 = buffer.GetByteArray(lenght1.IntValue, lenght2.IntValue + lenght3.IntValue);
+                }
                 typeface = ParseName(name, fontDescription);
             }
             return typeface;

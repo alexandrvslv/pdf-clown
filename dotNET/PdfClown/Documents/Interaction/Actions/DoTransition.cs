@@ -36,8 +36,7 @@ namespace PdfClown.Documents.Interaction.Actions
       <summary>'Control drawing during a sequence of actions' action [PDF:1.6:8.5.3].</summary>
     */
     [PDF(VersionEnum.PDF15)]
-    public sealed class DoTransition
-      : Action
+    public sealed class DoTransition : Action
     {
         #region dynamic
         #region constructors

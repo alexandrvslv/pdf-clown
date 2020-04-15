@@ -52,7 +52,7 @@ namespace PdfClown.Documents.Contents.Fonts
         { Load($"fonts.{fontName}"); }
 
         public int? NameToCode(string name)
-        { int code; return codes.TryGetValue(name, out code) ? code : (int?)null; }
+        { return codes.TryGetValue(name, out var code) ? code : (int?)null; }
 
         /**
           <summary>Loads the glyph list mapping character names to character codes (unicode

@@ -98,12 +98,8 @@ namespace PdfClown.Documents.Contents.Objects
 
         public override byte[] Text
         {
-            get => ((PdfString)operands[
-                  @operator.Equals(SimpleOperatorKeyword, StringComparison.Ordinal) ? 0 : 2
-                  ]).RawValue;
-            set => operands[
-                  @operator.Equals(SimpleOperatorKeyword, StringComparison.Ordinal) ? 0 : 2
-                  ] = new PdfByteString(value);
+            get => ((PdfString)operands[@operator.Equals(SimpleOperatorKeyword, StringComparison.Ordinal) ? 0 : 2]).RawValue;
+            set => operands[@operator.Equals(SimpleOperatorKeyword, StringComparison.Ordinal) ? 0 : 2] = new PdfByteString(value);
         }
 
         /**
