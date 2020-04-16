@@ -26,7 +26,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      *
      * @author John Hewson
      */
-	public interface Type1CharStringReader
+	public interface IType1CharStringReader
 	{
 		/**
          * Returns the Type 1 CharString for the character with the given name.

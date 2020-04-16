@@ -21,7 +21,6 @@ using System.Linq;
 namespace PdfClown.Documents.Contents.Fonts.Type1
 {
 
-
     /**
      * A Handler for CharStringCommands.
      *
@@ -29,7 +28,6 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      * @author John Hewson
      * 
      */
-
     public abstract class CharStringHandler
     {
         /**

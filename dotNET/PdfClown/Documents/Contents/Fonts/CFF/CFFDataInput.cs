@@ -14,79 +14,81 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Documents.Contents.Fonts.Type1;
+
 namespace PdfClown.Documents.Contents.Fonts.CCF
 {
-	/**
+    /**
 	 * This is specialized DataInput. It's used to parse a CFFFont.
 	 * 
 	 * @author Villu Ruusmann
 	 */
-	public class CFFDataInput : DataInput
-	{
+    public class CFFDataInput : DataInput
+    {
 
-		/**
+        /**
 		 * Constructor.
 		 * @param buffer the buffer to be read 
 		 */
-		public CFFDataInput(byte[] buffer)
-		{
-			super(buffer);
-		}
+        public CFFDataInput(byte[] buffer)
+            : base(buffer)
+        {
+        }
 
-		/**
+        /**
 		 * Read one single Card8 value from the buffer. 
 		 * @return the card8 value
 		 * @throws IOException if an error occurs during reading
 		 */
-		public byte readCard8()
-		{
-			return readUnsignedByte();
-		}
+        public byte ReadCard8()
+        {
+            return ReadUnsignedByte();
+        }
 
-		/**
+        /**
 		 * Read one single Card16 value from the buffer.
 		 * @return the card16 value
 		 * @throws IOException if an error occurs during reading
 		 */
-		public ushort readCard16()
-		{
-			return readUnsignedShort();
-		}
+        public ushort ReadCard16()
+        {
+            return readUnsignedShort();
+        }
 
-		/**
+        /**
 		 * Read the offset from the buffer.
 		 * @param offSize the given offsize
 		 * @return the offset
 		 * @throws IOException if an error occurs during reading
 		 */
-		public int readOffset(int offSize)
-		{
-			int value = 0;
-			for (int i = 0; i < offSize; i++)
-			{
-				value = value << 8 | readUnsignedByte();
-			}
-			return value;
-		}
+        public int ReadOffset(int offSize)
+        {
+            int value = 0;
+            for (int i = 0; i < offSize; i++)
+            {
+                value = value << 8 | ReadUnsignedByte();
+            }
+            return value;
+        }
 
-		/**
+        /**
 		 * Read the offsize from the buffer.
 		 * @return the offsize
 		 * @throws IOException if an error occurs during reading
 		 */
-		public byte readOffSize()
-		{
-			return readUnsignedByte();
-		}
+        public byte ReadOffSize()
+        {
+            return ReadUnsignedByte();
+        }
 
-		/**
+        /**
 		 * Read a SID from the buffer.
 		 * @return the SID
 		 * @throws IOException if an error occurs during reading
 		 */
-		public ushort readSID()
-		{
-			return readUnsignedShort();
-		}
-	}
+        public ushort ReadSID()
+        {
+            return readUnsignedShort();
+        }
+    }
 }

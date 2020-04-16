@@ -54,7 +54,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 * @param code the given code
 		 * @param sid the given SID
 		 */
-        public void add(int code, int sid, string name)
+        public void Add(int code, int sid, string name)
         {
             codeToName[code] = name;
             Put(code, name);
@@ -63,11 +63,11 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         /**
 		 * For use by subclasses only.
 		 */
-        protected void add(int code, int sid)
+        protected void Add(int code, int sid)
         {
-            string name = CFFStandardString.getName(sid);
-            codeToName.put(code, name);
-            addCharacterEncoding(code, name);
+            string name = CFFStandardString.GetName(sid);
+            codeToName[code] = name;
+            Put(code, name);
         }
     }
 }

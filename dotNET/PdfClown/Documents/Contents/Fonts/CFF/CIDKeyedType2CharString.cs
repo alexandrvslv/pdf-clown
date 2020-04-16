@@ -14,21 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Documents.Contents.Fonts.Type1;
 using System.Collections.Generic;
 
 namespace PdfClown.Documents.Contents.Fonts.CCF
 {
-
-	/**
+    /**
      * A CID-Keyed Type 2 CharString.
      *
      * @author John Hewson
      */
-	public class CIDKeyedType2CharString : Type2CharString
-	{
-		private final int cid;
+    public class CIDKeyedType2CharString : Type2CharString
+    {
+        private readonly int cid;
 
-		/**
+        /**
 		 * Constructor.
 		 *
 		 * @param font Parent CFF font
@@ -39,18 +39,19 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 * @param defaultWidthX default width
 		 * @param nomWidthX nominal width
 		 */
-		public CIDKeyedType2CharString(Type1CharStringReader font, String fontName, int cid, int gid, List<Object> sequence, int defaultWidthX, int nomWidthX)
-		{
-			// glyph name is for debugging only
-			super(font, fontName, String.format(Locale.US, "%04x", cid), gid, sequence, defaultWidthX, nomWidthX);
-			this.cid = cid;
-		}
+        public CIDKeyedType2CharString(IType1CharStringReader font, string fontName, int cid, int gid, List<object> sequence, int defaultWidthX, int nomWidthX)
+            : base(font, fontName, cid.ToString("x2"), gid, sequence, defaultWidthX, nomWidthX)
+        {
+            // glyph name is for debugging only
+            this.cid = cid;
+        }
 
-		/**
-		 * Returns the CID (character id) of this charstring.
-		 */
-		public int getCID()
-		{
-			return cid;
-		}
-	}
+        /**
+         * Returns the CID (character id) of this charstring.
+         */
+        public int CID
+        {
+            get => cid;
+        }
+    }
+}

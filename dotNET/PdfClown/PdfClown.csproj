@@ -21,8 +21,6 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-
-
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -168,7 +166,16 @@
     <None Include="Documents\Contents\Fonts\CFF\CFFCIDFont.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFDataInput.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFExpertCharset.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFExpertEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFExpertSubsetCharset.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFFont.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFISOAdobeCharset.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFOperator.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFParser.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFStandardEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFStandardString.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFType1Font.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CharStringCommand.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CharStringHandler.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CIDKeyedType2CharString.cs" />
@@ -188,7 +195,7 @@
     <None Include="Documents\Contents\Fonts\Type1\DamagedFontException.cs" />
     <None Include="Documents\Contents\Fonts\Type1\PfbParser.cs" />
     <None Include="Documents\Contents\Fonts\Type1\Token.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\Type1CharStringReader.cs" />
+    <None Include="Documents\Contents\Fonts\Type1\IType1CharStringReader.cs" />
     <None Include="Documents\Contents\Fonts\Type1\Type1Font.cs" />
     <None Include="Documents\Contents\Fonts\Type1\Type1Lexer.cs" />
     <None Include="Documents\Contents\Fonts\Type1\Type1Parser.cs" />

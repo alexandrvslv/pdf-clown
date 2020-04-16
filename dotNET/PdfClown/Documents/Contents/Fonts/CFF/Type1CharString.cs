@@ -31,7 +31,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      */
     public class Type1CharString : CharStringHandler
     {
-        private Type1CharStringReader font;
+        private IType1CharStringReader font;
         private readonly string fontName;
         private readonly string glyphName;
         private SKPath path = null;
@@ -51,7 +51,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
          * @param glyphName Name of the glyph.
          * @param sequence Type 1 char string sequence
          */
-        public Type1CharString(Type1CharStringReader font, string fontName, string glyphName, List<object> sequence)
+        public Type1CharString(IType1CharStringReader font, string fontName, string glyphName, List<object> sequence)
             : this(font, fontName, glyphName)
         {
             type1Sequence = sequence;
@@ -64,7 +64,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
          * @param fontName Name of the font.
          * @param glyphName Name of the glyph.
          */
-        protected Type1CharString(Type1CharStringReader font, string fontName, string glyphName)
+        protected Type1CharString(IType1CharStringReader font, string fontName, string glyphName)
         {
             this.font = font;
             this.fontName = fontName;

@@ -14,169 +14,154 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Util.Math.Geom;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PdfClown.Documents.Contents.Fonts.CCF
 {
-	/**
+    /**
      * An Adobe Compact Font Format (CFF) font. Thread safe.
      * 
      * @author Villu Ruusmann
      * @author John Hewson
      */
-	public abstract class CFFFont : FontBoxFont
-	{
-		protected string fontName;
-		protected readonly Dictionary<string, object> topDict = new Dictionary<string, object>(StringComparer.Ordinal);
-		protected CFFCharset charset;
-		protected byte[][] charStrings;
-		protected byte[][] globalSubrIndex;
-		private CFFParser.ByteSource source;
+    public abstract class CFFFont //: FontBoxFont
+    {
+        protected string fontName;
+        protected readonly Dictionary<string, object> topDict = new Dictionary<string, object>(StringComparer.Ordinal);
+        protected CFFCharset charset;
+        protected byte[][] charStrings;
+        protected byte[][] globalSubrIndex;
+        private CFFParser.IByteSource source;
 
-		/**
+        /**
 		 * The name of the font.
 		 *
 		 * @return the name of the font
 		 */
-		public string Name
-		{
-			get => fontName;
-			set => fontName = value;
-		}
+        public string Name
+        {
+            get => fontName;
+            set => fontName = value;
+        }
 
-		/**
+        /**
 		 * Adds the given key/value pair to the top dictionary.
 		 * 
 		 * @param name the given key
 		 * @param value the given value
 		 */
-		public void addValueToTopDict(string name, object value)
-		{
-			if (value != null)
-			{
-				topDict[name] = value;
-			}
-		}
+        public void AddValueToTopDict(string name, object value)
+        {
+            if (value != null)
+            {
+                topDict[name] = value;
+            }
+        }
 
-		/**
+        /**
 		 * Returns the top dictionary.
 		 * 
 		 * @return the dictionary
 		 */
-		public Dictionary<string, object> getTopDict()
-		{
-			return topDict;
-		}
+        public Dictionary<string, object> TopDict
+        {
+            get => topDict;
+        }
 
-		/**
+        /**
 		 * Returns the FontMatrix.
 		 */
-		//@Override
-		public abstract List<float> FontMatrix { get; set; }
+        public abstract List<float> FontMatrix { get; set; }
 
-		/**
+        /**
 		 * Returns the FontBBox.
 		 */
-		//@Override
-		public SKRect FontBBox
-		{
-			get
-			{
-				List<float> numbers = (List<float>)topDict.get("FontBBox");
-				return new BoundingBox(numbers);
-			}
-		}
+        public virtual SKRect FontBBox
+        {
+            get
+            {
+                List<float> numbers = (List<float>)topDict["FontBBox"];
+                var rect = new SKRect(numbers[0], numbers[1], numbers[2], numbers[3]);
+                return rect;
+            }
+        }
 
-		/**
+        /**
 		 * Returns the CFFCharset of the font.
 		 * 
 		 * @return the charset
 		 */
-		public CFFCharset getCharset()
-		{
-			return charset;
-		}
+        public virtual CFFCharset Charset
+        {
+            get => charset;
+            set => charset = value;
+        }
 
-		/**
-		 * Sets the CFFCharset of the font.
-		 * 
-		 * @param charset the given CFFCharset
-		 */
-		void setCharset(CFFCharset charset)
-		{
-			this.charset = charset;
-		}
-
-		/**
+        /**
 		 * Returns the character strings dictionary. For expert users only.
 		 *
 		 * @return the dictionary
 		 */
-		public List<byte[]> getCharStringBytes()
-		{
-			return Arrays.asList(charStrings);
-		}
+        public byte[][] CharStringBytes
+        {
+            get => charStrings;
+            set => charStrings = value;
+        }
 
-		/**
+        /**
 		 * Sets a byte source to re-read the CFF data in the future.
 		 */
-		readonly void setData(CFFParser.ByteSource source)
-		{
-			this.source = source;
-		}
+        public void SetData(CFFParser.IByteSource source)
+        {
+            this.source = source;
+        }
 
-		/**
+        /**
 		 * Returns the CFF data.
 		 */
-		public byte[] getData()
-		{
-			return source.getBytes();
-		}
+        public byte[] Data
+        {
+            get => source.Bytes;
+        }
 
-		/**
+        /**
 		 * Returns the number of charstrings in the font.
 		 */
-		public int getNumCharStrings()
-		{
-			return charStrings.Length;
-		}
+        public int NumCharStrings
+        {
+            get => charStrings.Length;
+        }
 
-		/**
-		 * Sets the global subroutine index data.
-		 * 
-		 * @param globalSubrIndexValue an list containing the global subroutines
-		 */
-		void setGlobalSubrIndex(byte[][] globalSubrIndexValue)
-		{
-			globalSubrIndex = globalSubrIndexValue;
-		}
 
-		/**
+        /**
 		 * Returns the list containing the global subroutine .
 		 * 
 		 * @return the dictionary
 		 */
-		public List<byte[]> getGlobalSubrIndex()
-		{
-			return Arrays.asList(globalSubrIndex);
-		}
+        public byte[][] GlobalSubrIndex
+        {
+            get => globalSubrIndex;
+            set => globalSubrIndex = value;
+        }
 
-		/**
+        /**
 		 * Returns the Type 2 charstring for the given CID.
 		 *
 		 * @param cidOrGid CID for CIFFont, or GID for Type 1 font
 		 * @throws IOException if the charstring could not be read
 		 */
-		public abstract Type2CharString getType2CharString(int cidOrGid);
+        public abstract Type2CharString GetType2CharString(int cidOrGid);
 
 
-		public override string ToString()
-		{
-			return GetType().Name + "[name=" + fontName + ", topDict=" + topDict
-					+ ", charset=" + charset + ", charStrings=" + string.Join(", ", charStrings)
-					+ "]";
-		}
-	}
+        public override string ToString()
+        {
+            return GetType().Name + "[name=" + fontName + ", topDict=" + topDict
+                    + ", charset=" + charset + ", charStrings=" + string.Join(", ", charStrings.Select(p => p.Length))
+                    + "]";
+        }
+    }
 }

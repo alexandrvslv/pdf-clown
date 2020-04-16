@@ -89,13 +89,13 @@ namespace PdfClown.Documents.Contents.Fonts
         #region protected
         protected void Put(int charCode, string charName)
         {
-            names[new ByteArray((byte)charCode)] = charName;
+            names[charCode] = charName;
             Put(charCode, GlyphMapping.Default.NameToCode(charName).Value);
         }
 
         protected void Put(int charCode, int unicode)
         {
-            codes[new ByteArray((byte)charCode)] = unicode;
+            codes[charCode] = unicode;
         }
         #endregion
         #endregion

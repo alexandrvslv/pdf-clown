@@ -24,6 +24,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using SkiaSharp;
 
 namespace PdfClown.Util.Math.Geom
@@ -37,7 +38,7 @@ namespace PdfClown.Util.Math.Geom
 
         public static SKPoint GetPerp(this SKPoint a, float v, bool xbasis = true)
         {
-            var b = xbasis 
+            var b = xbasis
                 ? SKPoint.Normalize(new SKPoint(a.Y == 0 ? 0 : v, a.Y == 0 ? v : -(a.X * v) / a.Y))
                 : SKPoint.Normalize(new SKPoint(a.X == 0 ? v : -(a.Y * v) / a.X, a.X == 0 ? 0 : v));
             var abs = System.Math.Abs(v);
@@ -67,6 +68,14 @@ namespace PdfClown.Util.Math.Geom
             path.LineTo(point);
             path.LineTo(point + new SKPoint(rotated2.X * 8, rotated2.Y * 8));
             path.Close();
+        }
+
+        public static void Add(this ref SKRect rectangle, IEnumerable<SKPoint> points)
+        {
+            foreach (var point in points)
+            {
+                rectangle.Add(point);
+            }
         }
 
         public static void Add(this ref SKRect rectangle, SKPoint[] points)

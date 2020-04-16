@@ -97,7 +97,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 * @return the unsigned byte as int
 		 * @throws IOException if an error occurs during reading
 		 */
-		public byte readUnsignedByte()
+		public byte ReadUnsignedByte()
 		{
 			return readByte();
 		}

@@ -45,7 +45,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      *
      * @author John Hewson
      */
-    public sealed class Type1Font : Type1CharStringReader//, EncodedFont, FontBoxFont
+    public sealed class Type1Font : IType1CharStringReader//, EncodedFont, FontBoxFont
     {
         /**
 		 * Constructs a new Type1Font object from a .pfb stream.

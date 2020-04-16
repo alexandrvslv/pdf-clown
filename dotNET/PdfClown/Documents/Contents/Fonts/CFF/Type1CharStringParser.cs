@@ -60,7 +60,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             DataInput input = new DataInput(bytes);
             while (input.hasRemaining())
             {
-                int b0 = input.readUnsignedByte();
+                int b0 = input.ReadUnsignedByte();
                 if (b0 == CALLSUBR)
                 {
                     // callsubr command
@@ -189,7 +189,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             if (b0 == 12)
 
             {
-                var b1 = input.readUnsignedByte();
+                var b1 = input.ReadUnsignedByte();
                 return new CharStringCommand(b0, b1);
             }
             return new CharStringCommand(b0);
@@ -203,12 +203,12 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             }
             else if (b0 >= 247 && b0 <= 250)
             {
-                var b1 = input.readUnsignedByte();
+                var b1 = input.ReadUnsignedByte();
                 return (b0 - 247) * 256 + b1 + 108;
             }
             else if (b0 >= 251 && b0 <= 254)
             {
-                var b1 = input.readUnsignedByte();
+                var b1 = input.ReadUnsignedByte();
                 return -(b0 - 251) * 256 - b1 - 108;
             }
             else if (b0 == 255)
