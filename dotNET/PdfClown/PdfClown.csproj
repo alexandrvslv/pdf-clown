@@ -20,7 +20,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
-  </PropertyGroup> 
+  </PropertyGroup>
 
 
   <ItemGroup>
@@ -131,7 +131,7 @@
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBK-EUC-V">
       <Link>res\fonts\cmap\GBK-EUC-V</Link>
       <LogicalName>fonts.cmap.GBK-EUC-V</LogicalName>
-    </EmbeddedResource>    
+    </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cff\ExpertCharset">
       <Link>res\fonts\cff\ExpertCharset</Link>
       <LogicalName>fonts.cff.ExpertCharset</LogicalName>
@@ -148,7 +148,7 @@
       <Link>res\fonts\cff\StandardStrings</Link>
       <LogicalName>fonts.cff.StandardStrings</LogicalName>
     </EmbeddedResource>
-    
+
     <EmbeddedResource Include="Assets\Comment.svg" />
     <EmbeddedResource Include="Assets\Graph.svg" />
     <EmbeddedResource Include="Assets\Key.svg" />
@@ -165,13 +165,19 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="Documents\Contents\Fonts\CFF\CFFCharset.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFCIDFont.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFDataInput.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CFFFont.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CharStringCommand.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CharStringHandler.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\CIDKeyedType2CharString.cs" />
     <None Include="Documents\Contents\Fonts\CFF\DataInput.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\FDSelect.cs" />
     <None Include="Documents\Contents\Fonts\CFF\Type1CharString.cs" />
     <None Include="Documents\Contents\Fonts\CFF\Type1CharStringParser.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\Type2CharString.cs" />
+    <None Include="Documents\Contents\Fonts\CFF\Type2CharStringParser.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFont.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType0.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType2.cs" />

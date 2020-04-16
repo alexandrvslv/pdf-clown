@@ -170,7 +170,7 @@ namespace PdfClown.Objects
         { return baseObject.GetHashCode(); }
 
         public override string ToString()
-        { return String.Format("{0} {{{1}}}", GetType().Name, BaseObject is PdfReference ? (PdfObject)BaseObject.DataContainer : BaseObject); }
+        { return $"{GetType().Name} {{{(BaseObject is PdfReference ? (PdfObject)BaseObject.DataContainer : BaseObject)}}}"; }
 
         #region IPdfObjectWrapper
         public virtual PdfDirectObject BaseObject

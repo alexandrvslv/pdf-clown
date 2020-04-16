@@ -100,6 +100,7 @@ namespace PdfClown.Bytes
           <param name="parameters">Decoding parameters.</param>
         */
         void Decode(Filter filter, PdfDictionary parameters);
+
         IBuffer Extract(Filter filter, PdfDictionary parameters);
 
         /**

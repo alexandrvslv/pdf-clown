@@ -18,56 +18,56 @@ using System.Collections.Generic;
 
 namespace PdfClown.Documents.Contents.Fonts.CCF
 {
-	/**
+    /**
      * A CFF Type 1-equivalent Encoding. An encoding is an array of codes associated with some or all
      * glyphs in a font
      *
      * @author John Hewson
      */
-	public abstract class CFFEncoding : Encoding
-	{
-		private readonly Dictionary<int, string> codeToName = new Dictionary<int, string>(250);
+    public abstract class CFFEncoding : Encoding
+    {
+        private readonly Dictionary<int, string> codeToName = new Dictionary<int, string>(250);
 
-		/**
+        /**
 		 * Package-private constructor for subclasses.
 		 */
-		CFFEncoding()
-		{ }
+        public CFFEncoding()
+        { }
 
-		/**
+        /**
 		 * Returns the name of the glyph for the given character code.
 		 *
 		 * @param code character code
 		 * @return PostScript glyph name
 		 */
-		override public string GetName(int code)
-		{
-			if (!codeToName.TryGetValue(code, out var name))
-			{
-				return ".notdef";
-			}
-			return name;
-		}
+        override public string GetName(int code)
+        {
+            if (!codeToName.TryGetValue(code, out var name))
+            {
+                return ".notdef";
+            }
+            return name;
+        }
 
-		/**
+        /**
 		 * Adds a new code/SID combination to the encoding.
 		 * @param code the given code
 		 * @param sid the given SID
 		 */
-		public void add(int code, int sid, string name)
-		{
-			codeToName.put(code, name);
-			Put(code, name);
-		}
+        public void add(int code, int sid, string name)
+        {
+            codeToName[code] = name;
+            Put(code, name);
+        }
 
-		/**
+        /**
 		 * For use by subclasses only.
 		 */
-		protected void add(int code, int sid)
-		{
-			string name = CFFStandardString.getName(sid);
-			codeToName.put(code, name);
-			addCharacterEncoding(code, name);
-		}
-	}
+        protected void add(int code, int sid)
+        {
+            string name = CFFStandardString.getName(sid);
+            codeToName.put(code, name);
+            addCharacterEncoding(code, name);
+        }
+    }
 }

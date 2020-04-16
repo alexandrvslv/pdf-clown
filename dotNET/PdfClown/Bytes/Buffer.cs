@@ -82,7 +82,10 @@ namespace PdfClown.Bytes
 
         public static IBuffer Extract(IBuffer buffer, PdfDataObject filter, PdfDirectObject parameters)
         {
-
+            if (filter == null)
+            {
+                return buffer;
+            }
             if (filter is PdfName) // Single filter.
             {
                 buffer = buffer.Extract(Filter.Get((PdfName)filter), (PdfDictionary)parameters);

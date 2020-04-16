@@ -63,26 +63,26 @@ namespace PdfClown.Documents.Contents.Fonts
         public Encoding()
         { }
 
-        public Encoding(Dictionary<ByteArray, string> codeToName)
+        public Encoding(Dictionary<int, string> codeToName)
         {
             names = codeToName;
         }
 
         #region dynamic
         #region fields
-        private readonly Dictionary<ByteArray, string> names = new Dictionary<ByteArray, string>();
-        private readonly Dictionary<ByteArray, int> codes = new Dictionary<ByteArray, int>();
+        private readonly Dictionary<int, string> names = new Dictionary<int, string>();
+        private readonly Dictionary<int, int> codes = new Dictionary<int, int>();
         #endregion
 
         #region interface
         #region public
-        public Dictionary<ByteArray, int> GetCodes()
-        { return new Dictionary<ByteArray, int>(codes); }
+        public Dictionary<int, int> GetCodes()
+        { return new Dictionary<int, int>(codes); }
 
-        public int GetUnicode(ByteArray key)
+        public int GetUnicode(int key)
         { return codes.TryGetValue(key, out var unicode) ? unicode : 0; }
 
-        public virtual string GetName(ByteArray key)
+        public virtual string GetName(int key)
         { return names.TryGetValue(key, out var name) ? name : null; }
         #endregion
 

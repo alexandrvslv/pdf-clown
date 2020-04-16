@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Objects;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 
@@ -32,13 +34,13 @@ namespace PdfClown.Documents.Contents.Fonts
         private readonly CFFCIDFont cidFont;  // Top DICT that uses CIDFont operators
         private readonly FontBoxFont t1Font; // Top DICT that does not use CIDFont operators
 
-        private readonly Dictionary<int, float> glyphHeights = new HashMap<>();
+        private readonly Dictionary<int, float> glyphHeights = new Dictionary<int, float>();
         private readonly bool isEmbedded;
         private readonly bool isDamaged;
-        private readonly AffineTransform fontMatrixTransform;
-        private float avgWidth = null;
-        private Matrix fontMatrix;
-        private BoundingBox fontBBox;
+        private readonly SKMatrix fontMatrixTransform;
+        private float? avgWidth = null;
+        private SKMatrix fontMatrix;
+        private SKRect? fontBBox;
         private int[] cid2gid = null;
 
         /**
@@ -47,18 +49,17 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param fontDictionary The font dictionary according to the PDF specification.
          * @param parent The parent font.
          */
-        public PDCIDFontType0(COSDictionary fontDictionary, PDType0Font parent)
+        public CIDFontType0(PdfDictionary fontDictionary, Type0Font parent)
+            : base(fontDictionary, parent)
         {
-            super(fontDictionary, parent);
-
-            PDFontDescriptor fd = getFontDescriptor();
+            FontDescriptor fd = FontDescriptor;
             byte[] bytes = null;
             if (fd != null)
             {
-                PDStream ff3Stream = fd.getFontFile3();
+                var ff3Stream = fd.FontFile3;
                 if (ff3Stream != null)
                 {
-                    bytes = ff3Stream.toByteArray();
+                    bytes = ff3Stream.BaseDataObject.ExtractBody(true);
                 }
             }
 
@@ -97,7 +98,7 @@ namespace PdfClown.Documents.Contents.Fonts
                     cidFont = null;
                     t1Font = cffFont;
                 }
-                cid2gid = readCIDToGIDMap();
+                cid2gid = ReadCIDToGIDMap();
                 isEmbedded = true;
                 isDamaged = false;
             }
@@ -105,8 +106,7 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 // find font or substitute
                 CIDFontMapping mapping = FontMappers.instance()
-                                                    .getCIDFont(getBaseFont(), getFontDescriptor(),
-                                                                getCIDSystemInfo());
+                                                    .GetCIDFont(BaseFont, FontDescriptor, CIDSystemInfo);
                 FontBoxFont font;
                 if (mapping.isCIDFont())
                 {
@@ -145,40 +145,43 @@ namespace PdfClown.Documents.Contents.Fonts
             fontMatrixTransform.scale(1000, 1000);
         }
 
-        override public readonly Matrix getFontMatrix()
+        override public SKMatrix FontMatrix
         {
-            if (fontMatrix == null)
+            get
             {
-                List<Number> numbers;
-                if (cidFont != null)
+                if (fontMatrix == null)
                 {
-                    numbers = cidFont.getFontMatrix();
-                }
-                else
-                {
-                    try
+                    List<Number> numbers;
+                    if (cidFont != null)
                     {
-                        numbers = t1Font.getFontMatrix();
+                        numbers = cidFont.getFontMatrix();
                     }
-                    catch (IOException e)
+                    else
                     {
-                        LOG.debug("Couldn't get font matrix - returning default value", e);
-                        return new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
+                        try
+                        {
+                            numbers = t1Font.getFontMatrix();
+                        }
+                        catch (IOException e)
+                        {
+                            LOG.debug("Couldn't get font matrix - returning default value", e);
+                            return new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
+                        }
                     }
-                }
 
-                if (numbers != null && numbers.size() == 6)
-                {
-                    fontMatrix = new Matrix(numbers.get(0).floatValue(), numbers.get(1).floatValue(),
-                                            numbers.get(2).floatValue(), numbers.get(3).floatValue(),
-                                            numbers.get(4).floatValue(), numbers.get(5).floatValue());
+                    if (numbers != null && numbers.size() == 6)
+                    {
+                        fontMatrix = new Matrix(numbers.get(0).floatValue(), numbers.get(1).floatValue(),
+                                                numbers.get(2).floatValue(), numbers.get(3).floatValue(),
+                                                numbers.get(4).floatValue(), numbers.get(5).floatValue());
+                    }
+                    else
+                    {
+                        fontMatrix = new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
+                    }
                 }
-                else
-                {
-                    fontMatrix = new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
-                }
+                return fontMatrix;
             }
-            return fontMatrix;
         }
 
         override public BoundingBox getBoundingBox()
@@ -295,7 +298,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         override public GeneralPath getPath(int code)
         {
-            int cid = codeToCID(code);
+            int cid = CodeToCID(code);
             if (cid2gid != null && isEmbedded)
             {
                 // PDFBOX-4093: despite being a type 0 font, there is a CIDToGIDMap
@@ -323,7 +326,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         override public bool hasGlyph(int code)
         {
-            int cid = codeToCID(code);
+            int cid = CodeToCID(code);
             Type2CharString charstring = getType2CharString(cid);
             if (charstring != null)
             {
@@ -345,14 +348,14 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param code character code
          * @return CID
          */
-        override public int codeToCID(int code)
+        override public int CodeToCID(int code)
         {
             return parent.getCMap().toCID(code);
         }
 
-        override public int codeToGID(int code)
+        override public int CodeToGID(int code)
         {
-            int cid = codeToCID(code);
+            int cid = CodeToCID(code);
             if (cidFont != null)
             {
                 // The CIDs shall be used to determine the GID value for the glyph procedure using the
@@ -366,21 +369,21 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        override public byte[] encode(int unicode)
+        override public byte[] Encode(int unicode)
         {
             // todo: we can use a known character collection CMap for a CIDFont
             //       and an Encoding for Type 1-equivalent
             throw new UnsupportedOperationException();
         }
 
-        override public byte[] encodeGlyphId(int glyphId)
+        override public byte[] EncodeGlyphId(int glyphId)
         {
             throw new UnsupportedOperationException();
         }
 
         override public float getWidthFromFont(int code)
         {
-            int cid = codeToCID(code);
+            int cid = CodeToCID(code);
             float width;
             if (cidFont != null)
             {
@@ -412,7 +415,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         override public float getHeight(int code)
         {
-            int cid = codeToCID(code);
+            int cid = CodeToCID(code);
 
             float height;
             if (!glyphHeights.containsKey(cid))

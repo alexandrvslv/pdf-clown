@@ -153,7 +153,19 @@ unaware of such a facility.
             return body;
         }
 
-
+        public IBuffer ExtractBody(bool decode)
+        {
+            var buffer = GetBody(false);
+            if (decode)
+            {
+                PdfDataObject filter = Filter;
+                if (filter != null) // Stream encoded.
+                {
+                    buffer = Bytes.Buffer.Extract(buffer, filter, Parameters);
+                }
+            }
+            return buffer;
+        }
 
         /**
           <summary>Gets the stream header.</summary>

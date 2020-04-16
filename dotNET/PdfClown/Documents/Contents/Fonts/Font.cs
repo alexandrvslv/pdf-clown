@@ -345,10 +345,50 @@ namespace PdfClown.Documents.Contents.Fonts
       */
         public double LineHeight => Ascent - Descent;
 
+        public string Type
+        {
+            get => ((PdfName)BaseDataObject[PdfName.Type]).ToString();
+            set => BaseDataObject[PdfName.Type] = new PdfName(value);
+        }
+
+        public string Subtype
+        {
+            get => ((PdfName)BaseDataObject[PdfName.Subtype]).ToString();
+            set => BaseDataObject[PdfName.Subtype] = new PdfName(value);
+        }
+
         /**
           <summary>Gets the PostScript name of the font.</summary>
         */
-        public string Name => ((PdfName)BaseDataObject[PdfName.BaseFont]).ToString();
+        public string Name
+        {
+            get => ((PdfName)BaseDataObject[PdfName.BaseFont]).ToString();
+            set => BaseDataObject[PdfName.BaseFont] = new PdfName(value);
+        }
+
+        public int FirstChar
+        {
+            get => ((PdfInteger)BaseDataObject[PdfName.FirstChar])?.IntValue ?? 0;
+            set => BaseDataObject[PdfName.FirstChar] = new PdfInteger(value);
+        }
+
+        public int LastChar
+        {
+            get => ((PdfInteger)BaseDataObject[PdfName.LastChar])?.IntValue ?? 0;
+            set => BaseDataObject[PdfName.LastChar] = new PdfInteger(value);
+        }
+
+        public PdfArray Widths
+        {
+            get => (PdfArray)BaseDataObject.Resolve(PdfName.Widths);
+            set => BaseDataObject[PdfName.Widths] = value.Reference;
+        }
+
+        public FontDescriptor FontDescriptor
+        {
+            get => Wrap<FontDescriptor>((PdfDictionary)BaseDataObject.Resolve(PdfName.FontDescriptor));
+            set => BaseDataObject[PdfName.FontDescriptor] = value.BaseObject;
+        }
 
         /**
           <summary>Gets whether the font encoding is custom (that is non-Unicode).</summary>

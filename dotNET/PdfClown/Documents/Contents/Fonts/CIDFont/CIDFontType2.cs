@@ -117,7 +117,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 ttf = ttfFont;
             }
             cmap = ttf.getUnicodeCmapLookup(false);
-            cid2gid = readCIDToGIDMap();
+            cid2gid = ReadCIDToGIDMap();
         }
 
         private TrueTypeFont findFontOrSubstitute()
@@ -179,7 +179,7 @@ namespace PdfClown.Documents.Contents.Fonts
             return ttf.getFontBBox();
         }
 
-        override public int codeToCID(int code)
+        override public int CodeToCID(int code)
         {
             CMap cMap = parent.getCMap();
 
@@ -199,7 +199,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @return GID
          * @throws IOException
          */
-        override public int codeToGID(int code)
+        override public int CodeToGID(int code)
         {
             if (!isEmbedded)
             {
@@ -212,7 +212,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 {
                     // Acrobat allows non-embedded GIDs - todo: can we find a test PDF for this?
                     LOG.warn("Using non-embedded GIDs in font " + getName());
-                    int cid = codeToCID(code);
+                    int cid = CodeToCID(code);
                     return cid2gid[cid];
                 }
                 else
@@ -229,7 +229,7 @@ namespace PdfClown.Documents.Contents.Fonts
                         }
                         // Acrobat is willing to use the CID as a GID, even when the font isn't embedded
                         // see PDFBOX-2599
-                        return codeToCID(code);
+                        return CodeToCID(code);
                     }
                     else if (unicode.length() > 1)
                     {
@@ -246,7 +246,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 // a CIDToGIDMap entry that maps CIDs to the glyph indices for the appropriate glyph
                 // descriptions in that font program.
 
-                int cid = codeToCID(code);
+                int cid = CodeToCID(code);
                 if (cid2gid != null)
                 {
                     // use CIDToGIDMap
@@ -284,7 +284,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         override public float getWidthFromFont(int code)
         {
-            int gid = codeToGID(code);
+            int gid = CodeToGID(code);
             int width = ttf.getAdvanceWidth(gid);
             int unitsPerEM = ttf.getUnitsPerEm();
             if (unitsPerEM != 1000)
@@ -294,7 +294,7 @@ namespace PdfClown.Documents.Contents.Fonts
             return width;
         }
 
-        override public byte[] encode(int unicode)
+        override public byte[] Encode(int unicode)
         {
             int cid = -1;
             if (isEmbedded)
@@ -336,10 +336,10 @@ namespace PdfClown.Documents.Contents.Fonts
                         String.format("No glyph for U+%04X (%c) in font %s", unicode, (char)unicode, getName()));
             }
 
-            return encodeGlyphId(cid);
+            return EncodeGlyphId(cid);
         }
 
-        override public byte[] encodeGlyphId(int glyphId)
+        override public byte[] EncodeGlyphId(int glyphId)
         {
             // CID is always 2-bytes (16-bit) for TrueType
             return new byte[] { (byte)(glyphId >> 8 & 0xff), (byte)(glyphId & 0xff) };
@@ -370,13 +370,13 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 // we're not supposed to have CFF fonts inside PDCIDFontType2, but if we do,
                 // then we treat their CIDs as GIDs, see PDFBOX-3344
-                int cid = codeToGID(code);
+                int cid = CodeToGID(code);
                 Type2CharString charstring = ((OpenTypeFont)ttf).getCFF().getFont().getType2CharString(cid);
                 return charstring.getPath();
             }
             else
             {
-                int gid = codeToGID(code);
+                int gid = CodeToGID(code);
                 GlyphData glyph = ttf.getGlyph().getGlyph(gid);
                 if (glyph != null)
                 {
@@ -390,7 +390,7 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             bool hasScaling = ttf.getUnitsPerEm() != 1000;
             float scale = 1000f / ttf.getUnitsPerEm();
-            int gid = codeToGID(code);
+            int gid = CodeToGID(code);
 
             SKPath path = getPath(code);
 
@@ -417,7 +417,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         override public bool hasGlyph(int code)
         {
-            return codeToGID(code) != 0;
+            return CodeToGID(code) != 0;
         }
     }
 }
