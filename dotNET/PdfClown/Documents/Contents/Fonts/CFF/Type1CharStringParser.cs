@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -58,7 +59,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         private static List<object> Parse(string fontName, string glyphName, byte[] bytes, List<byte[]> subrs, List<object> sequence)
         {
             DataInput input = new DataInput(bytes);
-            while (input.hasRemaining())
+            while (input.HasRemaining())
             {
                 int b0 = input.ReadUnsignedByte();
                 if (b0 == CALLSUBR)
@@ -96,10 +97,10 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                         }
                     }
                 }
-                else if (b0 == TWO_BYTE && input.peekUnsignedByte(0) == CALLOTHERSUBR)
+                else if (b0 == TWO_BYTE && input.PeekUnsignedByte(0) == CALLOTHERSUBR)
                 {
                     // callothersubr command (needed in order to expand Subrs)
-                    input.readByte();
+                    input.ReadByte();
 
                     int othersubrNum = (int)sequence.RemoveAtValue(sequence.Count - 1);
                     int numArgs = (int)sequence.RemoveAtValue(sequence.Count - 1);
@@ -135,10 +136,10 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                     }
 
                     // pop must follow immediately
-                    while (input.peekUnsignedByte(0) == TWO_BYTE && input.peekUnsignedByte(1) == POP)
+                    while (input.PeekUnsignedByte(0) == TWO_BYTE && input.PeekUnsignedByte(1) == POP)
                     {
-                        input.readByte(); // B0_POP
-                        input.readByte(); // B1_POP
+                        input.ReadByte(); // B0_POP
+                        input.ReadByte(); // B1_POP
                         sequence.Add(results.Pop());
                     }
 
@@ -214,7 +215,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             else if (b0 == 255)
 
             {
-                return input.readInt();
+                return input.ReadInt();
             }
             else
             {

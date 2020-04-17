@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -28,12 +29,12 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
      */
     public static class Type2CharStringParser
     {
-        public static List<object> Parser(string fontName, int cid, byte[] bytes, byte[][] globalSubrIndex, byte[][] localSubrIndex)
+        public static List<object> Parse(string fontName, int cid, byte[] bytes, byte[][] globalSubrIndex, byte[][] localSubrIndex)
         {
-            return Parser(fontName, cid.ToString("x4"), bytes, globalSubrIndex, localSubrIndex); // for debugging only
+            return Parse(fontName, cid.ToString("x4"), bytes, globalSubrIndex, localSubrIndex); // for debugging only
         }
 
-        public static List<object> Parser(string fontName, string glyphName, byte[] bytes, byte[][] globalSubrIndex, byte[][] localSubrIndex)
+        public static List<object> Parse(string fontName, string glyphName, byte[] bytes, byte[][] globalSubrIndex, byte[][] localSubrIndex)
         {
             return Parse(bytes, globalSubrIndex, localSubrIndex);
         }
@@ -67,7 +68,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             bool localSubroutineIndexProvided = localSubrIndex != null && localSubrIndex.Length > 0;
             bool globalSubroutineIndexProvided = globalSubrIndex != null && globalSubrIndex.Length > 0;
 
-            while (input.hasRemaining())
+            while (input.HasRemaining())
             {
                 var b0 = input.ReadUnsignedByte();
                 if (b0 == 10 && localSubroutineIndexProvided)
@@ -196,7 +197,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         {
             if (b0 == 28)
             {
-                return (int)input.readShort();
+                return (int)input.ReadShort();
             }
             else if (b0 >= 32 && b0 <= 246)
             {
@@ -216,9 +217,9 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             }
             else if (b0 == 255)
             {
-                short value = input.readShort();
+                short value = input.ReadShort();
                 // The lower bytes are representing the digits after the decimal point
-                double fraction = input.readUnsignedShort() / 65535d;
+                double fraction = input.ReadUnsignedShort() / 65535d;
                 return value + (float)fraction;
             }
             else

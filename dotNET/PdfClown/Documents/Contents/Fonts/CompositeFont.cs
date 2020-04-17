@@ -83,13 +83,25 @@ namespace PdfClown.Documents.Contents.Fonts
 
         #region interface
         #region protected
+
+        public PdfArray DescendantFonts
+        {
+            get => (PdfArray)BaseDataObject.Resolve(PdfName.DescendantFonts);
+            set => BaseDataObject[PdfName.DescendantFonts] = value?.Reference;
+        }
         /**
           <summary>Gets the CIDFont dictionary that is the descendant of this composite font.</summary>
         */
-        protected PdfDictionary CIDFontDictionary => (PdfDictionary)((PdfArray)BaseDataObject.Resolve(PdfName.DescendantFonts)).Resolve(0);
+        protected CIDFont CIDFont
+        {
+            get => CIDFont.WrapFont((PdfDictionary)DescendantFonts.Resolve(0), this);
+            set => DescendantFonts[0] = value?.BaseObject;
+        }
 
         protected override PdfDataObject GetDescriptorValue(PdfName key)
-        { return ((PdfDictionary)CIDFontDictionary.Resolve(PdfName.FontDescriptor)).Resolve(key); }
+        {
+            return CIDFont.FontDescriptor.BaseDataObject.Resolve(key);
+        }
 
         protected void LoadEncoding()
         {

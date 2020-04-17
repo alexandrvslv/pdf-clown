@@ -1,0 +1,222 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+namespace PdfClown.Documents.Contents.Fonts.TTF{
+
+using System.Diagnostics;
+
+
+using SkiaSharp;
+using System.Collections.Generic;
+import java.util.Locale;
+
+/**
+ * This class provides a glyph to SKPath conversion for true type fonts.
+ * Based on code from Apache Batik, a subproject of Apache XMLGraphics.
+ *
+ * @see
+ * <a href="http://xmlgraphics.apache.org/batik">http://xmlgraphics.apache.org/batik</a>
+ * 
+ * Contour rendering ported from PDF.js, viewed on 14.2.2015, rev 2e97c0d
+ *
+ * @see
+ * <a href="https://github.com/mozilla/pdf.js/blob/c0d17013a28ee7aa048831560b6494a26c52360c/src/core/font_renderer.js">pdf.js/src/core/font_renderer.js</a>
+ *
+ */
+class GlyphRenderer
+{
+    //private static readonly Log LOG = LogFactory.getLog(GlyphRenderer.class);
+
+    private GlyphDescription glyphDescription;
+
+    GlyphRenderer(GlyphDescription glyphDescription)
+    {
+        this.glyphDescription = glyphDescription;
+    }
+
+    /**
+     * Returns the path of the glyph.
+     * @return the path
+     */
+    public SKPath getPath()
+    {
+        Point[] points = describe(glyphDescription);
+        return calculatePath(points);
+    }
+
+    /**
+     * Set the points of a glyph from the GlyphDescription.
+     */
+    private Point[] describe(GlyphDescription gd)
+    {
+        int endPtIndex = 0;
+        int endPtOfContourIndex = -1;
+        Point[] points = new Point[gd.getPointCount()];
+        for (int i = 0; i < gd.getPointCount(); i++)
+        {
+            if (endPtOfContourIndex == -1)
+            {
+                endPtOfContourIndex = gd.getEndPtOfContours(endPtIndex);
+            }
+            bool endPt = endPtOfContourIndex == i;
+            if (endPt)
+            {
+                endPtIndex++;
+                endPtOfContourIndex = -1;
+            }
+            points[i] = new Point(gd.getXCoordinate(i), gd.getYCoordinate(i),
+                    (gd.GetFlags(i) & GlyfDescript.ON_CURVE) != 0, endPt);
+        }
+        return points;
+    }
+
+    /**
+     * Use the given points to calculate a SKPath.
+     *
+     * @param points the points to be used to generate the SKPath
+     *
+     * @return the calculated SKPath
+     */
+    private SKPath calculatePath(SKPoint[] points)
+    {
+        SKPath path = new SKPath();
+        int start = 0;
+        for (int p = 0, len = points.Length; p < len; ++p)
+        {
+            if (points[p].endOfContour)
+            {
+                Point firstPoint = points[start];
+                Point lastPoint = points[p];
+                List<Point> contour = new List<>();
+                for (int q = start; q <= p; ++q)
+                {
+                    contour.Add(points[q]);
+                }
+                if (points[start].onCurve)
+                {
+                    // using start point at the contour end
+                    contour.Add(firstPoint);
+                }
+                else if (points[p].onCurve)
+                {
+                    // first is off-curve point, trying to use one from the end
+                    contour.Add(0, lastPoint);
+                }
+                else
+                {
+                    // start and end are off-curve points, creating implicit one
+                    Point pmid = midValue(firstPoint, lastPoint);
+                    contour.Add(0, pmid);
+                    contour.Add(pmid);
+                }
+                moveTo(path, contour.get(0));
+                for (int j = 1, clen = contour.Count; j < clen; j++)
+                {
+                    Point pnow = contour.get(j);
+                    if (pnow.onCurve)
+                    {
+                        lineTo(path, pnow);
+                    }
+                    else if (contour.get(j + 1).onCurve)
+                    {
+                        quadTo(path, pnow, contour.get(j + 1));
+                        ++j;
+                    }
+                    else
+                    {
+                        quadTo(path, pnow, midValue(pnow, contour.get(j + 1)));
+                    }
+                }
+                path.closePath();            
+                start = p + 1;
+            }
+        }
+        return path;
+    }
+
+    private void moveTo(SKPath path, Point point)
+    {
+        path.moveTo(point.x, point.y);
+        if (LOG.isDebugEnabled())
+        {
+            Debug.WriteLine("trace: moveTo: " + string.format(Locale.US, "%d,%d", point.x, point.y));
+        }
+    }
+
+    private void lineTo(SKPath path, Point point)
+    {
+        path.lineTo(point.x, point.y);
+        if (LOG.isDebugEnabled())
+        {
+            Debug.WriteLine("trace: lineTo: " + string.format(Locale.US, "%d,%d", point.x, point.y));
+        }
+    }
+
+    private void quadTo(SKPath path, Point ctrlPoint, Point point)
+    {
+        path.quadTo(ctrlPoint.x, ctrlPoint.y, point.x, point.y);
+        if (LOG.isDebugEnabled())
+        {
+            Debug.WriteLine("trace: quadTo: " + string.format(Locale.US, "%d,%d %d,%d", ctrlPoint.x, ctrlPoint.y,
+                    point.x, point.y));
+        }
+    }
+
+    private int midValue(int a, int b)
+    {
+        return a + (b - a) / 2;
+    }
+
+    // this creates an onCurve point that is between point1 and point2
+    private Point midValue(Point point1, Point point2)
+    {
+        return new Point(midValue(point1.x, point2.x), midValue(point1.y, point2.y));
+    }
+
+    /**
+     * This class represents one point of a glyph.
+     */
+    private static class Point
+    {
+        internal int x = 0;
+        internal int y = 0;
+        private bool onCurve = true;
+        private bool endOfContour = false;
+
+        Point(int xValue, int yValue, bool onCurveValue, bool endOfContourValue)
+        {
+            x = xValue;
+            y = yValue;
+            onCurve = onCurveValue;
+            endOfContour = endOfContourValue;
+        }
+
+        // this constructs an on-curve, non-endofcountour point
+        Point(int xValue, int yValue)
+        {
+            this(xValue, yValue, true, false);
+        }
+
+        override
+        public string ToString()
+        {
+            return string.format(Locale.US, "Point(%d,%d,%s,%s)", x, y, onCurve ? "onCurve" : "",
+                    endOfContour ? "endOfContour" : "");
+        }
+    }
+    
+}
+}

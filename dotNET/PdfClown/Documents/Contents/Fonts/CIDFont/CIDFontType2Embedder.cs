@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -63,7 +64,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // descendant CIDFont
             cidFont = createCIDFont();
             PdfArray descendantFonts = new PdfArray();
-            descendantFonts.add(cidFont);
+            descendantFonts.Add(cidFont);
             dict.setItem(COSName.DESCENDANT_FONTS, descendantFonts);
 
             if (!embedSubset)
@@ -80,7 +81,7 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             // build CID2GIDMap, because the content stream has been written with the old GIDs
             Dictionary<Integer, Integer> cidToGid = new HashMap<>(gidToCid.size());
-            gidToCid.forEach((newGID, oldGID)->cidToGid.put(oldGID, newGID));
+            gidToCid.forEach((newGID, oldGID)->cidToGid[oldGID, newGID));
 
             // build unicode mapping before subsetting as the subsetted font won't have a cmap
             buildToUnicodeCMap(gidToCid);
@@ -131,7 +132,7 @@ namespace PdfClown.Documents.Contents.Fonts
                     {
                         hasSurrogates = true;
                     }
-                    toUniWriter.add(cid, new String(new int[] { codePoint }, 0, 1));
+                    toUniWriter.Add(cid, new String(new int[] { codePoint }, 0, 1));
                 }
             }
 
@@ -261,7 +262,7 @@ namespace PdfClown.Documents.Contents.Fonts
             PdfArray ws = new PdfArray();
             int prev = Integer.MIN_VALUE;
             // Use a sorted list to get an optimal width array  
-            Set<Integer> keys = new TreeSet<>(cidToGid.keySet());
+            ISet<Integer> keys = new TreeSet<>(cidToGid.keySet());
             foreach (int cid in keys)
             {
                 int gid = cidToGid.get(cid);
@@ -275,10 +276,10 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (prev != cid - 1)
                 {
                     ws = new PdfArray();
-                    widths.add(PdfInteger.get(cid)); // c
-                    widths.add(ws);
+                    widths.Add(PdfInteger.get(cid)); // c
+                    widths.Add(ws);
                 }
-                ws.add(PdfInteger.get(width)); // wi
+                ws.Add(PdfInteger.get(width)); // wi
                 prev = cid;
             }
             cidFont.setItem(COSName.W, widths);
@@ -300,8 +301,8 @@ namespace PdfClown.Documents.Contents.Fonts
             if (v != 880 || w1 != -1000)
             {
                 PdfArray cosDw2 = new PdfArray();
-                cosDw2.add(PdfInteger.get(v));
-                cosDw2.add(PdfInteger.get(w1));
+                cosDw2.Add(PdfInteger.get(v));
+                cosDw2.Add(PdfInteger.get(w1));
                 cidFont.setItem(COSName.DW2, cosDw2);
             }
             return true;
@@ -335,7 +336,7 @@ namespace PdfClown.Documents.Contents.Fonts
             PdfArray w2 = new PdfArray();
             int prev = Integer.MIN_VALUE;
             // Use a sorted list to get an optimal width array
-            Set<Integer> keys = new TreeSet<>(cidToGid.keySet());
+            ISet<Integer> keys = new TreeSet<>(cidToGid.keySet());
             foreach (int cid in keys)
             {
                 // Unlike buildWidths, we look up with cid (not gid) here because this is
@@ -356,13 +357,13 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (prev != cid - 1)
                 {
                     w2 = new PdfArray();
-                    heights.add(PdfInteger.get(cid)); // c
-                    heights.add(w2);
+                    heights.Add(PdfInteger.get(cid)); // c
+                    heights.Add(w2);
                 }
-                w2.add(PdfInteger.get(advance)); // w1_iy
+                w2.Add(PdfInteger.get(advance)); // w1_iy
                 long width = Math.round(hmtx.getAdvanceWidth(cid) * scaling);
-                w2.add(PdfInteger.get(width / 2)); // v_ix
-                w2.add(PdfInteger.get(height)); // v_iy
+                w2.Add(PdfInteger.get(width / 2)); // v_ix
+                w2.Add(PdfInteger.get(height)); // v_iy
                 prev = cid;
             }
             cidFont.setItem(COSName.W2, heights);
@@ -391,7 +392,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         private PdfArray getWidths(int[] widths)
         {
-            if (widths.length == 0)
+            if (widths.Length == 0)
             {
                 throw new IllegalArgumentException("length of widths must be > 0");
             }
@@ -403,11 +404,11 @@ namespace PdfClown.Documents.Contents.Fonts
 
             PdfArray inner = new PdfArray();
             PdfArray outer = new PdfArray();
-            outer.add(PdfInteger.get(lastCid));
+            outer.Add(PdfInteger.get(lastCid));
 
             State state = State.FIRST;
 
-            for (int i = 2; i < widths.length; i += 2)
+            for (int i = 2; i < widths.Length; i += 2)
             {
                 long cid = widths[i];
                 long value = Math.round(widths[i + 1] * scaling);
@@ -423,41 +424,41 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             state = State.BRACKET;
                             inner = new PdfArray();
-                            inner.add(PdfInteger.get(lastValue));
+                            inner.Add(PdfInteger.get(lastValue));
                         }
                         else
                         {
                             inner = new PdfArray();
-                            inner.add(PdfInteger.get(lastValue));
-                            outer.add(inner);
-                            outer.add(PdfInteger.get(cid));
+                            inner.Add(PdfInteger.get(lastValue));
+                            outer.Add(inner);
+                            outer.Add(PdfInteger.get(cid));
                         }
                         break;
                     case BRACKET:
                         if (cid == lastCid + 1 && value == lastValue)
                         {
                             state = State.SERIAL;
-                            outer.add(inner);
-                            outer.add(PdfInteger.get(lastCid));
+                            outer.Add(inner);
+                            outer.Add(PdfInteger.get(lastCid));
                         }
                         else if (cid == lastCid + 1)
                         {
-                            inner.add(PdfInteger.get(lastValue));
+                            inner.Add(PdfInteger.get(lastValue));
                         }
                         else
                         {
                             state = State.FIRST;
-                            inner.add(PdfInteger.get(lastValue));
-                            outer.add(inner);
-                            outer.add(PdfInteger.get(cid));
+                            inner.Add(PdfInteger.get(lastValue));
+                            outer.Add(inner);
+                            outer.Add(PdfInteger.get(cid));
                         }
                         break;
                     case SERIAL:
                         if (cid != lastCid + 1 || value != lastValue)
                         {
-                            outer.add(PdfInteger.get(lastCid));
-                            outer.add(PdfInteger.get(lastValue));
-                            outer.add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.get(lastCid));
+                            outer.Add(PdfInteger.get(lastValue));
+                            outer.Add(PdfInteger.get(cid));
                             state = State.FIRST;
                         }
                         break;
@@ -470,16 +471,16 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 case FIRST:
                     inner = new PdfArray();
-                    inner.add(PdfInteger.get(lastValue));
-                    outer.add(inner);
+                    inner.Add(PdfInteger.get(lastValue));
+                    outer.Add(inner);
                     break;
                 case BRACKET:
-                    inner.add(PdfInteger.get(lastValue));
-                    outer.add(inner);
+                    inner.Add(PdfInteger.get(lastValue));
+                    outer.Add(inner);
                     break;
                 case SERIAL:
-                    outer.add(PdfInteger.get(lastCid));
-                    outer.add(PdfInteger.get(lastValue));
+                    outer.Add(PdfInteger.get(lastCid));
+                    outer.Add(PdfInteger.get(lastValue));
                     break;
             }
             return outer;
@@ -519,7 +520,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         private PdfArray getVerticalMetrics(int[] values)
         {
-            if (values.length == 0)
+            if (values.Length == 0)
             {
                 throw new IllegalArgumentException("length of values must be > 0");
             }
@@ -533,11 +534,11 @@ namespace PdfClown.Documents.Contents.Fonts
 
             PdfArray inner = new PdfArray();
             PdfArray outer = new PdfArray();
-            outer.add(PdfInteger.get(lastCid));
+            outer.Add(PdfInteger.get(lastCid));
 
             State state = State.FIRST;
 
-            for (int i = 4; i < values.length; i += 4)
+            for (int i = 4; i < values.Length; i += 4)
             {
                 long cid = values[i];
                 if (cid == Integer.MIN_VALUE)
@@ -560,51 +561,51 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             state = State.BRACKET;
                             inner = new PdfArray();
-                            inner.add(PdfInteger.get(lastW1Value));
-                            inner.add(PdfInteger.get(lastVxValue));
-                            inner.add(PdfInteger.get(lastVyValue));
+                            inner.Add(PdfInteger.get(lastW1Value));
+                            inner.Add(PdfInteger.get(lastVxValue));
+                            inner.Add(PdfInteger.get(lastVyValue));
                         }
                         else
                         {
                             inner = new PdfArray();
-                            inner.add(PdfInteger.get(lastW1Value));
-                            inner.add(PdfInteger.get(lastVxValue));
-                            inner.add(PdfInteger.get(lastVyValue));
-                            outer.add(inner);
-                            outer.add(PdfInteger.get(cid));
+                            inner.Add(PdfInteger.get(lastW1Value));
+                            inner.Add(PdfInteger.get(lastVxValue));
+                            inner.Add(PdfInteger.get(lastVyValue));
+                            outer.Add(inner);
+                            outer.Add(PdfInteger.get(cid));
                         }
                         break;
                     case BRACKET:
                         if (cid == lastCid + 1 && w1Value == lastW1Value && vxValue == lastVxValue && vyValue == lastVyValue)
                         {
                             state = State.SERIAL;
-                            outer.add(inner);
-                            outer.add(PdfInteger.get(lastCid));
+                            outer.Add(inner);
+                            outer.Add(PdfInteger.get(lastCid));
                         }
                         else if (cid == lastCid + 1)
                         {
-                            inner.add(PdfInteger.get(lastW1Value));
-                            inner.add(PdfInteger.get(lastVxValue));
-                            inner.add(PdfInteger.get(lastVyValue));
+                            inner.Add(PdfInteger.get(lastW1Value));
+                            inner.Add(PdfInteger.get(lastVxValue));
+                            inner.Add(PdfInteger.get(lastVyValue));
                         }
                         else
                         {
                             state = State.FIRST;
-                            inner.add(PdfInteger.get(lastW1Value));
-                            inner.add(PdfInteger.get(lastVxValue));
-                            inner.add(PdfInteger.get(lastVyValue));
-                            outer.add(inner);
-                            outer.add(PdfInteger.get(cid));
+                            inner.Add(PdfInteger.get(lastW1Value));
+                            inner.Add(PdfInteger.get(lastVxValue));
+                            inner.Add(PdfInteger.get(lastVyValue));
+                            outer.Add(inner);
+                            outer.Add(PdfInteger.get(cid));
                         }
                         break;
                     case SERIAL:
                         if (cid != lastCid + 1 || w1Value != lastW1Value || vxValue != lastVxValue || vyValue != lastVyValue)
                         {
-                            outer.add(PdfInteger.get(lastCid));
-                            outer.add(PdfInteger.get(lastW1Value));
-                            outer.add(PdfInteger.get(lastVxValue));
-                            outer.add(PdfInteger.get(lastVyValue));
-                            outer.add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.get(lastCid));
+                            outer.Add(PdfInteger.get(lastW1Value));
+                            outer.Add(PdfInteger.get(lastVxValue));
+                            outer.Add(PdfInteger.get(lastVyValue));
+                            outer.Add(PdfInteger.get(cid));
                             state = State.FIRST;
                         }
                         break;
@@ -619,22 +620,22 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 case FIRST:
                     inner = new PdfArray();
-                    inner.add(PdfInteger.get(lastW1Value));
-                    inner.add(PdfInteger.get(lastVxValue));
-                    inner.add(PdfInteger.get(lastVyValue));
-                    outer.add(inner);
+                    inner.Add(PdfInteger.get(lastW1Value));
+                    inner.Add(PdfInteger.get(lastVxValue));
+                    inner.Add(PdfInteger.get(lastVyValue));
+                    outer.Add(inner);
                     break;
                 case BRACKET:
-                    inner.add(PdfInteger.get(lastW1Value));
-                    inner.add(PdfInteger.get(lastVxValue));
-                    inner.add(PdfInteger.get(lastVyValue));
-                    outer.add(inner);
+                    inner.Add(PdfInteger.get(lastW1Value));
+                    inner.Add(PdfInteger.get(lastVxValue));
+                    inner.Add(PdfInteger.get(lastVyValue));
+                    outer.Add(inner);
                     break;
                 case SERIAL:
-                    outer.add(PdfInteger.get(lastCid));
-                    outer.add(PdfInteger.get(lastW1Value));
-                    outer.add(PdfInteger.get(lastVxValue));
-                    outer.add(PdfInteger.get(lastVyValue));
+                    outer.Add(PdfInteger.get(lastCid));
+                    outer.Add(PdfInteger.get(lastW1Value));
+                    outer.Add(PdfInteger.get(lastVxValue));
+                    outer.Add(PdfInteger.get(lastVyValue));
                     break;
             }
             return outer;

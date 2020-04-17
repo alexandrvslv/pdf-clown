@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,10 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Documents.Contents.Fonts.CCF;
 using PdfClown.Objects;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -43,13 +47,21 @@ namespace PdfClown.Documents.Contents.Fonts
         private SKRect? fontBBox;
         private int[] cid2gid = null;
 
+        public CIDFontType0(Document document, PdfDictionary fontObject) : base(document, fontObject)
+        {
+        }
+
+        internal CIDFontType0(PdfDirectObject fontObject)
+            : this((PdfDictionary)fontObject, null)
+        {
+        }
         /**
          * Constructor.
          * 
          * @param fontDictionary The font dictionary according to the PDF specification.
          * @param parent The parent font.
          */
-        public CIDFontType0(PdfDictionary fontDictionary, Type0Font parent)
+        public CIDFontType0(PdfDictionary fontDictionary, CompositeFont parent)
             : base(fontDictionary, parent)
         {
             FontDescriptor fd = FontDescriptor;
@@ -65,10 +77,10 @@ namespace PdfClown.Documents.Contents.Fonts
 
             bool fontIsDamaged = false;
             CFFFont cffFont = null;
-            if (bytes != null && bytes.length > 0 && (bytes[0] & 0xff) == '%')
+            if (bytes != null && bytes.Length > 0 && (bytes[0] & 0xff) == '%')
             {
                 // PDFBOX-2642 contains a corrupt PFB font instead of a CFF
-                LOG.warn("Found PFB but expected embedded CFF font " + fd.getFontName());
+                Debug.WriteLine("warning: Found PFB but expected embedded CFF font " + fd.FontName);
                 fontIsDamaged = true;
             }
             else if (bytes != null)
@@ -76,11 +88,11 @@ namespace PdfClown.Documents.Contents.Fonts
                 CFFParser cffParser = new CFFParser();
                 try
                 {
-                    cffFont = cffParser.parse(bytes, new FF3ByteSource()).get(0);
+                    cffFont = cffParser.Parse(bytes, new FF3ByteSource()).get(0);
                 }
                 catch (IOException e)
                 {
-                    LOG.error("Can't read the embedded CFF font " + fd.getFontName(), e);
+                    Debug.WriteLine("error: Can't read the embedded CFF font " + fd.FontName, e);
                     fontIsDamaged = true;
                 }
             }
@@ -135,17 +147,16 @@ namespace PdfClown.Documents.Contents.Fonts
 
                 if (mapping.isFallback())
                 {
-                    LOG.warn("Using fallback " + font.getName() + " for CID-keyed font " +
-                             getBaseFont());
+                    Debug.WriteLine("warning: Using fallback " + font.getName() + " for CID-keyed font " + BaseFont);
                 }
                 isEmbedded = false;
                 isDamaged = fontIsDamaged;
             }
-            fontMatrixTransform = getFontMatrix().createAffineTransform();
-            fontMatrixTransform.scale(1000, 1000);
+            fontMatrixTransform = FontMatrix;
+            fontMatrixTransform.SetScaleTranslate(1000, 1000, 0, 0);
         }
 
-        override public SKMatrix FontMatrix
+        public override SKMatrix FontMatrix
         {
             get
             {
@@ -164,7 +175,7 @@ namespace PdfClown.Documents.Contents.Fonts
                         }
                         catch (IOException e)
                         {
-                            LOG.debug("Couldn't get font matrix - returning default value", e);
+                            Debug.WriteLine("debug:Couldn't get font matrix - returning default value", e);
                             return new Matrix(0.001f, 0, 0, 0.001f, 0, 0);
                         }
                     }
@@ -184,22 +195,18 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        override public BoundingBox getBoundingBox()
+        public override SKRect BoundingBox
         {
-            if (fontBBox == null)
-            {
-                fontBBox = generateBoundingBox();
-            }
-            return fontBBox;
+            get => fontBBox ?? (fontBBox = generateBoundingBox()).Value;
         }
 
-        private BoundingBox generateBoundingBox()
+        private SKRect generateBoundingBox()
         {
-            if (getFontDescriptor() != null)
+            if (FontDescriptor != null)
             {
-                PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
+                var bbox = FontDescriptor.FontBBox;
                 if (bbox != null && (float.compare(bbox.getLowerLeftX(), 0) != 0 ||
-                    float.compare(bbox.getLowerLeftY(), 0) != 0 ||
+                    float.Compare(bbox.getLowerLeftY(), 0) != 0 ||
                     float.compare(bbox.getUpperRightX(), 0) != 0 ||
                     float.compare(bbox.getUpperRightY(), 0) != 0))
                 {
@@ -209,17 +216,17 @@ namespace PdfClown.Documents.Contents.Fonts
             }
             if (cidFont != null)
             {
-                return cidFont.getFontBBox();
+                return cidFont.FontBBox;
             }
             else
             {
                 try
                 {
-                    return t1Font.getFontBBox();
+                    return t1Font.FontBBox;
                 }
                 catch (IOException e)
                 {
-                    LOG.debug("Couldn't get font bounding box - returning default value", e);
+                    Debug.WriteLine("debug: Couldn't get font bounding box - returning default value", e);
                     return new BoundingBox();
                 }
             }
@@ -228,19 +235,22 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
          * Returns the embedded CFF CIDFont, or null if the substitute is not a CFF font.
          */
-        public CFFFont getCFFFont()
+        public CFFFont CFFFont
         {
-            if (cidFont != null)
+            get
             {
-                return cidFont;
-            }
-            else if (t1Font is CFFType1Font)
-            {
-                return (CFFType1Font)t1Font;
-            }
-            else
-            {
-                return null;
+                if (cidFont != null)
+                {
+                    return cidFont;
+                }
+                else if (t1Font is CFFType1Font)
+                {
+                    return (CFFType1Font)t1Font;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
@@ -373,15 +383,15 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             // todo: we can use a known character collection CMap for a CIDFont
             //       and an Encoding for Type 1-equivalent
-            throw new UnsupportedOperationException();
+            throw new NotSupportedException();
         }
 
         override public byte[] EncodeGlyphId(int glyphId)
         {
-            throw new UnsupportedOperationException();
+            throw new NotSupportedException();
         }
 
-        override public float getWidthFromFont(int code)
+        public override float GetWidthFromFont(int code)
         {
             int cid = CodeToCID(code);
             float width;
@@ -398,45 +408,43 @@ namespace PdfClown.Documents.Contents.Fonts
                 width = t1Font.getWidth(getGlyphName(code));
             }
 
-            Point2D p = new SKPoint(width, 0);
-            fontMatrixTransform.transform(p, p);
-            return (float)p.getX();
+            SKPoint p = new SKPoint(width, 0);
+            p = fontMatrixTransform.MapPoint(p);
+            return p.X;
         }
 
-        override public bool isEmbedded()
+        override public bool IsEmbedded
         {
-            return isEmbedded;
+            get => isEmbedded;
         }
 
-        override public bool isDamaged()
+        override public bool IsDamaged
         {
-            return isDamaged;
+            get => isDamaged;
         }
 
-        override public float getHeight(int code)
+        public override float GetHeight(int code)
         {
             int cid = CodeToCID(code);
 
-            float height;
-            if (!glyphHeights.containsKey(cid))
+            if (!glyphHeights.TryGetValue(cid, out float height))
             {
-                height = (float)getType2CharString(cid).getBounds().getHeight();
-                glyphHeights.put(cid, height);
-            }
-            else
-            {
-                height = glyphHeights.get(cid);
+                height = (float)getType2CharString(cid).Bounds.Height;
+                glyphHeights[cid] = height;
             }
             return height;
         }
 
-        override public float getAverageFontWidth()
+        public override float AverageFontWidth
         {
-            if (avgWidth == null)
+            get
             {
-                avgWidth = getAverageCharacterWidth();
+                if (avgWidth == null)
+                {
+                    avgWidth = getAverageCharacterWidth();
+                }
+                return avgWidth;
             }
-            return avgWidth;
         }
 
         // todo: this is a replacement for FontMetrics method
@@ -446,11 +454,11 @@ namespace PdfClown.Documents.Contents.Fonts
             return 500;
         }
 
-        private class FF3ByteSource : CFFParser.ByteSource
+        private class FF3ByteSource : CFFParser.IByteSource
         {
-            override public byte[] getBytes()
+            public byte[] Bytes
             {
-                return getFontDescriptor().getFontFile3().toByteArray();
+                get => FontDescriptor.FontFile3.toByteArray();
             }
         }
     }

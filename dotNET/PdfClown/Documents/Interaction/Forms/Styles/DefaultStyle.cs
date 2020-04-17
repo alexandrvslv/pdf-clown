@@ -39,21 +39,17 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
     /**
       <summary>Default field appearance style.</summary>
     */
-    public sealed class DefaultStyle
-      : FieldStyle
+    public sealed class DefaultStyle : FieldStyle
     {
         #region dynamic
         #region constructors
-        public DefaultStyle(
-          )
+        public DefaultStyle()
         { BackColor = new DeviceRGBColor(.9, .9, .9); }
         #endregion
 
         #region interface
         #region public
-        public override void Apply(
-          Field field
-          )
+        public override void Apply(Field field)
         {
             if (field is PushButton)
             { Apply((PushButton)field); }
@@ -100,10 +96,10 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
                 normalAppearance[PdfName.Yes] = onState;
 
                 //TODO:verify!!!
-                //   appearance.getRollover().put(PdfName.Yes,onState);
-                //   appearance.getDown().put(PdfName.Yes,onState);
-                //   appearance.getRollover().put(PdfName.Off,offState);
-                //   appearance.getDown().put(PdfName.Off,offState);
+                //   appearance.getRollover()[PdfName.Yes,onState);
+                //   appearance.getDown()[PdfName.Yes,onState);
+                //   appearance.getRollover()[PdfName.Off,offState);
+                //   appearance.getDown()[PdfName.Off,offState);
 
                 float lineWidth = 1;
                 SKRect frame = SKRect.Create(lineWidth / 2, lineWidth / 2, size.Width - lineWidth, size.Height - lineWidth);
@@ -189,10 +185,10 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
                 FormXObject onState = normalAppearance[new PdfName(widget.Value)];
 
                 //TODO:verify!!!
-                //   appearance.getRollover().put(new PdfName(...),onState);
-                //   appearance.getDown().put(new PdfName(...),onState);
-                //   appearance.getRollover().put(PdfName.Off,offState);
-                //   appearance.getDown().put(PdfName.Off,offState);
+                //   appearance.getRollover()[new PdfName(...),onState);
+                //   appearance.getDown()[new PdfName(...),onState);
+                //   appearance.getRollover()[PdfName.Off,offState);
+                //   appearance.getDown()[PdfName.Off,offState);
 
                 SKSize size = widget.Box.Size;
                 float lineWidth = 1;

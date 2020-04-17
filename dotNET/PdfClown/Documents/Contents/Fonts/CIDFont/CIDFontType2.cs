@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,8 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Objects;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -32,8 +36,17 @@ namespace PdfClown.Documents.Contents.Fonts
         private readonly bool isDamaged;
         private readonly CmapLookup cmap; // may be null
         private SKMatrix fontMatrix;
-        private BoundingBox fontBBox;
+        private SKRect fontBBox;
         private readonly HashSet<int> noMapping = new HashSet<int>();
+
+        public CIDFontType2(Document document, PdfDictionary fontObject) : base(document, fontObject)
+        {
+        }
+
+        internal CIDFontType2(PdfDirectObject fontObject)
+            : base(fontObject)
+        {
+        }
 
         /**
          * Constructor.
@@ -42,9 +55,9 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param parent The parent font.
          * @throws IOException
          */
-        public PDCIDFontType2(COSDictionary fontDictionary, PDType0Font parent)
+        public CIDFontType2(PdfDictionary fontDictionary, CompositeFont parent)
+            : this(fontDictionary, parent, null)
         {
-            this(fontDictionary, parent, null);
         }
 
         /**
@@ -55,11 +68,11 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param trueTypeFont The true type font used to create the parent font
          * @throws IOException
          */
-        public PDCIDFontType2(COSDictionary fontDictionary, PDType0Font parent, TrueTypeFont trueTypeFont)
+        public CIDFontType2(PdfDictionary fontDictionary, CompositeFont parent, TrueTypeFont trueTypeFont)
+            : base(fontDictionary, parent)
         {
-            super(fontDictionary, parent);
 
-            PDFontDescriptor fd = getFontDescriptor();
+            FontDescriptor fd = FontDescriptor;
             if (trueTypeFont != null)
             {
                 ttf = trueTypeFont;
@@ -71,18 +84,18 @@ namespace PdfClown.Documents.Contents.Fonts
                 bool fontIsDamaged = false;
                 TrueTypeFont ttfFont = null;
 
-                PDStream stream = null;
+                FontFile stream = null;
                 if (fd != null)
                 {
-                    stream = fd.getFontFile2();
+                    stream = fd.FontFile2;
                     if (stream == null)
                     {
-                        stream = fd.getFontFile3();
+                        stream = fd.FontFile3;
                     }
                     if (stream == null)
                     {
                         // Acrobat looks in FontFile too, even though it is not in the spec, see PDFBOX-2599
-                        stream = fd.getFontFile();
+                        stream = fd.FontFile;
                     }
                 }
                 if (stream != null)
@@ -98,13 +111,13 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             // PDFBOX-3344 contains PostScript outlines instead of TrueType
                             fontIsDamaged = true;
-                            LOG.warn("Found CFF/OTF but expected embedded TTF font " + fd.getFontName());
+                            LOG.warn("Found CFF/OTF but expected embedded TTF font " + fd.FontName);
                         }
                     }
                     catch (IOException e)
                     {
                         fontIsDamaged = true;
-                        LOG.warn("Could not read embedded OTF for font " + getBaseFont(), e);
+                        LOG.warn("Could not read embedded OTF for font " + BaseFont, e);
                     }
                 }
                 isEmbedded = ttfFont != null;
@@ -218,20 +231,20 @@ namespace PdfClown.Documents.Contents.Fonts
                 else
                 {
                     // fallback to the ToUnicode CMap, test with PDFBOX-1422 and PDFBOX-2560
-                    String unicode = parent.toUnicode(code);
+                    string unicode = parent.toUnicode(code);
                     if (unicode == null)
                     {
                         if (!noMapping.contains(code))
                         {
                             // we keep track of which warnings have been issued, so we don't log multiple times
-                            noMapping.add(code);
+                            noMapping.Add(code);
                             LOG.warn("Failed to find a character mapping for " + code + " in " + getName());
                         }
                         // Acrobat is willing to use the CID as a GID, even when the font isn't embedded
                         // see PDFBOX-2599
                         return CodeToCID(code);
                     }
-                    else if (unicode.length() > 1)
+                    else if (unicode.Length > 1)
                     {
                         LOG.warn("Trying to map multi-byte character using 'cmap', result will be poor");
                     }
@@ -250,7 +263,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (cid2gid != null)
                 {
                     // use CIDToGIDMap
-                    if (cid < cid2gid.length)
+                    if (cid < cid2gid.Length)
                     {
                         return cid2gid[cid];
                     }
@@ -332,27 +345,26 @@ namespace PdfClown.Documents.Contents.Fonts
 
             if (cid == 0)
             {
-                throw new IllegalArgumentException(
-                        String.format("No glyph for U+%04X (%c) in font %s", unicode, (char)unicode, getName()));
+                throw new ArgumentException($"No glyph for U+{unicode:x4} ({(char)unicode}) in font {Name}");
             }
 
             return EncodeGlyphId(cid);
         }
 
-        override public byte[] EncodeGlyphId(int glyphId)
+        public override byte[] EncodeGlyphId(int glyphId)
         {
             // CID is always 2-bytes (16-bit) for TrueType
             return new byte[] { (byte)(glyphId >> 8 & 0xff), (byte)(glyphId & 0xff) };
         }
 
-        override public bool isEmbedded()
+        override public bool IsEmbedded
         {
-            return isEmbedded;
+            get => isEmbedded;
         }
 
-        override public bool isDamaged()
+        override public bool IsDamaged
         {
-            return isDamaged;
+            get => isDamaged;
         }
 
         /**
@@ -364,7 +376,7 @@ namespace PdfClown.Documents.Contents.Fonts
             return ttf;
         }
 
-        override public SKPath getPath(int code)
+        public override SKPath GetPath(int code)
         {
             if (ttf is OpenTypeFont && ((OpenTypeFont)ttf).isPostScript())
             {
@@ -386,7 +398,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        override public SKPath getNormalizedPath(int code)
+        override public SKPath GetNormalizedPath(int code)
         {
             bool hasScaling = ttf.getUnitsPerEm() != 1000;
             float scale = 1000f / ttf.getUnitsPerEm();
@@ -415,7 +427,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        override public bool hasGlyph(int code)
+        public override bool HasGlyph(int code)
         {
             return CodeToGID(code) != 0;
         }

@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -28,7 +29,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
      * @author Villu Ruusmann
      * @author John Hewson
      */
-    public abstract class CFFFont //: FontBoxFont
+    public abstract class CFFFont : BaseFont
     {
         protected string fontName;
         protected readonly Dictionary<string, object> topDict = new Dictionary<string, object>(StringComparer.Ordinal);
@@ -42,24 +43,15 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 *
 		 * @return the name of the font
 		 */
-        public string Name
+        public override string Name
+        {
+            get => fontName;
+        }
+
+        public string FontName
         {
             get => fontName;
             set => fontName = value;
-        }
-
-        /**
-		 * Adds the given key/value pair to the top dictionary.
-		 * 
-		 * @param name the given key
-		 * @param value the given value
-		 */
-        public void AddValueToTopDict(string name, object value)
-        {
-            if (value != null)
-            {
-                topDict[name] = value;
-            }
         }
 
         /**
@@ -73,14 +65,9 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         }
 
         /**
-		 * Returns the FontMatrix.
-		 */
-        public abstract List<float> FontMatrix { get; set; }
-
-        /**
 		 * Returns the FontBBox.
 		 */
-        public virtual SKRect FontBBox
+        public override SKRect FontBBox
         {
             get
             {
@@ -146,6 +133,20 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         {
             get => globalSubrIndex;
             set => globalSubrIndex = value;
+        }
+
+        /**
+		 * Adds the given key/value pair to the top dictionary.
+		 * 
+		 * @param name the given key
+		 * @param value the given value
+		 */
+        public void AddValueToTopDict(string name, object value)
+        {
+            if (value != null)
+            {
+                topDict[name] = value;
+            }
         }
 
         /**

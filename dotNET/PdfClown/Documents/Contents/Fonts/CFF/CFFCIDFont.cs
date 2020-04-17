@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -29,7 +30,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
      * @author Villu Ruusmann
      * @author John Hewson
      */
-    public class CFFCIDFont : CFFFont
+    public class CFFCIDFont : CFFFont, IType1CharStringReader
     {
         private string registry;
         private string ordering;
@@ -78,7 +79,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 *
 		 * @return the fontDict
 		 */
-        public List<Dictionary<string, object>> FontDicts
+        public virtual List<Dictionary<string, object>> FontDicts
         {
             get => fontDictionaries;
             set => fontDictionaries = value;
@@ -89,7 +90,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 *
 		 * @return the privDict
 		 */
-        public List<Dictionary<string, object>> PrivDicts
+        public virtual List<Dictionary<string, object>> PrivDicts
         {
             get => privateDictionaries;
             set => privateDictionaries = value;
@@ -100,7 +101,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 *
 		 * @return the fdSelect
 		 */
-        public FDSelect FdSelect
+        public virtual FDSelect FdSelect
         {
             get => fdSelect;
             set => fdSelect = value;
@@ -112,7 +113,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 *
 		 * @param gid GID
 		 */
-        private int GetDefaultWidthX(int gid)
+        protected virtual int GetDefaultWidthX(int gid)
         {
             int fdArrayIndex = this.fdSelect.GetFDIndex(gid);
             if (fdArrayIndex == -1)
@@ -128,7 +129,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 *
 		 * @param gid GID
 		 */
-        private int GetNominalWidthX(int gid)
+        protected virtual int GetNominalWidthX(int gid)
         {
             int fdArrayIndex = this.fdSelect.GetFDIndex(gid);
             if (fdArrayIndex == -1)
@@ -155,6 +156,10 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             return (byte[][])privDict["Subrs"];
         }
 
+        public Type1CharString GetType1CharString(string name)
+        {
+            return GetType2CharString(0);
+        }
         /**
 		 * Returns the Type 2 charstring for the given CID.
 		 *
@@ -172,19 +177,18 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 {
                     bytes = charStrings[0]; // .notdef
                 }
-                List<object> type2seq = Type2CharStringParser.Parser(fontName, cid, bytes, globalSubrIndex, GetLocalSubrIndex(gid));
-                type2 = new CIDKeyedType2CharString(this, fontName, cid, gid, type2seq,
-                                                    GetDefaultWidthX(gid), GetNominalWidthX(gid));
+                List<object> type2seq = Type2CharStringParser.Parse(fontName, cid, bytes, globalSubrIndex, GetLocalSubrIndex(gid));
+                type2 = new CIDKeyedType2CharString(this, fontName, cid, gid, type2seq, GetDefaultWidthX(gid), GetNominalWidthX(gid));
                 charStringCache[cid] = type2;
             }
             return type2;
         }
 
-        //@Override
-        public List<float> GetFontMatrix()
+        public override List<float> FontMatrix
         {
             // our parser guarantees that FontMatrix will be present and correct in the Top DICT
-            return topDict.TryGetValue("FontMatrix", out var array) ? (List<float>)array : null;
+            get => topDict.TryGetValue("FontMatrix", out var array) ? (List<float>)array : null;
+            set { }
         }
 
         //@Override

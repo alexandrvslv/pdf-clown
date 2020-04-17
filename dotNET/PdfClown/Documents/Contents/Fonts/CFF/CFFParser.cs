@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -124,13 +125,13 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         {
             // this is OpenType font containing CFF data
             // so find CFF tag
-            short numTables = input.readShort();
+            short numTables = input.ReadShort();
             //@SuppressWarnings({"unused", "squid:S1854"})
-            short searchRange = input.readShort();
+            short searchRange = input.ReadShort();
             //@SuppressWarnings({"unused", "squid:S1854"})
-            short entrySelector = input.readShort();
+            short entrySelector = input.ReadShort();
             //@SuppressWarnings({"unused", "squid:S1854"})
-            short rangeShift = input.readShort();
+            short rangeShift = input.ReadShort();
             for (int q = 0; q < numTables; q++)
             {
                 string tagName = ReadTagName(input);
@@ -140,7 +141,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 long Length = ReadLong(input);
                 if ("CFF ".Equals(tagName, StringComparison.Ordinal))
                 {
-                    byte[] bytes2 = Array.Copy(bytes, (int)offset, (int)(offset + Length));
+                    byte[] bytes2 = bytes.CopyOfRange((int)offset, (int)(offset + Length));
                     return new CFFDataInput(bytes2);
                 }
             }
@@ -149,7 +150,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 
         private static string ReadTagName(CFFDataInput input)
         {
-            byte[] b = input.readBytes(4);
+            byte[] b = input.ReadBytes(4);
             return PdfClown.Tokens.Encoding.Pdf.Decode(b);
         }
 
@@ -201,7 +202,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             for (int i = 0; i < count; i++)
             {
                 int Length = offsets[i + 1] - offsets[i];
-                indexDataValues[i] = input.readBytes(Length);
+                indexDataValues[i] = input.ReadBytes(Length);
             }
             return indexDataValues;
         }
@@ -224,7 +225,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                             i + ": offsets[" + (i + 1) + "]=" + offsets[i + 1] +
                             ", offsets[" + i + "]=" + offsets[i]);
                 }
-                indexDataValues[i] = PdfClown.Tokens.Encoding.Pdf.Decode(input.readBytes(Length));
+                indexDataValues[i] = PdfClown.Tokens.Encoding.Pdf.Decode(input.ReadBytes(Length));
             }
             return indexDataValues;
         }
@@ -232,7 +233,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         private static DictData ReadDictData(CFFDataInput input)
         {
             DictData dict = new DictData();
-            while (input.hasRemaining())
+            while (input.HasRemaining())
             {
                 dict.Add(ReadEntry(input));
             }
@@ -302,11 +303,11 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         {
             if (b0 == 28)
             {
-                return (int)input.readShort();
+                return (int)input.ReadShort();
             }
             else if (b0 == 29)
             {
-                return input.readInt();
+                return input.ReadInt();
             }
             else if (b0 >= 32 && b0 <= 246)
             {
@@ -446,7 +447,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 
             // name
             debugFontName = name;
-            font.Name = name;
+            font.FontName = name;
 
             // top dict
             font.AddValueToTopDict("version", GetString(topDict, "version"));
@@ -538,7 +539,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                     numEntries = charStringsIndex.Length;
                 }
 
-                parseCIDFontDicts(input, topDict, (CFFCIDFont)font, numEntries);
+                ParseCIDFontDicts(input, topDict, (CFFCIDFont)font, numEntries);
 
                 List<float> privMatrix = null;
                 List<Dictionary<string, Object>> fontDicts = ((CFFCIDFont)font).FontDicts;
@@ -571,7 +572,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             }
             else
             {
-                parseType1Dicts(input, topDict, (CFFType1Font)font, charset);
+                ParseType1Dicts(input, topDict, (CFFType1Font)font, charset);
             }
 
             return font;
@@ -583,33 +584,32 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             // (a b 0)
             // (c d 0)
             // (x y 1)
-            double a1 = matrixDest[0].doubleValue();
-            double b1 = matrixDest[1].doubleValue();
-            double c1 = matrixDest[2].doubleValue();
-            double d1 = matrixDest[3].doubleValue();
-            double x1 = matrixDest[4].doubleValue();
-            double y1 = matrixDest[5].doubleValue();
+            double a1 = matrixDest[0];
+            double b1 = matrixDest[1];
+            double c1 = matrixDest[2];
+            double d1 = matrixDest[3];
+            double x1 = matrixDest[4];
+            double y1 = matrixDest[5];
 
-            double a2 = matrixConcat[0].doubleValue();
-            double b2 = matrixConcat[1].doubleValue();
-            double c2 = matrixConcat[2].doubleValue();
-            double d2 = matrixConcat[3].doubleValue();
-            double x2 = matrixConcat[4].doubleValue();
-            double y2 = matrixConcat[5].doubleValue();
+            double a2 = matrixConcat[0];
+            double b2 = matrixConcat[1];
+            double c2 = matrixConcat[2];
+            double d2 = matrixConcat[3];
+            double x2 = matrixConcat[4];
+            double y2 = matrixConcat[5];
 
-            matrixDest.set(0, a1 * a2 + b1 * c2);
-            matrixDest.set(1, a1 * b2 + b1 * d1);
-            matrixDest.set(2, c1 * a2 + d1 * c2);
-            matrixDest.set(3, c1 * b2 + d1 * d2);
-            matrixDest.set(4, x1 * a2 + y1 * c2 + x2);
-            matrixDest.set(5, x1 * b2 + y1 * d2 + y2);
+            matrixDest[0] = (float)(a1 * a2 + b1 * c2);
+            matrixDest[1] = (float)(a1 * b2 + b1 * d1);
+            matrixDest[2] = (float)(c1 * a2 + d1 * c2);
+            matrixDest[3] = (float)(c1 * b2 + d1 * d2);
+            matrixDest[4] = (float)(x1 * a2 + y1 * c2 + x2);
+            matrixDest[5] = (float)(x1 * b2 + y1 * d2 + y2);
         }
 
         /**
          * Parse dictionaries specific to a CIDFont.
          */
-        private void parseCIDFontDicts(CFFDataInput input, DictData topDict, CFFCIDFont font, int nrOfcharStrings)
-
+        private void ParseCIDFontDicts(CFFDataInput input, DictData topDict, CFFCIDFont font, int nrOfcharStrings)
         {
             // In a CIDKeyed Font, the Private dictionary isn't in the Top Dict but in the Font dict
             // which can be accessed by a lookup using FDArray and FDSelect
@@ -654,7 +654,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 DictData privateDict = ReadDictData(input, privateSize);
 
                 // populate private dict
-                Dictionary<string, Object> privDict = readPrivateDict(privateDict);
+                Dictionary<string, Object> privDict = ReadPrivateDict(privateDict);
                 privateDictionaries.Add(privDict);
 
                 // local subrs
@@ -669,7 +669,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             // font-dict (FD) select
             DictData.Entry fdSelectEntry = topDict.GetEntry("FDSelect");
             int fdSelectPos = (int)fdSelectEntry.GetNumber(0);
-            input.Position = fdSelectPos);
+            input.Position = fdSelectPos;
             FDSelect fdSelect = ReadFDSelect(input, nrOfcharStrings, font);
 
             // TODO almost certainly erroneous - CIDFonts do not have a top-level private dict
@@ -681,7 +681,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             font.FdSelect = fdSelect;
         }
 
-        private Dictionary<string, Object> readPrivateDict(DictData privateDict)
+        private Dictionary<string, Object> ReadPrivateDict(DictData privateDict)
         {
             Dictionary<string, Object> privDict = new Dictionary<string, Object>(17);
             privDict["BlueValues"] = privateDict.GetDelta("BlueValues", null);
@@ -707,7 +707,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         /**
          * Parse dictionaries specific to a Type 1-equivalent font.
          */
-        private void parseType1Dicts(CFFDataInput input, DictData topDict, CFFType1Font font, CFFCharset charset)
+        private void ParseType1Dicts(CFFDataInput input, DictData topDict, CFFType1Font font, CFFCharset charset)
         {
             // encoding
             DictData.Entry encodingEntry = topDict.GetEntry("Encoding");
@@ -722,7 +722,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                     encoding = CFFExpertEncoding.Instance;
                     break;
                 default:
-                    input.Position = encodingId);
+                    input.Position = encodingId;
                     encoding = ReadEncoding(input, charset);
                     break;
             }
@@ -732,23 +732,23 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             DictData.Entry privateEntry = topDict.GetEntry("Private");
             if (privateEntry == null)
             {
-                throw new IOException("Private dictionary entry missing for font " + font.fontName);
+                throw new IOException("Private dictionary entry missing for font " + font.Name);
             }
             int privateOffset = (int)privateEntry.GetNumber(1);
-            input.Position = privateOffset);
+            input.Position = privateOffset;
             int privateSize = (int)privateEntry.GetNumber(0);
             DictData privateDict = ReadDictData(input, privateSize);
 
             // populate private dict
-            Dictionary<string, Object> privDict = readPrivateDict(privateDict);
-            foreach (var entry in privDict) font.addToPrivateDict(entry.Key, entry.Value);
+            Dictionary<string, Object> privDict = ReadPrivateDict(privateDict);
+            foreach (var entry in privDict) font.AddToPrivateDict(entry.Key, entry.Value);
 
             // local subrs
             int localSubrOffset = (int)privateDict.GetNumber("Subrs", 0);
             if (localSubrOffset > 0)
             {
-                input.Position = privateOffset + localSubrOffset);
-                font.addToPrivateDict("Subrs", ReadIndexData(input));
+                input.Position = privateOffset + localSubrOffset;
+                font.AddToPrivateDict("Subrs", ReadIndexData(input));
             }
         }
 
@@ -971,7 +971,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             public override string ToString()
             {
                 return GetType().Name + "[format=" + format + " nbRanges=" + nbRanges + ", range3="
-                        + Arrays.ToString(range3) + " sentinel=" + sentinel + "]";
+                        + string.Join(", ", range3.Select(p => p.ToString())) + " sentinel=" + sentinel + "]";
             }
         }
 
@@ -1184,7 +1184,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 return entry != null && entry.Operands.Count > 0 ? entry.Operands : defaultValue;
             }
 
-            public float GetNumber(string name, float defaultValue)
+            public float? GetNumber(string name, float? defaultValue)
             {
                 Entry entry = GetEntry(name);
                 return entry != null && entry.Operands.Count > 0 ? entry.GetNumber(0) : defaultValue;
@@ -1528,6 +1528,17 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         public override string ToString()
         {
             return GetType().Name + "[" + debugFontName + "]";
+        }
+    }
+
+    public static class BytesExtension
+    {
+        public static byte[] CopyOfRange(this byte[] src, int start, int end)
+        {
+            var len = end - start;
+            var dest = new byte[len];
+            Array.Copy(src, start, dest, 0, len);
+            return dest;
         }
     }
 }

@@ -70,7 +70,7 @@ public class DataOutput
      */
     public void write(byte[] buffer)
     {
-        outputBuffer.write(buffer, 0, buffer.length);
+        outputBuffer.write(buffer, 0, buffer.Length);
     }
 
     /**

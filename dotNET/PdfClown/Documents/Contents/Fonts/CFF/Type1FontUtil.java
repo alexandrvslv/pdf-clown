@@ -1,4 +1,5 @@
 /*
+ * https://github.com/apache/pdfbox
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -41,11 +42,11 @@ public final class Type1FontUtil
         for (byte aByte : bytes)
         {
             String string = Integer.toHexString(aByte & 0xff);
-            if (string.length() == 1)
+            if (string.Length == 1)
             {
-                sb.append("0");
+                sb.Append("0");
             }
-            sb.append(string.toUpperCase(Locale.US));
+            sb.Append(string.toUpperCase(Locale.US));
         }
         return sb.toString();
     }
@@ -57,12 +58,12 @@ public final class Type1FontUtil
      */
     public static byte[] hexDecode(String string)
     {
-        if (string.length() % 2 != 0)
+        if (string.Length % 2 != 0)
         {
             throw new IllegalArgumentException();
         }
-        byte[] bytes = new byte[string.length() / 2];
-        for (int i = 0; i < string.length(); i += 2)
+        byte[] bytes = new byte[string.Length / 2];
+        for (int i = 0; i < string.Length; i += 2)
         {
             bytes[i / 2] = (byte) Integer.parseInt(string.substring(i, i + 2), 16);
         }
@@ -92,21 +93,21 @@ public final class Type1FontUtil
 
     private static byte[] encrypt(byte[] plaintextBytes, int r, int n)
     {
-        byte[] buffer = new byte[plaintextBytes.length + n];
+        byte[] buffer = new byte[plaintextBytes.Length + n];
 
         for (int i = 0; i < n; i++)
         {
             buffer[i] = 0;
         }
 
-        System.arraycopy(plaintextBytes, 0, buffer, n, buffer.length - n);
+        System.arraycopy(plaintextBytes, 0, buffer, n, buffer.Length - n);
 
         int c1 = 52845;
         int c2 = 22719;
 
-        byte[] ciphertextBytes = new byte[buffer.length];
+        byte[] ciphertextBytes = new byte[buffer.Length];
 
-        for (int i = 0; i < buffer.length; i++)
+        for (int i = 0; i < buffer.Length; i++)
         {
             int plain = buffer[i] & 0xff;
             int cipher = plain ^ r >> 8;
@@ -142,12 +143,12 @@ public final class Type1FontUtil
 
     private static byte[] decrypt(byte[] ciphertextBytes, int r, int n)
     {
-        byte[] buffer = new byte[ciphertextBytes.length];
+        byte[] buffer = new byte[ciphertextBytes.Length];
 
         int c1 = 52845;
         int c2 = 22719;
 
-        for (int i = 0; i < ciphertextBytes.length; i++)
+        for (int i = 0; i < ciphertextBytes.Length; i++)
         {
             int cipher = ciphertextBytes[i] & 0xff;
             int plain = cipher ^ r >> 8;
@@ -157,8 +158,8 @@ public final class Type1FontUtil
             r = (cipher + r) * c1 + c2 & 0xffff;
         }
 
-        byte[] plaintextBytes = new byte[ciphertextBytes.length - n];
-        System.arraycopy(buffer, n, plaintextBytes, 0, plaintextBytes.length);
+        byte[] plaintextBytes = new byte[ciphertextBytes.Length - n];
+        System.arraycopy(buffer, n, plaintextBytes, 0, plaintextBytes.Length);
 
         return plaintextBytes;
     }

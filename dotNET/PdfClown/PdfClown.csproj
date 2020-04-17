@@ -20,7 +20,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
+  </PropertyGroup>  
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -192,6 +192,7 @@
     <None Include="Documents\Contents\Fonts\CIDFont\CIDSystemInfo.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CIDRange.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CodespaceRange.cs" />
+    <None Include="Documents\Contents\Fonts\TTF\GSUB\CompoundCharacterTokenizer.cs" />
     <None Include="Documents\Contents\Fonts\Type1\DamagedFontException.cs" />
     <None Include="Documents\Contents\Fonts\Type1\PfbParser.cs" />
     <None Include="Documents\Contents\Fonts\Type1\Token.cs" />

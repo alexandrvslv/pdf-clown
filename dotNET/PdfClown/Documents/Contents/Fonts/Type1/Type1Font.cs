@@ -19,7 +19,7 @@
 //import java.awt.geom.GeneralPath;
 //import java.io.IOException;
 //import java.io.InputStream;
-//import java.util.ArrayList;
+//import java.util.List;
 //import java.util.Collections;
 //import java.util.LinkedHashMap;
 //import java.util.List;
@@ -45,7 +45,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      *
      * @author John Hewson
      */
-    public sealed class Type1Font : IType1CharStringReader//, EncodedFont, FontBoxFont
+    public sealed class Type1Font : BaseFont, IType1CharStringReader//, EncodedFont, 
     {
         /**
 		 * Constructs a new Type1Font object from a .pfb stream.
@@ -98,6 +98,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         int fontType;
         List<float> fontMatrix = new List<float>();
         List<float> fontBBox = new List<float>();
+        private SKRect? rectBBox;
         int uniqueID;
         float strokeWidth;
         string fontID = "";
@@ -167,45 +168,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         }
 
 
-        public string Name => fontName;
-
-        public SKPath GetPath(string name)
-        {
-            return GetType1CharString(name).Path;
-        }
-
-
-        public float GetWidth(string name)
-        {
-            return GetType1CharString(name).Width;
-        }
-
-        public bool HasGlyph(string name)
-        {
-            return charstrings.TryGetValue(name, out _);
-        }
-
-        public Type1CharString GetType1CharString(ByteArray key)
-        {
-
-        }
-
-        public Type1CharString GetType1CharString(string name)
-        {
-            if (!charStringCache.TryGetValue(name, out Type1CharString type1))
-            {
-                if (!charstrings.TryGetValue(name, out byte[] bytes))
-                {
-                    bytes = charstrings[".notdef"];
-                }
-                List<Object> sequence = Type1CharStringParser.Parse(fontName, name, bytes, subrs);
-                type1 = new Type1CharString(this, fontName, name, sequence);
-                charStringCache.Add(name, type1);
-            }
-            return type1;
-        }
-
-        // font dictionary
+        public override string Name => fontName;
 
         /**
 		 * Returns the font name.
@@ -255,7 +218,12 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 * 
 		 * @return the font matrix
 		 */
-        public List<float> FontMatrix
+        public override List<float> FontMatrix
+        {
+            get => fontMatrix;
+        }
+
+        public List<float> FontMatrixData
         {
             get => fontMatrix;
             set => fontMatrix = value;
@@ -266,12 +234,17 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 * 
 		 * @return the font bounding box
 		 */
-        public List<float> FontBBox
+        public override SKRect FontBBox
+        {
+            get => rectBBox ?? (rectBBox = new SKRect(fontBBox[0], fontBBox[1], fontBBox[2], fontBBox[3])).Value;
+
+        }
+
+        public List<float> FontBBoxData
         {
             get => fontBBox;
             set => fontBBox = value;
         }
-
         /**
 		 * Returns unique ID.
 		 * 
@@ -569,6 +542,42 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         public byte[] BinarySegment
         {
             get => segment2;
+        }
+
+        public override SKPath GetPath(string name)
+        {
+            return GetType1CharString(name).Path;
+        }
+
+
+        public override float GetWidth(string name)
+        {
+            return GetType1CharString(name).Width;
+        }
+
+        public override bool HasGlyph(string name)
+        {
+            return charstrings.TryGetValue(name, out _);
+        }
+
+        public Type1CharString GetType1CharString(ByteArray key)
+        {
+
+        }
+
+        public Type1CharString GetType1CharString(string name)
+        {
+            if (!charStringCache.TryGetValue(name, out Type1CharString type1))
+            {
+                if (!charstrings.TryGetValue(name, out byte[] bytes))
+                {
+                    bytes = charstrings[".notdef"];
+                }
+                List<Object> sequence = Type1CharStringParser.Parse(fontName, name, bytes, subrs);
+                type1 = new Type1CharString(this, fontName, name, sequence);
+                charStringCache.Add(name, type1);
+            }
+            return type1;
         }
 
         /**
