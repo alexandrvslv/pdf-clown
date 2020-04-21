@@ -112,7 +112,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 */
         public byte[] Data
         {
-            get => source.Bytes;
+            get => source.GetBytes();
         }
 
         /**

@@ -29,7 +29,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * A tag used to identify this table.
          */
-        public static readonly string TAG = "cmap";
+        public const string TAG = "cmap";
 
         // platform
         public static readonly int PLATFORM_UNICODE = 0;
@@ -79,7 +79,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @ If there is an error reading the data.
          */
 
-        protected override void Read(TrueTypeFont ttf, TTFDataStream data)
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
             //@SuppressWarnings({"unused", "squid:S1854", "squid:S1481"})
             int version = data.ReadUnsignedShort();
@@ -93,7 +93,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             for (int i = 0; i < numberOfTables; i++)
             {
-                cmaps[i].InitSubtable(this, ttf.getNumberOfGlyphs, data);
+                cmaps[i].InitSubtable(this, ttf.NumberOfGlyphs, data);
             }
             initialized = true;
         }
@@ -101,7 +101,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Returns the subtable, if any, for the given platform and encoding.
          */
-        public CmapSubtable getSubtable(int platformId, int platformEncodingId)
+        public CmapSubtable GetSubtable(int platformId, int platformEncodingId)
         {
             foreach (CmapSubtable cmap in cmaps)
             {

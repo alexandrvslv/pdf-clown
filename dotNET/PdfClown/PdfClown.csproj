@@ -20,7 +20,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
-  </PropertyGroup>  
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -34,6 +34,10 @@
     <None Remove="Assets\Tag.svg" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\unicode\Scripts.txt">
+      <Link>res\fonts\unicode\Scripts.txt</Link>
+      <LogicalName>Scripts.txt</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\AGL20.scsv">
       <Link>res\fonts\AGL20.scsv</Link>
       <LogicalName>fonts.AGL20</LogicalName>
@@ -192,6 +196,7 @@
     <None Include="Documents\Contents\Fonts\CIDFont\CIDSystemInfo.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CIDRange.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CodespaceRange.cs" />
+    <None Include="Documents\Contents\Fonts\Embedder\TrueTypeEmbedder.cs" />
     <None Include="Documents\Contents\Fonts\TTF\GSUB\CompoundCharacterTokenizer.cs" />
     <None Include="Documents\Contents\Fonts\Type1\DamagedFontException.cs" />
     <None Include="Documents\Contents\Fonts\Type1\PfbParser.cs" />

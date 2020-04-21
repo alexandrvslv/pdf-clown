@@ -14,26 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace PdfClown.Documents.Contents.Fonts.TTF{
+using System;
+using System.Collections.Generic;
 
-
-
-
-/**
- * Windows Glyph List 4 (WGL4) names for Mac glyphs.
- */
-public sealed class WGL4Names
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    /**
-     * The number of standard mac glyph names.
-     */
-    public static readonly int NUMBER_OF_MAC_GLYPHS = 258;
+
+
+
 
     /**
-     * The 258 standard mac glyph names a used in 'post' format 1 and 2.
+     * Windows Glyph List 4 (WGL4) names for Mac glyphs.
      */
-    public static readonly string[] MAC_GLYPH_NAMES = new string[]
+    public sealed class WGL4Names
     {
+        /**
+         * The number of standard mac glyph names.
+         */
+        public static readonly int NUMBER_OF_MAC_GLYPHS = 258;
+
+        /**
+         * The 258 standard mac glyph names a used in 'post' format 1 and 2.
+         */
+        public static readonly string[] MAC_GLYPH_NAMES = new string[]
+        {
         ".notdef",".null", "nonmarkingreturn", "space", "exclam", "quotedbl",
         "numbersign", "dollar", "percent", "ampersand", "quotesingle",
         "parenleft", "parenright", "asterisk", "plus", "comma", "hyphen",
@@ -76,23 +80,24 @@ public sealed class WGL4Names
         "onequarter", "threequarters", "franc", "Gbreve", "gbreve",
         "Idotaccent", "Scedilla", "scedilla", "Cacute", "cacute", "Ccaron",
         "ccaron", "dcroat"
-    };
+        };
 
-    /**
-     * The indices of the standard mac glyph names.
-     */
-    public static readonly Dictionary<string,int> MAC_GLYPH_NAMES_INDICES;
+        /**
+         * The indices of the standard mac glyph names.
+         */
+        public static readonly Dictionary<string, int> MAC_GLYPH_NAMES_INDICES;
 
-    static
-    {
-        MAC_GLYPH_NAMES_INDICES = new Dictionary<>(NUMBER_OF_MAC_GLYPHS);
-        for (int i = 0; i < NUMBER_OF_MAC_GLYPHS; ++i)
+        static WGL4Names()
         {
-            MAC_GLYPH_NAMES_INDICES[MAC_GLYPH_NAMES[i],i);
+            MAC_GLYPH_NAMES_INDICES = new Dictionary<string, int>(NUMBER_OF_MAC_GLYPHS, StringComparer.Ordinal);
+            for (int i = 0; i < NUMBER_OF_MAC_GLYPHS; ++i)
+            {
+                MAC_GLYPH_NAMES_INDICES[MAC_GLYPH_NAMES[i]] = i;
+            }
         }
-    }
-    
-    private WGL4Names()
-    {
+
+        private WGL4Names()
+        {
+        }
     }
 }

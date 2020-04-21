@@ -14,38 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
-using System.Collections.Generic;
-
-/**
- * A cmap lookup that performs substitution via the 'GSUB' table.
- *
- * @author Aaron Madlon-Kay
- */
-public class SubstitutingCmapLookup : CmapLookup
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    private readonly CmapSubtable cmap;
-    private readonly GlyphSubstitutionTable gsub;
-    private readonly List<string> enabledFeatures;
 
-    public SubstitutingCmapLookup(CmapSubtable cmap, GlyphSubstitutionTable gsub,
-            List<string> enabledFeatures)
-    {
-        this.cmap = cmap;
-        this.gsub = gsub;
-        this.enabledFeatures = enabledFeatures;
-    }
+    using System.Collections.Generic;
 
-    public override int GetGlyphId(int characterCode)
+    /**
+     * A cmap lookup that performs substitution via the 'GSUB' table.
+     *
+     * @author Aaron Madlon-Kay
+     */
+    public class SubstitutingCmapLookup : CmapLookup
     {
-        int gid = cmap.GetGlyphId(characterCode);
-        string[] scriptTags = OpenTypeScript.getScriptTags(characterCode);
-        return gsub.GetSubstitution(gid, scriptTags, enabledFeatures);
-    }
+        private readonly CmapSubtable cmap;
+        private readonly GlyphSubstitutionTable gsub;
+        private readonly List<string> enabledFeatures;
 
-    public override List<int> GetCharCodes(int gid)
-    {
-        return cmap.GetCharCodes(gsub.GetUnsubstitution(gid));
+        public SubstitutingCmapLookup(CmapSubtable cmap, GlyphSubstitutionTable gsub,
+                List<string> enabledFeatures)
+        {
+            this.cmap = cmap;
+            this.gsub = gsub;
+            this.enabledFeatures = enabledFeatures;
+        }
+
+        public override int GetGlyphId(int characterCode)
+        {
+            int gid = cmap.GetGlyphId(characterCode);
+            string[] scriptTags = OpenTypeScript.getScriptTags(characterCode);
+            return gsub.GetSubstitution(gid, scriptTags, enabledFeatures);
+        }
+
+        public override List<int> GetCharCodes(int gid)
+        {
+            return cmap.GetCharCodes(gsub.GetUnsubstitution(gid));
+        }
     }
 }

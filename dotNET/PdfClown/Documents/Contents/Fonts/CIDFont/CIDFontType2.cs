@@ -15,10 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Documents.Contents.Fonts.CCF;
+using PdfClown.Documents.Contents.Fonts.TTF;
 using PdfClown.Objects;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace PdfClown.Documents.Contents.Fonts
@@ -35,8 +38,8 @@ namespace PdfClown.Documents.Contents.Fonts
         private readonly bool isEmbedded;
         private readonly bool isDamaged;
         private readonly CmapLookup cmap; // may be null
-        private SKMatrix fontMatrix;
-        private SKRect fontBBox;
+        private SKMatrix? fontMatrix;
+        private SKRect? fontBBox;
         private readonly HashSet<int> noMapping = new HashSet<int>();
 
         public CIDFontType2(Document document, PdfDictionary fontObject) : base(document, fontObject)
@@ -104,20 +107,20 @@ namespace PdfClown.Documents.Contents.Fonts
                     {
                         // embedded OTF or TTF
                         OTFParser otfParser = new OTFParser(true);
-                        OpenTypeFont otf = otfParser.parse(stream.createInputStream());
+                        OpenTypeFont otf = otfParser.Parse((Bytes.Buffer)stream.BaseDataObject.ExtractBody(true));
                         ttfFont = otf;
 
-                        if (otf.isPostScript())
+                        if (otf.IsPostScript)
                         {
                             // PDFBOX-3344 contains PostScript outlines instead of TrueType
                             fontIsDamaged = true;
-                            LOG.warn("Found CFF/OTF but expected embedded TTF font " + fd.FontName);
+                            Debug.WriteLine("warning: Found CFF/OTF but expected embedded TTF font " + fd.FontName);
                         }
                     }
                     catch (IOException e)
                     {
                         fontIsDamaged = true;
-                        LOG.warn("Could not read embedded OTF for font " + BaseFont, e);
+                        Debug.WriteLine("warning: Could not read embedded OTF for font " + BaseFont, e);
                     }
                 }
                 isEmbedded = ttfFont != null;
@@ -125,84 +128,89 @@ namespace PdfClown.Documents.Contents.Fonts
 
                 if (ttfFont == null)
                 {
-                    ttfFont = findFontOrSubstitute();
+                    ttfFont = FindFontOrSubstitute();
                 }
                 ttf = ttfFont;
             }
-            cmap = ttf.getUnicodeCmapLookup(false);
+            cmap = ttf.GetUnicodeCmapLookup(false);
             cid2gid = ReadCIDToGIDMap();
         }
 
-        private TrueTypeFont findFontOrSubstitute()
+        private TrueTypeFont FindFontOrSubstitute()
         {
             TrueTypeFont ttfFont;
 
             CIDFontMapping mapping = FontMappers.instance()
-                    .getCIDFont(getBaseFont(), getFontDescriptor(),
-                            getCIDSystemInfo());
+                    .getCIDFont(BaseFont, FontDescriptor,
+                            CIDSystemInfo);
             if (mapping.isCIDFont())
             {
                 ttfFont = mapping.getFont();
             }
             else
             {
-                ttfFont = (TrueTypeFont)mapping.getTrueTypeFont();
+                ttfFont = (PdfTrueTypeFont)mapping.getTrueTypeFont();
             }
             if (mapping.isFallback())
             {
-                LOG.warn("Using fallback font " + ttfFont.getName() + " for CID-keyed TrueType font " + getBaseFont());
+                Debug.WriteLine("warning: Using fallback font " + ttfFont.Name + " for CID-keyed TrueType font " + BaseFont);
             }
             return ttfFont;
         }
 
-        override public SKMatrix getFontMatrix()
+        override public SKMatrix FontMatrix
         {
-            if (fontMatrix == null)
+            get
             {
-                // 1000 upem, this is not strictly true
-                fontMatrix = new SKMatrix(0.001f, 0, 0, 0.001f, 0, 0);
-            }
-            return fontMatrix;
-        }
-
-        override public BoundingBox getBoundingBox()
-        {
-            if (fontBBox == null)
-            {
-                fontBBox = generateBoundingBox();
-            }
-            return fontBBox;
-        }
-
-        private BoundingBox generateBoundingBox()
-        {
-            if (getFontDescriptor() != null)
-            {
-                PDRectangle bbox = getFontDescriptor().getFontBoundingBox();
-                if (bbox != null &&
-                        (Float.compare(bbox.getLowerLeftX(), 0) != 0 ||
-                         Float.compare(bbox.getLowerLeftY(), 0) != 0 ||
-                         Float.compare(bbox.getUpperRightX(), 0) != 0 ||
-                         Float.compare(bbox.getUpperRightY(), 0) != 0))
+                if (fontMatrix == null)
                 {
-                    return new BoundingBox(bbox.getLowerLeftX(), bbox.getLowerLeftY(),
-                                           bbox.getUpperRightX(), bbox.getUpperRightY());
+                    // 1000 upem, this is not strictly true
+                    fontMatrix = new SKMatrix(0.001f, 0, 0, 0.001f, 0, 0, 0, 0, 1);
+                }
+                return (SKMatrix)fontMatrix;
+            }
+        }
+
+        override public SKRect BoundingBox
+        {
+            get
+            {
+                if (fontBBox == null)
+                {
+                    fontBBox = GenerateBoundingBox();
+                }
+                return (SKRect)fontBBox;
+            }
+        }
+
+        private SKRect GenerateBoundingBox()
+        {
+            if (FontDescriptor != null)
+            {
+                var bbox = FontDescriptor.FontBBox;
+                if (bbox != null &&
+                        (bbox.Left.CompareTo(0) != 0 ||
+                         bbox.Bottom.CompareTo(0) != 0 ||
+                         bbox.Right.CompareTo(0) != 0 ||
+                         bbox.Top.CompareTo(0) != 0))
+                {
+                    return bbox.ToRectangleF();
                 }
             }
-            return ttf.getFontBBox();
+            return ttf.FontBBox;
         }
 
         override public int CodeToCID(int code)
         {
-            CMap cMap = parent.getCMap();
+            CMap cMap = parent.CMap;
 
             // Acrobat allows bad PDFs to use Unicode CMaps here instead of CID CMaps, see PDFBOX-1283
-            if (!cMap.hasCIDMappings() && cMap.hasUnicodeMappings())
+            if (!cMap.HasCIDMappings && cMap.HasUnicodeMappings)
             {
-                return cMap.toUnicode(code).codePointAt(0); // actually: code -> CID
+                return cMap.ToUnicode(code); // actually: code -> CID
             }
 
-            return cMap.toCID(code);
+            return cMap.ToCID(code);
         }
 
         /**
@@ -224,33 +232,33 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (cid2gid != null && !isDamaged)
                 {
                     // Acrobat allows non-embedded GIDs - todo: can we find a test PDF for this?
-                    LOG.warn("Using non-embedded GIDs in font " + getName());
+                    Debug.WriteLine("warning: Using non-embedded GIDs in font " + Name);
                     int cid = CodeToCID(code);
                     return cid2gid[cid];
                 }
                 else
                 {
                     // fallback to the ToUnicode CMap, test with PDFBOX-1422 and PDFBOX-2560
-                    string unicode = parent.toUnicode(code);
-                    if (unicode == null)
+                    var unicode = parent.ToUnicode(code);
+                    if (unicode < 0)
                     {
-                        if (!noMapping.contains(code))
+                        if (!noMapping.Contains(code))
                         {
                             // we keep track of which warnings have been issued, so we don't log multiple times
                             noMapping.Add(code);
-                            LOG.warn("Failed to find a character mapping for " + code + " in " + getName());
+                            Debug.WriteLine("warning: Failed to find a character mapping for " + code + " in " + Name);
                         }
                         // Acrobat is willing to use the CID as a GID, even when the font isn't embedded
                         // see PDFBOX-2599
                         return CodeToCID(code);
                     }
-                    else if (unicode.Length > 1)
+                    else if (unicode > char.MaxValue)
                     {
-                        LOG.warn("Trying to map multi-byte character using 'cmap', result will be poor");
+                        Debug.WriteLine("warning: Trying to map multi-byte character using 'cmap', result will be poor");
                     }
 
                     // a non-embedded font always has a cmap (otherwise FontMapper won't load it)
-                    return cmap.getGlyphId(unicode.codePointAt(0));
+                    return cmap.GetGlyphId(unicode);
                 }
             }
             else
@@ -275,7 +283,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 else
                 {
                     // "Identity" is the default CIDToGIDMap
-                    if (cid < ttf.getNumberOfGlyphs())
+                    if (cid < ttf.NumberOfGlyphs)
                     {
                         return cid;
                     }
@@ -288,18 +296,18 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        override public float getHeight(int code)
+        override public float GetHeight(int code)
         {
             // todo: really we want the BBox, (for text extraction:)
-            return (ttf.getHorizontalHeader().getAscender() + -ttf.getHorizontalHeader().getDescender())
-                    / ttf.getUnitsPerEm(); // todo: shouldn't this be the yMax/yMin?
+            return (ttf.HorizontalHeader.Ascender + -ttf.HorizontalHeader.Descender)
+                    / ttf.UnitsPerEm; // todo: shouldn't this be the yMax/yMin?
         }
 
-        override public float getWidthFromFont(int code)
+        override public float GetWidthFromFont(int code)
         {
             int gid = CodeToGID(code);
-            int width = ttf.getAdvanceWidth(gid);
-            int unitsPerEM = ttf.getUnitsPerEm();
+            int width = ttf.GetAdvanceWidth(gid);
+            int unitsPerEM = ttf.UnitsPerEm;
             if (unitsPerEM != 1000)
             {
                 width *= 1000f / unitsPerEM;
@@ -307,25 +315,25 @@ namespace PdfClown.Documents.Contents.Fonts
             return width;
         }
 
-        override public byte[] Encode(int unicode)
+        public override byte[] Encode(int unicode)
         {
             int cid = -1;
             if (isEmbedded)
             {
                 // embedded fonts always use CIDToGIDMap, with Identity as the default
-                if (parent.getCMap().getName().startsWith("Identity-"))
+                if (parent.CMap.CMapName.StartsWith("Identity-", StringComparison.Ordinal))
                 {
                     if (cmap != null)
                     {
-                        cid = cmap.getGlyphId(unicode);
+                        cid = cmap.GetGlyphId(unicode);
                     }
                 }
                 else
                 {
                     // if the CMap is predefined then there will be a UCS-2 CMap
-                    if (parent.getCMapUCS2() != null)
+                    if (parent.CMapUCS2 != null)
                     {
-                        cid = parent.getCMapUCS2().toCID(unicode);
+                        cid = parent.CMapUCS2.ToCID(unicode);
                     }
                 }
 
@@ -340,7 +348,7 @@ namespace PdfClown.Documents.Contents.Fonts
             else
             {
                 // a non-embedded font always has a cmap (otherwise it we wouldn't load it)
-                cid = cmap.getGlyphId(unicode);
+                cid = cmap.GetGlyphId(unicode);
             }
 
             if (cid == 0)
@@ -357,12 +365,12 @@ namespace PdfClown.Documents.Contents.Fonts
             return new byte[] { (byte)(glyphId >> 8 & 0xff), (byte)(glyphId & 0xff) };
         }
 
-        override public bool IsEmbedded
+        public override bool IsEmbedded
         {
             get => isEmbedded;
         }
 
-        override public bool IsDamaged
+        public override bool IsDamaged
         {
             get => isDamaged;
         }
@@ -371,25 +379,25 @@ namespace PdfClown.Documents.Contents.Fonts
          * Returns the embedded or substituted TrueType font. May be an OpenType font if the font is
          * not embedded.
          */
-        public TrueTypeFont getTrueTypeFont()
+        public TrueTypeFont TrueTypeFont
         {
-            return ttf;
+            get => ttf;
         }
 
         public override SKPath GetPath(int code)
         {
-            if (ttf is OpenTypeFont && ((OpenTypeFont)ttf).isPostScript())
+            if (ttf is OpenTypeFont && ((OpenTypeFont)ttf).IsPostScript)
             {
                 // we're not supposed to have CFF fonts inside PDCIDFontType2, but if we do,
                 // then we treat their CIDs as GIDs, see PDFBOX-3344
                 int cid = CodeToGID(code);
-                Type2CharString charstring = ((OpenTypeFont)ttf).getCFF().getFont().getType2CharString(cid);
-                return charstring.getPath();
+                Type2CharString charstring = ((OpenTypeFont)ttf).CFF.GetFont().GetType2CharString(cid);
+                return charstring.Path;
             }
             else
             {
                 int gid = CodeToGID(code);
-                GlyphData glyph = ttf.getGlyph().getGlyph(gid);
+                GlyphData glyph = ttf.Glyph.GetGlyph(gid);
                 if (glyph != null)
                 {
                     return glyph.getPath();
@@ -400,14 +408,14 @@ namespace PdfClown.Documents.Contents.Fonts
 
         override public SKPath GetNormalizedPath(int code)
         {
-            bool hasScaling = ttf.getUnitsPerEm() != 1000;
-            float scale = 1000f / ttf.getUnitsPerEm();
+            bool hasScaling = ttf.UnitsPerEm != 1000;
+            float scale = 1000f / ttf.UnitsPerEm;
             int gid = CodeToGID(code);
 
-            SKPath path = getPath(code);
+            SKPath path = GetPath(code);
 
             // Acrobat only draws GID 0 for embedded CIDFonts, see PDFBOX-2372
-            if (gid == 0 && !isEmbedded())
+            if (gid == 0 && !IsEmbedded)
             {
                 path = null;
             }
@@ -421,7 +429,7 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 if (hasScaling)
                 {
-                    path.transform(AffineTransform.getScaleInstance(scale, scale));
+                    path.Transform(SKMatrix.MakeScale(scale, scale));
                 }
                 return path;
             }

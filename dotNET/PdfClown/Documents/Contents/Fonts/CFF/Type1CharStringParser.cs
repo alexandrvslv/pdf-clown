@@ -232,5 +232,13 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             list.RemoveAt(index);
             return item;
         }
+
+        public static void Fill<T>(this T[] list, T value)
+        {
+            for (int i = 0; i < list.Length; i++)
+            {
+                list[i] = value;
+            }
+        }
     }
 }

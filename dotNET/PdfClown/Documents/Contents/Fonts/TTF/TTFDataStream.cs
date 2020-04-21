@@ -86,7 +86,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return An unsigned byte.
          * @ If there is an error reading the data.
          */
-        public abstract long readLong();
+        public abstract long ReadLong();
 
         /**
          * Read a signed byte.
@@ -94,10 +94,10 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return A signed byte.
          * @ If there is an error reading the data.
          */
-        public int readSignedByte()
+        public sbyte ReadSignedByte()
         {
-            int signedByte = Read();
-            return signedByte <= 127 ? signedByte : signedByte - 256;
+            byte signedByte = (byte)Read();
+            return unchecked((sbyte)signedByte);// signedByte <= 127 ? signedByte : signedByte - 256;
         }
 
         /**
@@ -106,14 +106,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return A unsigned byte.
          * @ If there is an error reading the data.
          */
-        public int readUnsignedByte()
+        public byte ReadUnsignedByte()
         {
-            int unsignedByte = Read();
-            if (unsignedByte == -1)
-            {
-                throw new EndOfStreamException("premature EOF");
-            }
-            return unsignedByte;
+            return (byte)Read();
         }
 
         /**
@@ -122,17 +117,17 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return An unsigned integer.
          * @ If there is an error reading the data.
          */
-        public long ReadUnsignedInt()
+        public uint ReadUnsignedInt()
         {
-            long byte1 = Read();
-            long byte2 = Read();
-            long byte3 = Read();
-            long byte4 = Read();
+            var byte1 = Read();
+            var byte2 = Read();
+            var byte3 = Read();
+            var byte4 = Read();
             if (byte4 < 0)
             {
                 throw new EndOfStreamException();
             }
-            return (byte1 << 24) + (byte2 << 16) + (byte3 << 8) + (byte4 << 0);
+            return (uint)((byte1 << 24) + (byte2 << 16) + (byte3 << 8) + (byte4 << 0));
         }
 
         /**
@@ -141,7 +136,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return An unsigned short.
          * @ If there is an error reading the data.
          */
-        public abstract int ReadUnsignedShort();
+        public abstract ushort ReadUnsignedShort();
 
         /**
          * Read an unsigned byte array.
@@ -150,12 +145,12 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return An unsigned byte array.
          * @ If there is an error reading the data.
          */
-        public int[] readUnsignedByteArray(int length)
+        public byte[] ReadUnsignedByteArray(int length)
         {
-            int[] array = new int[length];
+            byte[] array = new byte[length];
             for (int i = 0; i < length; i++)
             {
-                array[i] = Read();
+                array[i] = (byte)Read();
             }
             return array;
         }
@@ -167,9 +162,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return An unsigned short array.
          * @ If there is an error reading the data.
          */
-        public int[] readUnsignedShortArray(int length)
+        public ushort[] ReadUnsignedShortArray(int length)
         {
-            int[] array = new int[length];
+            ushort[] array = new ushort[length];
             for (int i = 0; i < length; i++)
             {
                 array[i] = ReadUnsignedShort();
@@ -191,25 +186,20 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return An signed short.
          * @ If there is an error reading the data.
          */
-        public DateTime readInternationalDate()
+        public DateTime ReadInternationalDate()
         {
-            long secondsSince1904 = readLong();
-            Calendar cal = Calendar.Get(TimeZone.getTimeZone("UTC"));
-            cal.set(1904, 0, 1, 0, 0, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            long millisFor1904 = cal.getTimeInMillis();
-            millisFor1904 += (secondsSince1904 * 1000);
-            cal.setTimeInMillis(millisFor1904);
-            return cal;
+            long secondsSince1904 = ReadLong();
+            var cal = new DateTime(1904, 0, 1, 0, 0, 0, DateTimeKind.Utc);
+            return cal + TimeSpan.FromMilliseconds(secondsSince1904);
         }
 
         /**
          * Reads a tag, an array of four uint8s used to identify a script, language system, feature,
          * or baseline.
          */
-        public string readTag()
+        public string ReadTag()
         {
-            return new string(Read(4), StandardCharsets.US_ASCII);
+            return Charset.ASCII.GetString(Read(4));
         }
 
         /**
@@ -218,7 +208,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param pos The position to seek to.
          * @ If there is an error seeking to that position.
          */
-        public abstract void seek(long pos);
+        public abstract void Seek(long pos);
 
         /**
          * Read a specific number of bytes from the stream.
@@ -234,7 +224,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             int totalAmountRead = 0;
             // read at most numberOfBytes bytes from the stream.
             while (totalAmountRead < numberOfBytes
-                    && (amountRead = read(data, totalAmountRead, numberOfBytes - totalAmountRead)) != -1)
+                    && (amountRead = Read(data, totalAmountRead, numberOfBytes - totalAmountRead)) != -1)
             {
                 totalAmountRead += amountRead;
             }
@@ -259,7 +249,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * 
          * @ If there is an error reading from the stream.
          */
-        public abstract int read(byte[] b, int off, int len);
+        public abstract int Read(byte[] b, int off, int len);
 
         public abstract void Dispose();
 

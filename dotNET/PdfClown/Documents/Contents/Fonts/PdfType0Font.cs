@@ -1,5 +1,5 @@
 /*
-  Copyright 2009-2015 Stefano Chizzolini. http://www.pdfclown.org
+  Copyright 2009-2010 Stefano Chizzolini. http://www.pdfclown.org
 
   Contributors:
     * Stefano Chizzolini (original code developer, http://www.stefanochizzolini.it)
@@ -23,29 +23,33 @@
   this list of conditions.
 */
 
-using PdfClown.Documents;
-using PdfClown.Files;
 using PdfClown.Objects;
-using PdfClown.Util;
 
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
     /**
-      <summary>TrueType font [PDF:1.6:5;OFF:2009].</summary>
+      <summary>Composite font associated to a Type 0 CIDFont,
+      containing glyph descriptions based on the Adobe Type 1 font format [PDF:1.6:5.6.3].</summary>
     */
-    [PDF(VersionEnum.PDF10)]
-    public sealed class TrueTypeFont : SimpleFont
+    /*
+      NOTE: Type 0 CIDFonts encompass several formats:
+      * CFF;
+      * OpenFont/CFF (in case "CFF" table's Top DICT has CIDFont operators).
+    */
+    [PDF(VersionEnum.PDF12)]
+    public sealed class PdfType0Font : CompositeFont
     {
-        #region dynamic
         #region constructors
-        internal TrueTypeFont(PdfDirectObject baseObject) : base(baseObject)
+        internal PdfType0Font(Document context, OpenFontParser parser) : base(context, parser)
+        { }
+
+        internal PdfType0Font(PdfDirectObject baseObject) : base(baseObject)
         { }
         #endregion
-        #endregion
+
+
+
     }
 }

@@ -620,6 +620,7 @@ namespace PdfClown.Objects
         public static readonly PdfName Win = new PdfName("Win");
         public static readonly PdfName WinAnsiEncoding = new PdfName("WinAnsiEncoding");
         public static readonly PdfName Wipe = new PdfName("Wipe");
+        public static readonly PdfName WMode = new PdfName("WMode");
         public static readonly PdfName WP = new PdfName("WP");
         public static readonly PdfName WS = new PdfName("WS");
         public static readonly PdfName X = new PdfName("X");

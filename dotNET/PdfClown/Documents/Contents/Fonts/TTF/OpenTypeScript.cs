@@ -14,54 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
 using System.IO;
-
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-
-
-
-import java.util.Dictionary.Entry;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-
 using System.Diagnostics;
+using System.Collections.Generic;
+using PdfClown.Documents.Contents.Fonts.TTF.GSUB;
+using System;
+using System.Linq;
 
-
-/**
- * A class for mapping Unicode codepoints to OpenType script tags
- *
- * @author Aaron Madlon-Kay
- *
- * @see <a href="https://www.microsoft.com/typography/otspec/scripttags.htm">Microsoft Typography:
- * Script Tags</a>
- * @see <a href="https://www.unicode.org/reports/tr24/">Unicode Script Property</a>
- */
-public sealed class OpenTypeScript
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    //private static readonly Log LOG = LogFactory.getLog(OpenTypeScript.class);
-
-    public static readonly string INHERITED = "Inherited";
-    public static readonly string UNKNOWN = "Unknown";
-    public static readonly string TAG_DEFAULT = "DFLT";
-
     /**
-     * A map associating Unicode scripts with one or more OpenType script tags. Script tags are not
-     * necessarily the same as Unicode scripts. A single Unicode script may correspond to multiple
-     * tags, especially when there has been a revision to the latter (e.g. Bengali -> [bng2, beng]).
-     * When there are multiple tags, they are ordered from newest to oldest.
+     * A class for mapping Unicode codepoints to OpenType script tags
      *
-     * @see <a href="https://www.microsoft.com/typography/otspec/scripttags.htm">Microsoft
-     * Typography: Script Tags</a>
+     * @author Aaron Madlon-Kay
+     *
+     * @see <a href="https://www.microsoft.com/typography/otspec/scripttags.htm">Microsoft Typography:
+     * Script Tags</a>
+     * @see <a href="https://www.unicode.org/reports/tr24/">Unicode Script Property</a>
      */
-    private static readonly Dictionary<string, string[]> UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP;
-
-    static
+    public sealed class OpenTypeScript
     {
-        object[][] table = 
+        //private static readonly Log LOG = LogFactory.getLog(OpenTypeScript.class);
+
+        public static readonly string INHERITED = "Inherited";
+        public static readonly string UNKNOWN = "Unknown";
+        public static readonly string TAG_DEFAULT = "DFLT";
+
+        /**
+         * A map associating Unicode scripts with one or more OpenType script tags. Script tags are not
+         * necessarily the same as Unicode scripts. A single Unicode script may correspond to multiple
+         * tags, especially when there has been a revision to the latter (e.g. Bengali -> [bng2, beng]).
+         * When there are multiple tags, they are ordered from newest to oldest.
+         *
+         * @see <a href="https://www.microsoft.com/typography/otspec/scripttags.htm">Microsoft
+         * Typography: Script Tags</a>
+         */
+        private static readonly Dictionary<string, string[]> UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP;
+        private static int[] unicodeRangeStarts;
+        private static string[] unicodeRangeScripts;
+
+        static OpenTypeScript()
         {
+            UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP = new Dictionary<string, string[]>()
+            {
             {"Adlam", new string[] { "adlm" }},
             {"Ahom", new string[] { "ahom" }},
             {"Anatolian_Hieroglyphs", new string[] { "hluw" }},
@@ -205,158 +200,150 @@ public sealed class OpenTypeScript
             {"Warang_Citi", new string[] { "wara" }},
             {"Yi", new string[] { "yi  " }}
         };
-        UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP = new Dictionary<>(table.Length);
-        for (object[] array : table)
-        {
-            UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP[(string) array[0], (string[]) array[1]);
-        }
-    }
 
-    private static int[] unicodeRangeStarts;
-    private static string[] unicodeRangeScripts;
-
-    static OpenTypeScript()
-    {
-        string path = "/org/apache/fontbox/unicode/Scripts.txt";
-        try (Bytes.Buffer input = OpenTypeScript.class.getResourceAsStream(path))
-        {
-            if (input != null)
+            string path = "/org/apache/fontbox/unicode/Scripts.txt";
+            try
             {
-                parseScriptsFile(input);
-            }
-            else
-            {
-                Debug.WriteLine("warning: Could not find '" + path + "', mirroring char map will be empty: ");
-            }
-        }
-        catch (IOException e)
-        {
-            Debug.WriteLine("warning: Could not parse Scripts.txt, mirroring char map will be empty: "
-                    + e.getMessage(), e);
-        }
-    }
-
-    private OpenTypeScript()
-    {
-    }
-
-    private static void parseScriptsFile(Bytes.Buffer inputStream) 
-    {
-        Dictionary<int[], string> unicodeRanges = new TreeMap<>((o1, o2) -> int.compare(o1[0], o2[0]));
-        try (LineNumberReader rd = new LineNumberReader(new InputStreamReader(inputStream)))
-        {
-            int[] lastRange = { int.MinValue, int.MinValue };
-            string lastScript = null;
-            do
-            {
-                string s = rd.readLine();
-                if (s == null)
+                Bytes.Buffer input = OpenTypeScript.getResourceAsStream(path);
+                if (input != null)
                 {
-                    break;
-                }
-                
-                // ignore comments
-                int comment = s.indexOf('#');
-                if (comment != -1)
-                {
-                    s = s.substring(0, comment);
-                }
-                
-                if (s.Length < 2)
-                {
-                    continue;
-                }
-                
-                StringTokenizer st = new StringTokenizer(s, ";");
-                int nFields = st.countTokens();
-                if (nFields < 2)
-                {
-                    continue;
-                }
-                string characters = st.nextToken().trim();
-                string script = st.nextToken().trim();
-                int[] range = new int[2];
-                int rangeDelim = characters.indexOf("..");
-                if (rangeDelim == -1)
-                {
-                    range[0] = range[1] = int.parseInt(characters, 16);
+                    ParseScriptsFile(input);
                 }
                 else
                 {
-                    range[0] = int.parseInt(characters.substring(0, rangeDelim), 16);
-                    range[1] = int.parseInt(characters.substring(rangeDelim + 2), 16);
-                }
-                if (range[0] == lastRange[1] + 1 && script.equals(lastScript))
-                {
-                    // Combine with previous range
-                    lastRange[1] = range[1];
-                }
-                else
-                {
-                    unicodeRanges[range, script);
-                    lastRange = range;
-                    lastScript = script;
+                    Debug.WriteLine("warning: Could not find '" + path + "', mirroring char map will be empty: ");
                 }
             }
-            while (true);
+            catch (IOException e)
+            {
+                Debug.WriteLine("warning: Could not parse Scripts.txt, mirroring char map will be empty: "
+                        + e.Message, e);
+            }
         }
 
-        unicodeRangeStarts = new int[unicodeRanges.Count];
-        unicodeRangeScripts = new string[unicodeRanges.Count];
-        int i = 0;
-        for (Entry<int[], string> e : unicodeRanges.entrySet())
+        private OpenTypeScript()
         {
-            unicodeRangeStarts[i] = e.Key[0];
-            unicodeRangeScripts[i] = e.Value;
-            i++;
         }
-    }
 
-    /**
-     * Obtain the Unicode script associated with the given Unicode codepoint.
-     *
-     * @param codePoint
-     * @return A Unicode script string, or {@code #UNKNOWN} if unknown
-     */
-    private static string getUnicodeScript(int codePoint)
-    {
-        ensureValidCodePoint(codePoint);
-        int type = Character.getType(codePoint);
-        if (type == Character.UNASSIGNED)
+        private static void ParseScriptsFile(Stream inputStream)
         {
-            return UNKNOWN;
+            Dictionary<int[], string> unicodeRanges = new Dictionary<int[], string>(new ArrayComparer<int>());
+            using (var rd = new StreamReader(inputStream))
+            {
+
+                int[] lastRange = { int.MinValue, int.MinValue };
+                string lastScript = null;
+                do
+                {
+                    string s = rd.ReadLine();
+                    if (s == null)
+                    {
+                        break;
+                    }
+
+                    // ignore comments
+                    int comment = s.IndexOf('#');
+                    if (comment != -1)
+                    {
+                        s = s.Substring(0, comment);
+                    }
+
+                    if (s.Length < 2)
+                    {
+                        continue;
+                    }
+
+                    var st = s.Split(new[] { ';' });
+                    int nFields = st.Length;
+                    if (nFields < 2)
+                    {
+                        continue;
+                    }
+                    string characters = st[0].Trim();
+                    string script = st[1].Trim();
+                    int[] range = new int[2];
+                    int rangeDelim = characters.IndexOf("..", StringComparison.Ordinal);
+                    if (rangeDelim == -1)
+                    {
+                        range[0] = range[1] = int.parseInt(characters, 16);
+                    }
+                    else
+                    {
+                        range[0] = int.parseInt(characters.Substring(0, rangeDelim), 16);
+                        range[1] = int.parseInt(characters.Substring(rangeDelim + 2), 16);
+                    }
+                    if (range[0] == lastRange[1] + 1 && script.Equals(lastScript, StringComparison.Ordinal))
+                    {
+                        // Combine with previous range
+                        lastRange[1] = range[1];
+                    }
+                    else
+                    {
+                        unicodeRanges[range] = script;
+                        lastRange = range;
+                        lastScript = script;
+                    }
+                }
+                while (true);
+            }
+
+            unicodeRangeStarts = new int[unicodeRanges.Count];
+            unicodeRangeScripts = new string[unicodeRanges.Count];
+            int i = 0;
+            foreach (var e in unicodeRanges)
+            {
+                unicodeRangeStarts[i] = e.Key[0];
+                unicodeRangeScripts[i] = e.Value;
+                i++;
+            }
         }
-        int scriptIndex = Array.binarySearch(unicodeRangeStarts, codePoint);
-        if (scriptIndex < 0)
+
+        /**
+         * Obtain the Unicode script associated with the given Unicode codepoint.
+         *
+         * @param codePoint
+         * @return A Unicode script string, or {@code #UNKNOWN} if unknown
+         */
+        private string GetUnicodeScript(int codePoint)
         {
-            scriptIndex = -scriptIndex - 2;
+            EnsureValidCodePoint(codePoint);
+            int type = Character.getType(codePoint);
+            if (type == Char.UNASSIGNED)
+            {
+                return UNKNOWN;
+            }
+            int scriptIndex = Array.BinarySearch(unicodeRangeStarts, codePoint);
+            if (scriptIndex < 0)
+            {
+                scriptIndex = -scriptIndex - 2;
+            }
+            return unicodeRangeScripts[scriptIndex];
         }
-        return unicodeRangeScripts[scriptIndex];
-    }
 
-    /**
-     * Obtain the OpenType script tags associated with the given Unicode codepoint.
-     *
-     * The result may contain the special value {@code #INHERITED}, which indicates that the
-     * codepoint's script can only be determined by its context.
-     *
-     * Unknown codepoints are mapped to {@code #TAG_DEFAULT}.
-     *
-     * @param codePoint
-     * @return An array of four-char script tags
-     */
-    public static string[] getScriptTags(int codePoint)
-    {
-        ensureValidCodePoint(codePoint);
-        string unicode = getUnicodeScript(codePoint);
-        return UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP.get(unicode);
-    }
-
-    private static void ensureValidCodePoint(int codePoint)
-    {
-        if (codePoint < Character.MIN_CODE_POINT || codePoint > Character.MAX_CODE_POINT)
+        /**
+         * Obtain the OpenType script tags associated with the given Unicode codepoint.
+         *
+         * The result may contain the special value {@code #INHERITED}, which indicates that the
+         * codepoint's script can only be determined by its context.
+         *
+         * Unknown codepoints are mapped to {@code #TAG_DEFAULT}.
+         *
+         * @param codePoint
+         * @return An array of four-char script tags
+         */
+        public string[] GetScriptTags(int codePoint)
         {
-            throw new IllegalArgumentException("Invalid codepoint: " + codePoint);
+            EnsureValidCodePoint(codePoint);
+            string unicode = GetUnicodeScript(codePoint);
+            return UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP.TryGetValue(unicode, out var result) ? result : null;
+        }
+
+        private void EnsureValidCodePoint(int codePoint)
+        {
+            if (codePoint < Character.MIN_CODE_POINT || codePoint > Character.MAX_CODE_POINT)
+            {
+                throw new ArgumentException("Invalid codepoint: " + codePoint);
+            }
         }
     }
 }

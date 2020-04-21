@@ -15,17 +15,19 @@
  * limitations under the License.
  */
 
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
-/**
- * OpenType Layout (OTL) table. Uses the OpenType Layout Common Table Format.
- */
-public class OTLTable : TTFTable
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    // todo: this is a stub, a full implementation is needed
-    
-    OTLTable(TrueTypeFont font)
+
+    /**
+     * OpenType Layout (OTL) table. Uses the OpenType Layout Common Table Format.
+     */
+    public class OTLTable : TTFTable
     {
-        :base(font);
+        // todo: this is a stub, a full implementation is needed
+
+        public OTLTable(TrueTypeFont font)
+                : base(font)
+        {
+        }
     }
 }

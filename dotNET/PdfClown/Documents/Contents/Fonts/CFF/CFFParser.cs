@@ -50,7 +50,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             /**
              * Returns the source bytes. May be called more than once.
              */
-            byte[] Bytes { get; }
+            byte[] GetBytes();
         }
 
         /**

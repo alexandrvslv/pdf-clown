@@ -188,25 +188,21 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         {
             // our parser guarantees that FontMatrix will be present and correct in the Top DICT
             get => topDict.TryGetValue("FontMatrix", out var array) ? (List<float>)array : null;
-            set { }
         }
 
-        //@Override
-        public SKPath GetPath(string selector)
+        public override SKPath GetPath(string selector)
         {
             int cid = SelectorToCID(selector);
             return GetType2CharString(cid).Path;
         }
 
-        //@Override
-        public float GetWidth(string selector)
+        public override float GetWidth(string selector)
         {
             int cid = SelectorToCID(selector);
             return GetType2CharString(cid).Width;
         }
 
-        //@Override
-        public bool HasGlyph(string selector)
+        public override bool HasGlyph(string selector)
         {
             int cid = SelectorToCID(selector);
             return cid != 0;

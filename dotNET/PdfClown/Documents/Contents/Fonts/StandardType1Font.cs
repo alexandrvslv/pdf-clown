@@ -40,7 +40,7 @@ namespace PdfClown.Documents.Contents.Fonts
       <summary>Standard Type 1 font [PDF:1.6:5.5.1].</summary>
     */
     [PDF(VersionEnum.PDF10)]
-    public sealed class StandardType1Font : Type1Font
+    public sealed class StandardType1Font : PdfType1Font
     {
         #region types
         /**
@@ -123,7 +123,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         #region interface
         #region public
-        public override double Ascent => metrics.Ascender;
+        public override float Ascent => metrics.Ascender;
 
         public override double Descent => metrics.Descender;
 
@@ -150,7 +150,7 @@ namespace PdfClown.Documents.Contents.Fonts
               otherwise, when overridden they degrade to a common Type 1 font.
               Metrics of non-overridden Standard Type 1 fonts MUST be loaded from resources.
             */
-            Load(((PdfName)BaseDataObject[PdfName.BaseFont]).StringValue);
+            Load(BaseFont);
 
             base.OnLoad();
         }

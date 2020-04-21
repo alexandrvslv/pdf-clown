@@ -36,18 +36,20 @@ using System.Collections.Generic;
 using SkiaSharp;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
+using PdfClown.Documents.Contents.Fonts.TTF.Model;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
     /**
       <summary>Composite font, also called Type 0 font [PDF:1.6:5.6].</summary>
-      <remarks>Do not confuse it with <see cref="Type0Font">Type 0 CIDFont</see>: the latter is
+      <remarks>Do not confuse it with <see cref="PdfType0Font">Type 0 CIDFont</see>: the latter is
       a composite font descendant describing glyphs based on Adobe Type 1 font format.</remarks>
     */
     [PDF(VersionEnum.PDF12)]
     public abstract class CompositeFont : Font
     {
-        private CMap ucs2CMap;
+
         #region static
         #region interface
         #region public
@@ -57,9 +59,9 @@ namespace PdfClown.Documents.Contents.Fonts
             switch (parser.OutlineFormat)
             {
                 case OpenFontParser.OutlineFormatEnum.PostScript:
-                    return new Type0Font(context, parser);
+                    return new PdfType0Font(context, parser);
                 case OpenFontParser.OutlineFormatEnum.TrueType:
-                    return new Type2Font(context, parser);
+                    return new PdfType2Font(context, parser);
             }
             throw new NotSupportedException("Unknown composite font format.");
         }
@@ -69,6 +71,10 @@ namespace PdfClown.Documents.Contents.Fonts
 
         #region dynamic
         #region fields
+        private CMap ucs2CMap;
+        private bool isCMapPredefined;
+        private bool isDescendantCJK;
+        private CMap cMapUCS2;
         #endregion
 
         #region constructors
@@ -98,63 +104,297 @@ namespace PdfClown.Documents.Contents.Fonts
             set => DescendantFonts[0] = value?.BaseObject;
         }
 
-        protected override PdfDataObject GetDescriptorValue(PdfName key)
+        public override FontDescriptor FontDescriptor
         {
-            return CIDFont.FontDescriptor.BaseDataObject.Resolve(key);
+            get => CIDFont.FontDescriptor;
+            set => CIDFont.FontDescriptor = value;
+        }
+
+        public override int DefaultWidth
+        {
+            get => base.DefaultWidth;
+            set => base.DefaultWidth = value;
+        }
+
+        public override SKMatrix FontMatrix
+        {
+            get => CIDFont.FontMatrix;
+        }
+
+        public override bool IsVertical
+        {
+            get => cmap.WMode == 1;
+        }
+
+        public override float GetHeight(int code)
+        {
+            return CIDFont.GetHeight(code);
+        }
+
+        protected override byte[] Encode(int unicode)
+        {
+            return CIDFont.Encode(unicode);
+        }
+
+        public override bool HasExplicitWidth(int code)
+        {
+            return CIDFont.HasExplicitWidth(code);
+        }
+
+        public override float AverageFontWidth
+        {
+            get => CIDFont.AverageFontWidth;
+        }
+
+        public override SKPoint GetPositionVector(int code)
+        {
+            // units are always 1/1000 text space, font matrix is not used, see FOP-2252
+            return CIDFont.GetPositionVector(code).Scale(-1 / 1000f);
+        }
+
+
+        public override SKPoint GetDisplacement(int code)
+        {
+            if (IsVertical)
+            {
+                return new SKPoint(0, CIDFont.GetVerticalDisplacementVectorY(code) / 1000f);
+            }
+            else
+            {
+                return base.GetDisplacement(code);
+            }
+        }
+
+
+        public override float GetWidth(int code)
+        {
+            return CIDFont.GetWidth(code);
+        }
+
+        protected override float GetStandard14Width(int code)
+        {
+            throw new NotSupportedException("not supported");
+        }
+
+
+        public override float GetWidthFromFont(int code)
+        {
+            return CIDFont.GetWidthFromFont(code);
+        }
+
+
+        public override bool IsEmbedded
+        {
+            get => CIDFont.IsEmbedded;
+        }
+
+
+        public override int ToUnicode(int code)
+        {
+            // try to use a ToUnicode CMap
+            var unicode = base.ToUnicode(code);
+            if (unicode > -1)
+            {
+                return unicode;
+            }
+
+            if ((isCMapPredefined || isDescendantCJK) && cMapUCS2 != null)
+            {
+                // if the font is composite and uses a predefined cmap (excluding Identity-H/V) then
+                // or if its descendant font uses Adobe-GB1/CNS1/Japan1/Korea1
+
+                // a) Map the character code to a character identifier (CID) according to the font?s CMap
+                int cid = CodeToCID(code);
+
+                // e) Map the CID according to the CMap from step d), producing a Unicode value
+                return cMapUCS2.ToUnicode(cid);
+            }
+            else
+            {
+                if (LOG.isWarnEnabled() && !noUnicode.contains(code))
+                {
+                    // if no value has been produced, there is no way to obtain Unicode for the character.
+                    String cid = "CID+" + CodeToCID(code);
+                    Debug.WriteLine("warning: No Unicode mapping for " + cid + " (" + code + ") in font " + Name);
+                    // we keep track of which warnings have been issued, so we don't log multiple times
+                    noUnicode.add(code);
+                }
+                return null;
+            }
+        }
+
+        //public override int ToUnicode(int code)
+        //{
+        //    // try to use a ToUnicode CMap
+        //    var unicode = base.ToUnicode(code);
+        //    if (unicode > -1)
+        //    {
+        //        return unicode;
+        //    }
+
+        //    if (ucs2CMap != null)
+        //    {
+        //        // if the font is composite and uses a predefined cmap (excluding Identity-H/V) then
+        //        // or if its descendant font uses Adobe-GB1/CNS1/Japan1/Korea1
+
+        //        // a) Map the character code to a character identifier (CID) according to the font?s CMap
+        //        int cid = cmap.ToCID(code);
+
+        //        // e) Map the CID according to the CMap from step d), producing a Unicode value
+        //        return ucs2CMap.ToUnicode(cid);
+        //    }
+        //    else
+        //    {
+        //        return -1;
+        //    }
+        //}
+
+
+        public override SKRect BoundingBox
+        {
+            // Will be cached by underlying font
+            get => CIDFont.BoundingBox;
+        }
+
+        public override int ReadCode(Bytes.Buffer input, out byte[] bytes)
+        {
+            return CMap.ReadCode(input, out bytes);
+        }
+
+        /**
+         * Returns the CID for the given character code. If not found then CID 0 is returned.
+         *
+         * @param code character code
+         * @return CID
+         */
+        public int CodeToCID(int code)
+        {
+            return CIDFont.CodeToCID(code);
+        }
+
+        /**
+         * Returns the GID for the given character code.
+         *
+         * @param code character code
+         * @return GID
+         */
+        public int CodeToGID(int code)
+        {
+            return CIDFont.CodeToGID(code);
+        }
+
+        public override bool IsStandard14
+        {
+            get => false;
+        }
+
+        public override bool IsDamaged
+        {
+            get => CIDFont.IsDamaged;
+        }
+
+        public override SKPath GetPath(int code)
+        {
+            return CIDFont.GetPath(code);
+        }
+
+        public override SKPath GetNormalizedPath(int code)
+        {
+            return CIDFont.GetNormalizedPath(code);
+        }
+
+        public override bool HasGlyph(int code)
+        {
+            return CIDFont.HasGlyph(code);
+        }
+
+        public GsubData GsubData
+        {
+            get => gsubData;
+        }
+
+        public byte[] EncodeGlyphId(int glyphId)
+        {
+            return CIDFont.EncodeGlyphId(glyphId);
         }
 
         protected void LoadEncoding()
         {
-            PdfDataObject encodingObject = BaseDataObject.Resolve(PdfName.Encoding);
-
-            // CMap [PDF:1.6:5.6.4].
-            var cmap = CMap.Get(encodingObject);
-
-            // 1. Unicode.
-            if (encodingObject.)
+            var encoding = Dictionary.Resolve(PdfName.Encoding);
+            if (encoding is PdfName encodingName)
             {
-                if (encodingObject is PdfName
-                  && !(encodingObject.Equals(PdfName.IdentityH)
-                    || encodingObject.Equals(PdfName.IdentityV)))
+                // predefined CMap
+                cmap = CMap.Get(encodingName);
+                if (cmap != null)
                 {
-                    /*
-                      NOTE: According to [PDF:1.6:5.9.1], the fallback method to retrieve
-                      the character-code-to-Unicode mapping implies getting the UCS2 CMap
-                      (Unicode value to CID) corresponding to the font's one (character code to CID);
-                      CIDs are the bridge from character codes to Unicode values.
-                    */
-                    PdfDictionary cidSystemInfo = (PdfDictionary)CIDFontDictionary.Resolve(PdfName.CIDSystemInfo);
-                    String registry = (String)((PdfTextString)cidSystemInfo[PdfName.Registry]).Value;
-                    String ordering = (String)((PdfTextString)cidSystemInfo[PdfName.Ordering]).Value;
-                    String ucs2CMapName = registry + "-" + ordering + "-" + "UCS2";
-                    ucs2CMap = CMap.Get(ucs2CMapName);
+                    isCMapPredefined = true;
                 }
-                if (!cmap.HasUnicodeMappings)
+                else
                 {
-                    /*
-                      NOTE: In case no clue is available to determine the Unicode resolution map,
-                      the font is considered symbolic and an identity map is synthesized instead.
-                    */
-                    symbolic = true;
-                    foreach (KeyValuePair<ByteArray, int> cmapEntry in cmap)
-                    { codes[cmapEntry.Key] = ConvertUtils.ByteArrayToInt(cmapEntry.Key.Data); }
+                    throw new Exception("Missing required CMap");
+                }
+            }
+            else if (encoding != null)
+            {
+                cmap = CMap.Get(encoding);
+                if (cmap == null)
+                {
+                    throw new IOException("Missing required CMap");
+                }
+                else if (!cmap.HasCIDMappings)
+                {
+                    Debug.WriteLine("warning Invalid Encoding CMap in font " + Name);
                 }
             }
 
-            // 2. Glyph indexes.
-            /*
-            TODO: gids map for glyph indexes as glyphIndexes is used to map cids!!!
-            */
-            // Character-code-to-CID mapping [PDF:1.6:5.6.4,5].
-            glyphIndexes = new Dictionary<int, int>();
-            foreach (KeyValuePair<ByteArray, int> cmapEntry in cmap)
+            // check if the descendant font is CJK
+            var ros = CIDFont.CIDSystemInfo;
+            if (ros != null)
             {
-                if (!codes.ContainsKey(cmapEntry.Key))
-                    continue;
+                isDescendantCJK = "Adobe".Equals(ros.Registry, StringComparison.OrdinalIgnoreCase) &&
+                        ("GB1".Equals(ros.Ordering, StringComparison.OrdinalIgnoreCase) ||
+                         "CNS1".Equals(ros.Ordering, StringComparison.OrdinalIgnoreCase) ||
+                         "Japan1".Equals(ros.Ordering, StringComparison.OrdinalIgnoreCase) ||
+                         "Korea1".Equals(ros.Ordering, StringComparison.OrdinalIgnoreCase));
+            }
 
-                glyphIndexes[codes[cmapEntry.Key]] = cmapEntry.Value;
+
+            // if the font is composite and uses a predefined cmap (excluding Identity-H/V)
+            // or whose descendant CIDFont uses the Adobe-GB1, Adobe-CNS1, Adobe-Japan1, or
+            // Adobe-Korea1 character collection:
+
+            if (isCMapPredefined && !(encoding == PdfName.IdentityH || encoding == PdfName.IdentityV) ||
+                isDescendantCJK)
+            {
+                // a) Map the character code to a CID using the font's CMap
+                // b) Obtain the ROS from the font's CIDSystemInfo
+                // c) Construct a second CMap name by concatenating the ROS in the format "R-O-UCS2"
+                // d) Obtain the CMap with the constructed name
+                // e) Map the CID according to the CMap from step d), producing a Unicode value
+
+                // todo: not sure how to interpret the PDF spec here, do we always override? or only when Identity-H/V?
+                string strName = null;
+                if (isDescendantCJK)
+                {
+                    strName = $"{ros.Registry}-{ros.Ordering}-{ros.Supplement}";
+                }
+                else if (encoding is PdfName encodingName2)
+                {
+                    strName = encodingName2.StringValue;
+                }
+
+                // try to find the corresponding Unicode (UC2) CMap
+                if (strName != null)
+                {
+                    CMap prdCMap = CMap.Get(strName);
+                    string ucs2Name = prdCMap.Registry + "-" + prdCMap.Ordering + "-UCS2";
+                    cMapUCS2 = CMap.Get(ucs2Name);
+                }
             }
         }
+
+
+
 
         protected override void OnLoad()
         {
@@ -163,7 +403,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // Glyph widths.
             {
                 glyphWidths = new Dictionary<int, int>();
-                PdfArray glyphWidthObjects = (PdfArray)CIDFontDictionary.Resolve(PdfName.W);
+                PdfArray glyphWidthObjects = CIDFont.Widths;
                 if (glyphWidthObjects != null)
                 {
                     for (IEnumerator<PdfDirectObject> iterator = glyphWidthObjects.GetEnumerator(); iterator.MoveNext();)
@@ -490,31 +730,7 @@ namespace PdfClown.Documents.Contents.Fonts
         }
 
 
-        public override int ToUnicode(int code)
-        {
-            // try to use a ToUnicode CMap
-            var unicode = base.ToUnicode(code);
-            if (unicode > -1)
-            {
-                return unicode;
-            }
 
-            if (ucs2CMap != null)
-            {
-                // if the font is composite and uses a predefined cmap (excluding Identity-H/V) then
-                // or if its descendant font uses Adobe-GB1/CNS1/Japan1/Korea1
-
-                // a) Map the character code to a character identifier (CID) according to the font?s CMap
-                int cid = cmap.ToCID(code);
-
-                // e) Map the CID according to the CMap from step d), producing a Unicode value
-                return ucs2CMap.ToUnicode(cid);
-            }
-            else
-            {
-                return -1;
-            }
-        }
         #endregion
         #endregion
         #endregion

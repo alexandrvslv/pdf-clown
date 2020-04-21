@@ -19,6 +19,7 @@ using PdfClown.Objects;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -31,7 +32,7 @@ namespace PdfClown.Documents.Contents.Fonts
      *
      * @author Ben Litchfield
      */
-    public abstract class CIDFont : PdfObjectWrapper<PdfDictionary>// PDFontLike, PDVectorFont
+    public abstract class CIDFont : Font// PDFontLike, PDVectorFont
     {
         public static CIDFont WrapFont(PdfDictionary pdfDictionary, CompositeFont compositeFont)
         {
@@ -61,8 +62,12 @@ namespace PdfClown.Documents.Contents.Fonts
         private float[] dw2 = new float[] { 880, -1000 };
 
         private FontDescriptor fontDescriptor;
+        public CIDFont(Document document)
+            : this(document, new PdfDictionary(new PdfName[] { PdfName.Type }, new PdfDirectObject[] { PdfName.Font }))
+        { }
 
-        public CIDFont(Document document, PdfDictionary fontObject) : base(document, fontObject)
+        public CIDFont(Document document, PdfDictionary fontObject)
+            : base(document, fontObject)
         {
         }
 
@@ -86,28 +91,11 @@ namespace PdfClown.Documents.Contents.Fonts
             ReadVerticalDisplacements();
         }
 
-        public string Type
-        {
-            get => ((PdfName)Dictionary[PdfName.Type]).StringValue;
-            set => Dictionary[PdfName.Type] = new PdfName(value);
-        }
-
-        public string Subtype
-        {
-            get => ((PdfName)Dictionary[PdfName.Subtype]).StringValue;
-            set => Dictionary[PdfName.Subtype] = new PdfName(value);
-        }
-
         /**
          * The PostScript name of the font.
          *
          * @return The postscript name of the font.
          */
-        public string BaseFont
-        {
-            get => ((PdfName)Dictionary[PdfName.BaseFont]).StringValue;
-            set => Dictionary[PdfName.BaseFont] = new PdfName(value);
-        }
 
         public CIDSystemInfo CIDSystemInfo
         {
@@ -115,24 +103,19 @@ namespace PdfClown.Documents.Contents.Fonts
             set => Dictionary[PdfName.BaseFont] = value?.BaseObject;
         }
 
-        public virtual string Name
-        {
-            get => BaseFont;
-        }
-
-        public virtual FontDescriptor FontDescriptor
+        public override FontDescriptor FontDescriptor
         {
             get => fontDescriptor ?? (fontDescriptor = Wrap<FontDescriptor>((PdfDirectObject)Dictionary.Resolve(PdfName.FontDescriptor)));
             set => Dictionary[PdfName.FontDescriptor] = value?.BaseObject;
         }
 
-        public int DefaultWidth
+        public override int DefaultWidth
         {
             get => defaultWidth ?? (defaultWidth = ((PdfInteger)Dictionary[PdfName.DW])?.IntValue ?? 1000).Value;
             set => Dictionary[PdfName.DW] = new PdfInteger(value);
         }
 
-        public PdfArray Widths
+        public override PdfArray Widths
         {
             get => (PdfArray)Dictionary.Resolve(PdfName.W);
             set => Dictionary[PdfName.W] = value.Reference;
@@ -161,7 +144,7 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @return parent Type 0 font
          */
-        public CompositeFont Parent
+        public virtual CompositeFont Parent
         {
             get => parent;
         }
@@ -262,25 +245,25 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @param cid CID
          */
-        protected virtual SKPoint GetDefaultPositionVector(int cid)
+        public override SKPoint GetDefaultPositionVector(int cid)
         {
             return new SKPoint(GetWidthForCID(cid) / 2, dw2[0]);
         }
 
-        protected float GetWidthForCID(int cid)
+        public float GetWidthForCID(int cid)
         {
             if (widths.TryGetValue(cid, out var width))
                 return width;
             return DefaultWidth;
         }
 
-        public virtual bool HasExplicitWidth(int code)
+        public override bool HasExplicitWidth(int code)
         {
             var cid = CodeToCID(code);
             return widths.TryGetValue(cid, out _);
         }
 
-        public virtual SKPoint GetPositionVector(int code)
+        public override SKPoint GetPositionVector(int code)
         {
             int cid = CodeToCID(code);
             if (positionVectors.TryGetValue(cid, out var position))
@@ -294,7 +277,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param code character code
          * @return w1y
          */
-        public virtual float GetVerticalDisplacementVectorY(int code)
+        public override float GetVerticalDisplacementVectorY(int code)
         {
             int cid = CodeToCID(code);
             if (verticalDisplacementY.TryGetValue(cid, out var w1y))
@@ -304,7 +287,7 @@ namespace PdfClown.Documents.Contents.Fonts
             return dw2[1];
         }
 
-        public virtual float GetWidth(int code)
+        public override float GetWidth(int code)
         {
             // these widths are supposed to be consistent with the actual widths given in the CIDFont
             // program, but PDFBOX-563 shows that when they are not, Acrobat overrides the embedded
@@ -313,30 +296,33 @@ namespace PdfClown.Documents.Contents.Fonts
         }
 
         // todo: this method is highly suspicious, the average glyph width is not usually a good metric
-        public virtual float GetAverageFontWidth()
+        public override float AverageFontWidth
         {
-            if (averageWidth == 0)
+            get
             {
-                float totalWidths = 0.0f;
-                int characterCount = 0;
-                if (widths != null)
+                if (averageWidth == 0)
                 {
-                    foreach (float width in widths.Values)
+                    float totalWidths = 0.0f;
+                    int characterCount = 0;
+                    if (widths != null)
                     {
-                        if (width > 0)
+                        foreach (float width in widths.Values)
                         {
-                            totalWidths += width;
-                            ++characterCount;
+                            if (width > 0)
+                            {
+                                totalWidths += width;
+                                ++characterCount;
+                            }
                         }
                     }
+                    averageWidth = totalWidths / characterCount;
+                    if (averageWidth <= 0 || averageWidth == float.NaN)
+                    {
+                        averageWidth = DefaultWidth;
+                    }
                 }
-                averageWidth = totalWidths / characterCount;
-                if (averageWidth <= 0 || averageWidth == float.NaN)
-                {
-                    averageWidth = DefaultWidth;
-                }
+                return averageWidth;
             }
-            return averageWidth;
         }
 
         /**
@@ -368,7 +354,6 @@ namespace PdfClown.Documents.Contents.Fonts
          * @return Array of 1 to 4 PDF content stream bytes.
          * @throws IOException If the text could not be encoded.
          */
-        protected abstract byte[] Encode(int unicode);
 
         public virtual int[] ReadCIDToGIDMap()
         {

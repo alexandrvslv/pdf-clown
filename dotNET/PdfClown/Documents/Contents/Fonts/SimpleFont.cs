@@ -47,12 +47,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         #region interface
         #region protected
-        protected override PdfDataObject GetDescriptorValue(PdfName key)
-        {
-            PdfDictionary fontDescriptor = (PdfDictionary)BaseDataObject.Resolve(PdfName.FontDescriptor);
-            return fontDescriptor != null ? fontDescriptor.Resolve(key) : null;
-        }
-
+       
         protected virtual IDictionary<ByteArray, int> GetBaseEncoding(PdfName encodingName)
         {
             if (encodingName == null) // Default encoding.

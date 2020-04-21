@@ -73,7 +73,7 @@ namespace PdfClown
         #endregion
 
         #region constructors
-        private Version(int major, int minor)
+        internal Version(int major, int minor)
         {
             this.major = major;
             this.minor = minor;
@@ -95,6 +95,11 @@ namespace PdfClown
         #region IComparable
         public int CompareTo(IVersion value)
         { return VersionUtils.CompareTo(this, value); }
+
+        public float GetFloat()
+        {
+            return float.Parse($"{Major}.{Minor}");
+        }
         #endregion
         #endregion
         #endregion

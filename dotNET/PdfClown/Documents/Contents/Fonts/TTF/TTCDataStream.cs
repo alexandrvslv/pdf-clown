@@ -15,73 +15,75 @@
  * limitations under the License.
  */
 
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
-using System.IO;
-
-
-/**
- * A wrapper for a TTF stream inside a TTC file, does not close the underlying shared stream.
- *
- * @author John Hewson
- */
-class TTCDataStream : TTFDataStream
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    private readonly TTFDataStream stream; 
-    
-    TTCDataStream(TTFDataStream stream)
-    {
-        this.stream = stream;
-    }
-    
-    public override int Read() 
-    {
-        return stream.Read();
-    }
 
-    public override long readLong() 
-    {
-        return stream.readLong();
-    }
+    using System.IO;
 
-    public override int ReadUnsignedShort() 
-    {
-        return stream.ReadUnsignedShort();
-    }
 
-    public override short ReadSignedShort() 
+    /**
+     * A wrapper for a TTF stream inside a TTC file, does not close the underlying shared stream.
+     *
+     * @author John Hewson
+     */
+    class TTCDataStream : TTFDataStream
     {
-        return stream.ReadSignedShort();
-    }
+        private readonly TTFDataStream stream;
 
-    public override void Dispose() 
-    {
-        // don't close the underlying stream, as it is shared by all fonts from the same TTC
-        // TrueTypeCollection.Dispose() must be called instead
-    }
+        TTCDataStream(TTFDataStream stream)
+        {
+            this.stream = stream;
+        }
 
-    public override void seek(long pos) 
-    {
-        stream.seek(pos);
-    }
+        public override int Read()
+        {
+            return stream.Read();
+        }
 
-    public override int read(byte[] b, int off, int len) 
-    {
-        return stream.Read(b, off, len);
-    }
+        public override long ReadLong()
+        {
+            return stream.ReadLong();
+        }
 
-    public override long getCurrentPosition() 
-    {
-        return stream.getCurrentPosition();
-    }
+        public override int ReadUnsignedShort()
+        {
+            return stream.ReadUnsignedShort();
+        }
 
-    public override bytes.Buffer getOriginalData() 
-    {
-        return stream.getOriginalData();
-    }
+        public override short ReadSignedShort()
+        {
+            return stream.ReadSignedShort();
+        }
 
-    public override long getOriginalDataSize()
-    {
-        return stream.getOriginalDataSize();
+        public override void Dispose()
+        {
+            // don't close the underlying stream, as it is shared by all fonts from the same TTC
+            // TrueTypeCollection.Dispose() must be called instead
+        }
+
+        public override void Seek(long pos)
+        {
+            stream.Seek(pos);
+        }
+
+        public override int Read(byte[] b, int off, int len)
+        {
+            return stream.Read(b, off, len);
+        }
+
+        public override long CurrentPosition
+        {
+            get => stream.CurrentPosition;
+        }
+
+        public override bytes.Buffer OriginalData
+        {
+            get => stream.OriginalData;
+        }
+
+        public override long OriginalDataSize
+        {
+            get => stream.OriginalDataSize;
+        }
     }
 }

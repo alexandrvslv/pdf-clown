@@ -28,7 +28,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * A tag that identifies this table type.
          */
-        public static readonly string TAG = "maxp";
+        public const string TAG = "maxp";
 
         private float version;
         private int numGlyphs;
@@ -193,7 +193,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param data The stream to read the data from.
          * @ If there is an error reading the data.
          */
-        protected override void Read(TrueTypeFont ttf, TTFDataStream data)
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
             version = data.Read32Fixed();
             numGlyphs = data.ReadUnsignedShort();

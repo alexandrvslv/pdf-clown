@@ -1,5 +1,5 @@
 /*
-  Copyright 2009-2010 Stefano Chizzolini. http://www.pdfclown.org
+  Copyright 2009-2011 Stefano Chizzolini. http://www.pdfclown.org
 
   Contributors:
     * Stefano Chizzolini (original code developer, http://www.stefanochizzolini.it)
@@ -24,14 +24,15 @@
 */
 
 using PdfClown.Objects;
-
+using SkiaSharp;
+using System;
 using System.Collections.Generic;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
     /**
-      <summary>Composite font associated to a Type 0 CIDFont,
-      containing glyph descriptions based on the Adobe Type 1 font format [PDF:1.6:5.6.3].</summary>
+      <summary>Composite font associated to a Type 2 CIDFont, containing glyph descriptions based on
+      the TrueType font format [PDF:1.6:5.6.3].</summary>
     */
     /*
       NOTE: Type 0 CIDFonts encompass several formats:
@@ -39,17 +40,34 @@ namespace PdfClown.Documents.Contents.Fonts
       * OpenFont/CFF (in case "CFF" table's Top DICT has CIDFont operators).
     */
     [PDF(VersionEnum.PDF12)]
-    public sealed class Type0Font : CompositeFont
+    public sealed class PdfType2Font : CompositeFont
     {
         #region constructors
-        internal Type0Font(Document context, OpenFontParser parser) : base(context, parser)
+        internal PdfType2Font(Document context, OpenFontParser parser) : base(context, parser)
         { }
 
-        internal Type0Font(PdfDirectObject baseObject) : base(baseObject)
+        internal PdfType2Font(PdfDirectObject baseObject) : base(baseObject)
         { }
         #endregion
 
+        protected override SKTypeface GetTypeface(FontDescriptor fontDescription, PdfStream stream)
+        {
+            var buffer = stream.GetBody(true);
+            var lenght1 = stream.Header[PdfName.Length1] as PdfInteger;
+            var bytes = buffer.ToByteArray();
 
-        
+            using (var data = new SKMemoryStream(bytes))
+            {
+                typeface = SKFontManager.Default.CreateTypeface(data);
+            }
+
+            if (typeface == null)
+            {
+                typeface = ParseName(fontDescription.Resolve(PdfName.FontName)?.ToString(), stream.Header);
+            }
+            return typeface;
+        }
+
+
     }
 }

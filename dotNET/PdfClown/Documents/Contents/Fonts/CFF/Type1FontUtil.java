@@ -100,7 +100,7 @@ public final class Type1FontUtil
             buffer[i] = 0;
         }
 
-        System.arraycopy(plaintextBytes, 0, buffer, n, buffer.Length - n);
+        Array.Copy(plaintextBytes, 0, buffer, n, buffer.Length - n);
 
         int c1 = 52845;
         int c2 = 22719;
@@ -159,7 +159,7 @@ public final class Type1FontUtil
         }
 
         byte[] plaintextBytes = new byte[ciphertextBytes.Length - n];
-        System.arraycopy(buffer, n, plaintextBytes, 0, plaintextBytes.Length);
+        Array.Copy(buffer, n, plaintextBytes, 0, plaintextBytes.Length);
 
         return plaintextBytes;
     }

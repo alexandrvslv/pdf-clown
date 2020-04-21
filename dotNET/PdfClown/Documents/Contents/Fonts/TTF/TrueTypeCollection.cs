@@ -15,140 +15,142 @@
  * limitations under the License.
  */
 
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
-using System;
-using System.IO;
-
-
-/**
- * A TrueType Collection, now more properly known as a "Font Collection" as it may contain either
- * TrueType or OpenType fonts.
- * 
- * @author John Hewson
- */
-public class TrueTypeCollection : IDisposable
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    private readonly TTFDataStream stream;
-    private readonly int numFonts;
-    private readonly long[] fontOffsets;
+
+    using System;
+    using System.IO;
+
 
     /**
-     * Creates a new TrueTypeCollection from a .ttc file.
-     *
-     * @param file The TTC file.
-     * @ If the font could not be parsed.
-     */
-    public TrueTypeCollection(File file) 
-    {
-        this(new RAFDataStream(file, "r"));
-    }
-
-    /**
-     * Creates a new TrueTypeCollection from a .ttc input stream.
-     *
-     * @param stream A TTC input stream.
-     * @ If the font could not be parsed.
-     */
-    public TrueTypeCollection(Bytes.Buffer stream) 
-    {
-        this(new MemoryTTFDataStream(stream));
-    }
-
-    /**
-     * Creates a new TrueTypeCollection from a TTC stream.
-     *
-     * @param stream The TTF file.
-     * @ If the font could not be parsed.
-     */
-    TrueTypeCollection(TTFDataStream stream) 
-    {
-        this.stream = stream;
-
-        // TTC header
-        string tag = stream.readTag();
-        if (!tag.equals("ttcf"))
-        {
-            throw new IOException("Missing TTC header");
-        }
-        float version = stream.Read32Fixed();
-        numFonts = (int)stream.ReadUnsignedInt();
-        fontOffsets = new long[numFonts];
-        for (int i = 0; i < numFonts; i++)
-        {
-            fontOffsets[i] = stream.ReadUnsignedInt();
-        }
-        if (version >= 2)
-        {
-            // not used at this time
-            int ulDsigTag = stream.ReadUnsignedShort();
-            int ulDsigLength = stream.ReadUnsignedShort();
-            int ulDsigOffset = stream.ReadUnsignedShort();
-        }
-    }
-    
-    /**
-     * Run the callback for each TT font in the collection.
+     * A TrueType Collection, now more properly known as a "Font Collection" as it may contain either
+     * TrueType or OpenType fonts.
      * 
-     * @param trueTypeFontProcessor the object with the callback method.
-     * @ 
+     * @author John Hewson
      */
-    public void processAllFonts(TrueTypeFontProcessor trueTypeFontProcessor) 
+    public class TrueTypeCollection : IDisposable
     {
-        for (int i = 0; i < numFonts; i++)
-        {
-            TrueTypeFont font = getFontAtIndex(i);
-            trueTypeFontProcessor.process(font);
-        }
-    }
-    
-    private TrueTypeFont getFontAtIndex(int idx) 
-    {
-        stream.seek(fontOffsets[idx]);
-        TTFParser parser;
-        if (stream.readTag().equals("OTTO"))
-        {
-            parser = new OTFParser(false, true);
-        }
-        else
-        {
-            parser = new TTFParser(false, true);
-        }
-        stream.seek(fontOffsets[idx]);
-        return parser.Parse(new TTCDataStream(stream));
-    }
+        private readonly TTFDataStream stream;
+        private readonly int numFonts;
+        private readonly long[] fontOffsets;
 
-    /**
-     * Get a TT font from a collection.
-     * 
-     * @param name The postscript name of the font.
-     * @return The found font, nor null if none is found.
-     * @ 
-     */
-    public TrueTypeFont getFontByName(string name) 
-    {
-        for (int i = 0; i < numFonts; i++)
+        /**
+         * Creates a new TrueTypeCollection from a .ttc file.
+         *
+         * @param file The TTC file.
+         * @ If the font could not be parsed.
+         */
+        public TrueTypeCollection(File file)
+                : this(new RAFDataStream(file, "r"))
         {
-            TrueTypeFont font = getFontAtIndex(i);
-            if (font.Name.equals(name))
+        }
+
+        /**
+         * Creates a new TrueTypeCollection from a .ttc input stream.
+         *
+         * @param stream A TTC input stream.
+         * @ If the font could not be parsed.
+         */
+        public TrueTypeCollection(Bytes.Buffer stream)
+            : this(new MemoryTTFDataStream(stream))
+        {
+        }
+
+        /**
+         * Creates a new TrueTypeCollection from a TTC stream.
+         *
+         * @param stream The TTF file.
+         * @ If the font could not be parsed.
+         */
+        public TrueTypeCollection(TTFDataStream stream)
+        {
+            this.stream = stream;
+
+            // TTC header
+            string tag = stream.ReadTag();
+            if (!tag.Equals("ttcf", StringComparison.Ordinal))
             {
-                return font;
+                throw new IOException("Missing TTC header");
+            }
+            float version = stream.Read32Fixed();
+            numFonts = (int)stream.ReadUnsignedInt();
+            fontOffsets = new long[numFonts];
+            for (int i = 0; i < numFonts; i++)
+            {
+                fontOffsets[i] = stream.ReadUnsignedInt();
+            }
+            if (version >= 2)
+            {
+                // not used at this time
+                int ulDsigTag = stream.ReadUnsignedShort();
+                int ulDsigLength = stream.ReadUnsignedShort();
+                int ulDsigOffset = stream.ReadUnsignedShort();
             }
         }
-        return null;
-    }
 
-    /**
-     * Implement the callback method to call {@link TrueTypeCollection#processAllFonts(TrueTypeFontProcessor)}.
-     */
-    @FunctionalInterface
-    public interface TrueTypeFontProcessor
-    {
-        void process(TrueTypeFont ttf) ;
-    }
-    
-    public override void Dispose() 
-    {
-        stream.Dispose();
+        /**
+         * Run the callback for each TT font in the collection.
+         * 
+         * @param trueTypeFontProcessor the object with the callback method.
+         * @ 
+         */
+        public void ProcessAllFonts(TrueTypeFontProcessor trueTypeFontProcessor)
+        {
+            for (int i = 0; i < numFonts; i++)
+            {
+                TrueTypeFont font = getFontAtIndex(i);
+                trueTypeFontProcessor.Process(font);
+            }
+        }
+
+        private TrueTypeFont getFontAtIndex(int idx)
+        {
+            stream.Seek(fontOffsets[idx]);
+            TTFParser parser;
+            if (stream.ReadTag().Equals("OTTO", StringComparison.Ordinal))
+            {
+                parser = new OTFParser(false, true);
+            }
+            else
+            {
+                parser = new TTFParser(false, true);
+            }
+            stream.Seek(fontOffsets[idx]);
+            return parser.Parse(new TTCDataStream(stream));
+        }
+
+        /**
+         * Get a TT font from a collection.
+         * 
+         * @param name The postscript name of the font.
+         * @return The found font, nor null if none is found.
+         * @ 
+         */
+        public TrueTypeFont getFontByName(string name)
+        {
+            for (int i = 0; i < numFonts; i++)
+            {
+                TrueTypeFont font = getFontAtIndex(i);
+                if (font.Name.Equals(name, StringComparison.Ordinal))
+                {
+                    return font;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Implement the callback method to call {@link TrueTypeCollection#processAllFonts(TrueTypeFontProcessor)}.
+         */
+        //@FunctionalInterface
+        public interface TrueTypeFontProcessor
+        {
+            void Process(TrueTypeFont ttf);
+        }
+
+        public void Dispose()
+        {
+            stream.Dispose();
+        }
     }
 }

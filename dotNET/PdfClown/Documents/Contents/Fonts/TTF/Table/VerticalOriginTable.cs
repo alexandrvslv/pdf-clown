@@ -14,90 +14,90 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
+using System.Collections.Generic;
 using System.IO;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-/**
- * A vertical origin 'VORG' table in an OpenType font.
- *
- * The purpose of this table is to improve the efficiency of determining
- * vertical origins in CFF fonts where absent this information the bounding
- * box would have to be extracted from CFF charstring data.
- *
- * This table is strongly recommended by the OpenType CJK Font Guidelines
- * for "CFF OpenType fonts that are used for vertical writing".
- * 
- * This table is specified only in the OpenType specification (1.3 and later).
- * 
- * @author Glenn Adams
- * 
- */
-public class VerticalOriginTable : TTFTable
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    /**
-     * A tag that identifies this table type.
-     */
-    public static readonly string TAG = "VORG";
-    
-    private float version;
-    private int defaultVertOriginY;
-    private Dictionary<int, int> origins;
-
-    VerticalOriginTable(TrueTypeFont font)
-    {
-        :base(font);
-    }
 
     /**
-     * This will read the required data from the stream.
-     * 
-     * @param ttf The font that is being read.
-     * @param data The stream to read the data from.
-     * @ If there is an error reading the data.
-     */
-    override
-    void Read(TrueTypeFont ttf, TTFDataStream data) 
-    {
-        version = data.Read32Fixed();
-        defaultVertOriginY = data.ReadSignedShort();
-        int numVertOriginYMetrics = data.ReadUnsignedShort();
-        origins = new ConcurrentHashMap<>(numVertOriginYMetrics);
-        for (int i = 0; i < numVertOriginYMetrics; ++i) 
-        {
-            int g = data.ReadUnsignedShort();
-            int y = data.ReadSignedShort();
-            origins[g, y);
-        }
-        initialized = true;
-    }
-    
-    /**
-     * @return Returns the version.
-     */
-    public float Version
-    {
-        return version;
-    }
-
-    /**
-     * Returns the y-coordinate of the vertical origin for the given GID if known,
-     * or returns the default value if not specified in table data.
+     * A vertical origin 'VORG' table in an OpenType font.
      *
-     * @param gid GID
-     * @return Returns the y-coordinate of the vertical origin.
+     * The purpose of this table is to improve the efficiency of determining
+     * vertical origins in CFF fonts where absent this information the bounding
+     * box would have to be extracted from CFF charstring data.
+     *
+     * This table is strongly recommended by the OpenType CJK Font Guidelines
+     * for "CFF OpenType fonts that are used for vertical writing".
+     * 
+     * This table is specified only in the OpenType specification (1.3 and later).
+     * 
+     * @author Glenn Adams
+     * 
      */
-    public int getOriginY(int gid)
+    public class VerticalOriginTable : TTFTable
     {
-        if (origins.containsKey(gid))
+        /**
+         * A tag that identifies this table type.
+         */
+        public const string TAG = "VORG";
+
+        private float version;
+        private int defaultVertOriginY;
+        private Dictionary<int, int> origins;
+
+        public VerticalOriginTable(TrueTypeFont font)
+                : base(font)
         {
-            return origins.get(gid);
         }
-        else
+
+        /**
+         * This will read the required data from the stream.
+         * 
+         * @param ttf The font that is being read.
+         * @param data The stream to read the data from.
+         * @ If there is an error reading the data.
+         */
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
-            return defaultVertOriginY;
+            version = data.Read32Fixed();
+            defaultVertOriginY = data.ReadSignedShort();
+            int numVertOriginYMetrics = data.ReadUnsignedShort();
+            origins = new Dictionary<int, int>(numVertOriginYMetrics);
+            for (int i = 0; i < numVertOriginYMetrics; ++i)
+            {
+                int g = data.ReadUnsignedShort();
+                int y = data.ReadSignedShort();
+                origins[g] = y;
+            }
+            initialized = true;
+        }
+
+        /**
+         * @return Returns the version.
+         */
+        public float Version
+        {
+            get => version;
+        }
+
+        /**
+         * Returns the y-coordinate of the vertical origin for the given GID if known,
+         * or returns the default value if not specified in table data.
+         *
+         * @param gid GID
+         * @return Returns the y-coordinate of the vertical origin.
+         */
+        public int GetOriginY(int gid)
+        {
+            if (origins.TryGetValue(gid, out var origin))
+            {
+                return origin;
+            }
+            else
+            {
+                return defaultVertOriginY;
+            }
         }
     }
 }

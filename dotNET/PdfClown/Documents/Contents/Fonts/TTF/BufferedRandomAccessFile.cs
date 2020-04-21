@@ -15,7 +15,7 @@
  */
 namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-
+    using System;
     using System.IO;
 
     /**
@@ -29,7 +29,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
      *
      * @author jg
      */
-    public class BufferedRandomAccessFile : RandomAccessFile
+    public class BufferedRandomAccessFile : BinaryReader
     {
         /**
          * Uses a byte instead of a char buffer for efficiency reasons.
@@ -60,11 +60,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * an existing, writable regular file and a new regular file of that name cannot be created, or
          * if some other error occurs while opening or creating the file.
          */
-        public BufferedRandomAccessFile(string filename, string mode, int bufsize)
-            : base(filename, mode)
+        public BufferedRandomAccessFile(string filename, System.Text.Encoding mode, int bufsize)
+            : this(new FileStream(filename, FileMode.Open), mode, bufsize)
         {
-            BUFSIZE = bufsize;
-            buffer = new byte[BUFSIZE];
         }
 
         /**
@@ -79,7 +77,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * an existing, writable regular file and a new regular file of that name cannot be created, or
          * if some other error occurs while opening or creating the file.
          */
-        public BufferedRandomAccessFile(File file, string mode, int bufsize)
+        public BufferedRandomAccessFile(Stream file, System.Text.Encoding mode, int bufsize)
             : base(file, mode)
         {
             BUFSIZE = bufsize;
@@ -89,9 +87,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * {@inheritDoc}
          */
-        public override int read()
+        public override int Read()
         {
-            if (bufpos >= bufend && fillBuffer() < 0)
+            if (bufpos >= bufend && FillBuffer() < 0)
             {
                 return -1;
             }
@@ -99,8 +97,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             {
                 return -1;
             }
-            // FIX to handle unsigned bytes
-            return (buffer[bufpos++] + 256) & 0xFF;
+
+            return buffer[bufpos++];//TODO test + 256) & 0xFF
             // End of fix
         }
 
@@ -112,7 +110,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @ If the first byte cannot be read for any reason other than end of file,
          * or if the random access file has been closed, or if some other I/O error occurs.
          */
-        private int fillBuffer()
+        private int FillBuffer()
         {
             int n = base.Read(buffer, 0, BUFSIZE);
 
@@ -130,30 +128,30 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          *
          * @ If an I/O error occurs.
          */
-        private void invalidate()
+        private void Invalidate()
         {
             bufend = 0;
             bufpos = 0;
-            realpos = base.getFilePointer();
+            realpos = base.BaseStream.Position;
         }
 
         /**
          * {@inheritDoc}
          */
-        public override int read(byte[] b, int off, int len)
+        public override int Read(byte[] b, int off, int len)
         {
             int leftover = bufend - bufpos;
             if (len <= leftover)
             {
-                System.arraycopy(buffer, bufpos, b, off, len);
+                Array.Copy(buffer, bufpos, b, off, len);
                 bufpos += len;
                 return len;
             }
-            System.arraycopy(buffer, bufpos, b, off, leftover);
+            Array.Copy(buffer, bufpos, b, off, leftover);
             bufpos += leftover;
-            if (fillBuffer() > 0)
+            if (FillBuffer() > 0)
             {
-                int bytesRead = read(b, off + leftover, len - leftover);
+                int bytesRead = Read(b, off + leftover, len - leftover);
                 if (bytesRead > 0)
                 {
                     leftover += bytesRead;
@@ -165,15 +163,15 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * {@inheritDoc}
          */
-        public override long getFilePointer()
+        public long FilePointer
         {
-            return realpos - bufend + bufpos;
+            get => realpos - bufend + bufpos;
         }
 
         /**
          * {@inheritDoc}
          */
-        public override void seek(long pos)
+        public virtual void Seek(long pos)
         {
             int n = (int)(realpos - pos);
             if (n >= 0 && n <= bufend)
@@ -182,8 +180,10 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             else
             {
-            :base.seek(pos);
-                invalidate();
+                base.BaseStream.Seek(pos, SeekOrigin.Begin);
+                Invalidate();
             }
         }
     }
+
+}

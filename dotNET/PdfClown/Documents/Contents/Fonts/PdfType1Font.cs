@@ -49,7 +49,7 @@ namespace PdfClown.Documents.Contents.Fonts
       * OpenFont/CFF (in case "CFF" table's Top DICT has no CIDFont operators).
     */
     [PDF(VersionEnum.PDF10)]
-    public class Type1Font : SimpleFont
+    public class PdfType1Font : SimpleFont
     {
         #region dynamic
         #region fields
@@ -57,10 +57,10 @@ namespace PdfClown.Documents.Contents.Fonts
         #endregion
 
         #region constructors
-        internal Type1Font(Document context) : base(context)
+        internal PdfType1Font(Document context) : base(context)
         { }
 
-        internal Type1Font(PdfDirectObject baseObject) : base(baseObject)
+        internal PdfType1Font(PdfDirectObject baseObject) : base(baseObject)
         { }
         #endregion
 

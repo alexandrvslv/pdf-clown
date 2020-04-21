@@ -329,6 +329,20 @@ namespace PdfClown.Bytes
             return length;
         }
 
+        public int Read(sbyte[] data)
+        { return Read(data, 0, data.Length); }
+
+        public int Read(sbyte[] data, int offset, int length)
+        {
+            if (position + length > Length)
+            {
+                length = (int)(Length - position);
+            }
+            System.Buffer.BlockCopy(this.data, position, data, offset, length);
+            position += length;
+            return length;
+        }
+
         public byte[] ReadNullTermitaded()
         {
             var start = position;
@@ -470,8 +484,12 @@ namespace PdfClown.Bytes
             this.position = (int)position;
         }
 
-        public void Skip(long offset)
-        { Seek(position + offset); }
+        public long Skip(long offset)
+        {
+            var newPosition = position + offset;
+            Seek(newPosition);
+            return newPosition;
+        }
 
         public int Mark()
         {
@@ -557,6 +575,11 @@ namespace PdfClown.Bytes
 
             dirty = true;
             OnChange(this, null);
+        }
+
+        internal void Flush()
+        {
+            throw new NotImplementedException();
         }
 
 

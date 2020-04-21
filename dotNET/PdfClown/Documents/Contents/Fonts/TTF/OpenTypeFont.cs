@@ -15,81 +15,92 @@
  * limitations under the License.
  */
 
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
-using SkiaSharp;
-using System.IO;
-
-/**
- * An OpenType (OTF/TTF) font.
- */
-public class OpenTypeFont : TrueTypeFont
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    private bool isPostScript;
-    
-    /**
-     * Constructor. Clients should use the OTFParser to create a new OpenTypeFont object.
-     *
-     * @param fontData The font data.
-     */
-    OpenTypeFont(TTFDataStream fontData):base(fontData);
-    {
-        
-    }
 
-    override
-    void setVersion(float versionValue)
-    {
-        isPostScript = Float.floatToIntBits(versionValue) == 0x469EA8A9; // OTTO
-        :base.setVersion(versionValue);
-    }
-    
+    using SkiaSharp;
+    using System;
+    using System.IO;
+
     /**
-     * Get the "CFF" table for this OTF.
-     *
-     * @return The "CFF" table.
+     * An OpenType (OTF/TTF) font.
      */
-    public CFFTable getCFF() 
+    public class OpenTypeFont : TrueTypeFont
     {
-        if (!isPostScript)
+        private bool isPostScript;
+
+        /**
+         * Constructor. Clients should use the OTFParser to create a new OpenTypeFont object.
+         *
+         * @param fontData The font data.
+         */
+        public OpenTypeFont(TTFDataStream fontData) : base(fontData)
         {
-            throw new NotSupportedException("TTF fonts do not have a CFF table");
-        }
-        return (CFFTable) getTable(CFFTable.TAG);
-    }
 
-    public overrideGlyphTable Glyph 
-    {
-        if (isPostScript)
+        }
+
+        public override float Version
         {
-            throw new NotSupportedException("OTF fonts do not have a glyf table");
+            get => base.Version;
+            set
+            {
+                //isPostScript = Float.floatToIntBits(value) == 0x469EA8A9; // OTTO
+                base.Version = value;
+            }
         }
-        return :base.Glyph;
-    }
+        /**
+         * Get the "CFF" table for this OTF.
+         *
+         * @return The "CFF" table.
+         */
+        public CFFTable CFF
+        {
+            get
+            {
+                if (!IsPostScript)
+                {
+                    throw new NotSupportedException("TTF fonts do not have a CFF table");
+                }
+                return (CFFTable)GetTable(CFFTable.TAG);
+            }
+        }
 
-    public override SKPath GetPath(string name) 
-    {
-        int gid = nameToGID(name);
-        return getCFF().getFont().getType2CharString(gid).getPath();
-    }
+        public override GlyphTable Glyph
+        {
+            get
+            {
+                if (IsPostScript)
+                {
+                    throw new NotSupportedException("OTF fonts do not have a glyf table");
+                }
+                return base.Glyph;
+            }
+        }
 
-    /**
-     * Returns true if this font is a PostScript outline font.
-     */
-    public bool isPostScript()
-    {
-        return tables.containsKey(CFFTable.TAG);
-    }
+        public override SKPath GetPath(string name)
+        {
+            int gid = NameToGID(name);
+            return CFF.GetFont().GetType2CharString(gid).Path;
+        }
 
-    /**
-     * Returns true if this font uses OpenType Layout (Advanced Typographic) tables.
-     */
-    public bool hasLayoutTables()
-    {
-        return tables.containsKey("BASE") ||
-               tables.containsKey("GDEF") ||
-               tables.containsKey("GPOS") ||
-               tables.containsKey("GSUB") ||
-               tables.containsKey("JSTF");
+        /**
+         * Returns true if this font is a PostScript outline font.
+         */
+        public bool IsPostScript
+        {
+            get => tables.ContainsKey(CFFTable.TAG);
+        }
+
+        /**
+         * Returns true if this font uses OpenType Layout (Advanced Typographic) tables.
+         */
+        public bool HasLayoutTables()
+        {
+            return tables.ContainsKey("BASE") ||
+                   tables.ContainsKey("GDEF") ||
+                   tables.ContainsKey("GPOS") ||
+                   tables.ContainsKey("GSUB") ||
+                   tables.ContainsKey("JSTF");
+        }
     }
 }

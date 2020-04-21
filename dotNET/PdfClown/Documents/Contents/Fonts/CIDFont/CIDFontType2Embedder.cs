@@ -15,8 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Documents.Contents.Fonts.TTF;
+using PdfClown.Objects;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -31,9 +36,8 @@ namespace PdfClown.Documents.Contents.Fonts
      */
     sealed class PDCIDFontType2Embedder : TrueTypeEmbedder
     {
-
-        private readonly PdfDocument document;
-        private readonly Type0Font parent;
+        private readonly Document document;
+        private readonly PdfType0Font parent;
         private readonly PdfDictionary dict;
         private readonly PdfDictionary cidFont;
         private readonly bool vertical;
@@ -47,8 +51,8 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param parent parent Type 0 font
          * @ if the TTF could not be read
          */
-        PDCIDFontType2Embedder(PDDocument document, PdfDictionary dict, TrueTypeFont ttf,
-                bool embedSubset, PDType0Font parent, bool vertical)
+        public PDCIDFontType2Embedder(Document document, PdfDictionary dict, TrueTypeFont ttf,
+                bool embedSubset, PdfType0Font parent, bool vertical)
                 : base(document, dict, ttf, embedSubset)
         {
             this.document = document;
@@ -57,64 +61,64 @@ namespace PdfClown.Documents.Contents.Fonts
             this.vertical = vertical;
 
             // parent Type 0 font
-            dict.setItem(COSName.SUBTYPE, COSName.TYPE0);
-            dict.setName(COSName.BASE_FONT, fontDescriptor.getFontName());
-            dict.setItem(COSName.ENCODING, vertical ? COSName.IDENTITY_V : COSName.IDENTITY_H); // CID = GID
+            dict[PdfName.Subtype] = PdfName.Type0;
+            dict[PdfName.BaseFont] = PdfName.Get(FontDescriptor.FontName);
+            dict[PdfName.Encoding] = vertical ? PdfName.IdentityV : PdfName.IdentityH; // CID = GID
 
             // descendant CIDFont
-            cidFont = createCIDFont();
+            cidFont = CreateCIDFont();
             PdfArray descendantFonts = new PdfArray();
             descendantFonts.Add(cidFont);
-            dict.setItem(COSName.DESCENDANT_FONTS, descendantFonts);
+            dict[PdfName.DescendantFonts] = descendantFonts.Reference;
 
             if (!embedSubset)
             {
                 // build GID -> Unicode map
-                buildToUnicodeCMap(null);
+                BuildToUnicodeCMap(null);
             }
         }
 
         /**
          * Rebuild a font subset.
          */
-        override protected void buildSubset(InputStream ttfSubset, String tag, Dictionary<Integer, Integer> gidToCid)
+        protected override void BuildSubset(Bytes.Buffer ttfSubset, string tag, Dictionary<int, int> gidToCid)
         {
             // build CID2GIDMap, because the content stream has been written with the old GIDs
-            Dictionary<Integer, Integer> cidToGid = new HashMap<>(gidToCid.size());
-            gidToCid.forEach((newGID, oldGID)->cidToGid[oldGID, newGID));
+            Dictionary<int, int> cidToGid = new Dictionary<int, int>(gidToCid.Count);
+            foreach (var entry in gidToCid)
+            {
+                //(newGID, oldGID)->
+                cidToGid[entry.Value] = entry.Key;
+            }
 
             // build unicode mapping before subsetting as the subsetted font won't have a cmap
-            buildToUnicodeCMap(gidToCid);
+            BuildToUnicodeCMap(gidToCid);
             // build vertical metrics before subsetting as the subsetted font won't have vhea, vmtx
             if (vertical)
             {
-                buildVerticalMetrics(cidToGid);
+                BuildVerticalMetrics(cidToGid);
             }
             // rebuild the relevant part of the font
-            buildFontFile2(ttfSubset);
-            addNameTag(tag);
-            buildWidths(cidToGid);
+            BuildFontFile2(ttfSubset);
+            AddNameTag(tag);
+            BuildWidths(cidToGid);
             buildCIDToGIDMap(cidToGid);
-            buildCIDSet(cidToGid);
+            BuildCIDSet(cidToGid);
         }
 
-        private void buildToUnicodeCMap(Dictionary<Integer, Integer> newGIDToOldCID)
+        private void BuildToUnicodeCMap(Dictionary<int, int> newGIDToOldCID)
         {
             ToUnicodeWriter toUniWriter = new ToUnicodeWriter();
             bool hasSurrogates = false;
-            for (int gid = 1, max = ttf.getMaximumProfile().getNumGlyphs(); gid <= max; gid++)
+            for (int gid = 1, max = ttf.MaximumProfile.NumGlyphs; gid <= max; gid++)
             {
                 // optional CID2GIDMap for subsetting
                 int cid;
                 if (newGIDToOldCID != null)
                 {
-                    if (!newGIDToOldCID.containsKey(gid))
+                    if (!newGIDToOldCID.TryGetValue(gid, out cid))
                     {
                         continue;
-                    }
-                    else
-                    {
-                        cid = newGIDToOldCID.get(gid);
                     }
                 }
                 else
@@ -123,150 +127,143 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
 
                 // skip composite glyph components that have no code point
-                List<Integer> codes = cmapLookup.getCharCodes(cid); // old GID -> Unicode
+                List<int> codes = cmapLookup.GetCharCodes(cid); // old GID -> Unicode
                 if (codes != null)
                 {
                     // use the first entry even for ambiguous mappings
-                    int codePoint = codes.get(0);
+                    int codePoint = codes[0];
                     if (codePoint > 0xFFFF)
                     {
                         hasSurrogates = true;
                     }
-                    toUniWriter.Add(cid, new String(new int[] { codePoint }, 0, 1));
+                    toUniWriter.Add(cid, new string(new int[] { codePoint }, 0, 1));
                 }
             }
 
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            var output = new MemoryStream();
             toUniWriter.writeTo(output);
-            InputStream cMapStream = new ByteArrayInputStream(output.toByteArray());
+            var cMapStream = new Bytes.Buffer(output.ToArray());
 
-            PDStream stream = new PDStream(document, cMapStream, COSName.FLATE_DECODE);
+            PdfStream stream = new PdfStream(document, cMapStream, PdfName.FlateDecode);
 
             // surrogate code points, requires PDF 1.5
             if (hasSurrogates)
             {
-                float version = document.getVersion();
-                if (version < 1.5)
+                var version = document.Version;
+                if (version.GetFloat() < 1.5)
                 {
-                    document.setVersion(1.5f);
+                    document.Version = new Version(1, 5);
                 }
             }
 
-            dict.setItem(COSName.TO_UNICODE, stream);
+            dict[PdfName.ToUnicode] = stream.Reference;
         }
 
-        private PdfDictionary toCIDSystemInfo(String registry, String ordering, int supplement)
+        private PdfDictionary toCIDSystemInfo(string registry, string ordering, int supplement)
         {
             PdfDictionary info = new PdfDictionary();
-            info.setString(COSName.REGISTRY, registry);
-            info.setString(COSName.ORDERING, ordering);
-            info.setInt(COSName.SUPPLEMENT, supplement);
+            info[PdfName.Registry] = new PdfString(registry);
+            info[PdfName.Ordering] = new PdfString(ordering);
+            info[PdfName.Supplement] = new PdfInteger(supplement);
             return info;
         }
 
-        private PdfDictionary createCIDFont()
+        private PdfDictionary CreateCIDFont()
         {
             PdfDictionary cidFont = new PdfDictionary();
 
             // Type, Subtype
-            cidFont.setItem(COSName.TYPE, COSName.FONT);
-            cidFont.setItem(COSName.SUBTYPE, COSName.CID_FONT_TYPE2);
-
+            cidFont[PdfName.Type] = PdfName.Font;
+            cidFont[PdfName.Subtype] = PdfName.CIDFontType2;
             // BaseFont
-            cidFont.setName(COSName.BASE_FONT, fontDescriptor.getFontName());
-
+            cidFont[PdfName.BaseFont] = PdfName.Get(fontDescriptor.FontName);
             // CIDSystemInfo
             PdfDictionary info = toCIDSystemInfo("Adobe", "Identity", 0);
-            cidFont.setItem(COSName.CIDSYSTEMINFO, info);
-
+            cidFont[PdfName.CIDSystemInfo] = info.Reference;
             // FontDescriptor
-            cidFont.setItem(COSName.FONT_DESC, fontDescriptor.getCOSObject());
+            cidFont[PdfName.FontDescriptor] = fontDescriptor.BaseObject;
 
             // W - widths
-            buildWidths(cidFont);
+            BuildWidths(cidFont);
 
             // Vertical metrics
             if (vertical)
             {
-                buildVerticalMetrics(cidFont);
+                BuildVerticalMetrics(cidFont);
             }
 
             // CIDToGIDMap
-            cidFont.setItem(COSName.CID_TO_GID_MAP, COSName.IDENTITY);
+            cidFont[PdfName.CIDToGIDMap] = PdfName.Identity;
 
             return cidFont;
         }
 
-        private void addNameTag(String tag)
+        private void AddNameTag(string tag)
         {
-            String name = fontDescriptor.getFontName();
-            String newName = tag + name;
+            string name = fontDescriptor.FontName;
+            string newName = tag + name;
 
-            dict.setName(COSName.BASE_FONT, newName);
-            fontDescriptor.setFontName(newName);
-            cidFont.setName(COSName.BASE_FONT, newName);
+            dict[PdfName.BaseFont] = new PdfName(newName);
+            fontDescriptor.FontName = newName;
+            cidFont[PdfName.BaseFont] = new PdfName(newName);
         }
 
-        private void buildCIDToGIDMap(Dictionary<Integer, Integer> cidToGid)
+        private void buildCIDToGIDMap(Dictionary<int, int> cidToGid)
         {
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            int cidMax = Collections.max(cidToGid.keySet());
+            MemoryStream output = new MemoryStream();
+            int cidMax = cidToGid.Keys.Max();
             for (int i = 0; i <= cidMax; i++)
             {
                 int gid;
-                if (cidToGid.containsKey(i))
-                {
-                    gid = cidToGid.get(i);
-                }
-                else
+                if (!cidToGid.TryGetValue(i, out gid))
                 {
                     gid = 0;
                 }
-                output.write(new byte[] { (byte)(gid >> 8 & 0xff), (byte)(gid & 0xff) });
+                output.Write(new byte[] { (byte)(gid >> 8 & 0xff), (byte)(gid & 0xff) }, 0, 2);
             }
 
-            InputStream input = new ByteArrayInputStream(output.toByteArray());
-            PDStream stream = new PDStream(document, input, COSName.FLATE_DECODE);
+            var input = new Bytes.Buffer(output.ToArray());
+            PdfStream stream = new PdfStream(document, input, PdfName.FlateDecode);
 
-            cidFont.setItem(COSName.CID_TO_GID_MAP, stream);
+            cidFont[PdfName.CIDToGIDMap] = stream.Reference;
         }
 
         /**
          * Builds the CIDSet entry, required by PDF/A. This lists all CIDs in the font, including those
          * that don't have a GID.
          */
-        private void buildCIDSet(Dictionary<Integer, Integer> cidToGid)
+        private void BuildCIDSet(Dictionary<int, int> cidToGid)
         {
-            int cidMax = Collections.max(cidToGid.keySet());
+            int cidMax = cidToGid.Keys.Max();
             byte[] bytes = new byte[cidMax / 8 + 1];
             for (int cid = 0; cid <= cidMax; cid++)
             {
                 int mask = 1 << 7 - cid % 8;
-                bytes[cid / 8] |= mask;
+                bytes[cid / 8] = (byte)(bytes[cid / 8] | mask);
             }
 
-            InputStream input = new ByteArrayInputStream(bytes);
-            PDStream stream = new PDStream(document, input, COSName.FLATE_DECODE);
+            var input = new Bytes.Buffer(bytes);
+            PdfStream stream = new PdfStream(document, input, PdfName.FlateDecode);
 
-            fontDescriptor.setCIDSet(stream);
+            fontDescriptor.CIDSet = stream;
         }
 
         /**
          * Builds widths with a custom CIDToGIDMap (for embedding font subset).
          */
-        private void buildWidths(Dictionary<Integer, Integer> cidToGid)
+        private void BuildWidths(Dictionary<int, int> cidToGid)
         {
-            float scaling = 1000f / ttf.getHeader().getUnitsPerEm();
+            float scaling = 1000f / ttf.Header.UnitsPerEm;
 
             PdfArray widths = new PdfArray();
             PdfArray ws = new PdfArray();
-            int prev = Integer.MIN_VALUE;
+            int prev = int.MinValue;
             // Use a sorted list to get an optimal width array  
-            ISet<Integer> keys = new TreeSet<>(cidToGid.keySet());
+            ISet<int> keys = new HashSet<int>(cidToGid.Keys);
             foreach (int cid in keys)
             {
-                int gid = cidToGid.get(cid);
-                long width = Math.round(ttf.getHorizontalMetrics().getAdvanceWidth(gid) * scaling);
+                int gid = cidToGid[cid];
+                long width = (long)Math.Round(ttf.HorizontalMetrics.GetAdvanceWidth(gid) * scaling);
                 if (width == 1000)
                 {
                     // skip default width
@@ -276,34 +273,34 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (prev != cid - 1)
                 {
                     ws = new PdfArray();
-                    widths.Add(PdfInteger.get(cid)); // c
+                    widths.Add(PdfInteger.Get(cid)); // c
                     widths.Add(ws);
                 }
-                ws.Add(PdfInteger.get(width)); // wi
+                ws.Add(PdfInteger.Get(width)); // wi
                 prev = cid;
             }
-            cidFont.setItem(COSName.W, widths);
+            cidFont[PdfName.W] = widths.Reference;
         }
 
-        private bool buildVerticalHeader(PdfDictionary cidFont)
+        private bool BuildVerticalHeader(PdfDictionary cidFont)
         {
-            VerticalHeaderTable vhea = ttf.getVerticalHeader();
+            VerticalHeaderTable vhea = ttf.VerticalHeader;
             if (vhea == null)
             {
-                LOG.warn("Font to be subset is set to vertical, but has no 'vhea' table");
+                Debug.WriteLine("warning: Font to be subset is set to vertical, but has no 'vhea' table");
                 return false;
             }
 
-            float scaling = 1000f / ttf.getHeader().getUnitsPerEm();
+            float scaling = 1000f / ttf.Header.UnitsPerEm;
 
-            long v = Math.round(vhea.getAscender() * scaling);
-            long w1 = Math.round(-vhea.getAdvanceHeightMax() * scaling);
+            long v = (long)Math.Round(vhea.Ascender * scaling);
+            long w1 = (long)Math.Round(-vhea.AdvanceHeightMax * scaling);
             if (v != 880 || w1 != -1000)
             {
                 PdfArray cosDw2 = new PdfArray();
-                cosDw2.Add(PdfInteger.get(v));
-                cosDw2.Add(PdfInteger.get(w1));
-                cidFont.setItem(COSName.DW2, cosDw2);
+                cosDw2.Add(PdfInteger.Get(v));
+                cosDw2.Add(PdfInteger.Get(w1));
+                cidFont[PdfName.DW2] = cosDw2.Reference;
             }
             return true;
         }
@@ -311,43 +308,43 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
          * Builds vertical metrics with a custom CIDToGIDMap (for embedding font subset).
          */
-        private void buildVerticalMetrics(Dictionary<Integer, Integer> cidToGid)
+        private void BuildVerticalMetrics(Dictionary<int, int> cidToGid)
         {
             // The "vhea" and "vmtx" tables that specify vertical metrics shall never be used by a conforming
             // reader. The only way to specify vertical metrics in PDF shall be by means of the DW2 and W2
             // entries in a CIDFont dictionary.
 
-            if (!buildVerticalHeader(cidFont))
+            if (!BuildVerticalHeader(cidFont))
             {
                 return;
             }
 
-            float scaling = 1000f / ttf.getHeader().getUnitsPerEm();
+            float scaling = 1000f / ttf.Header.UnitsPerEm;
 
-            VerticalHeaderTable vhea = ttf.getVerticalHeader();
-            VerticalMetricsTable vmtx = ttf.getVerticalMetrics();
-            GlyphTable glyf = ttf.getGlyph();
-            HorizontalMetricsTable hmtx = ttf.getHorizontalMetrics();
+            VerticalHeaderTable vhea = ttf.VerticalHeader;
+            VerticalMetricsTable vmtx = ttf.VerticalMetrics;
+            GlyphTable glyf = ttf.Glyph;
+            HorizontalMetricsTable hmtx = ttf.HorizontalMetrics;
 
-            long v_y = Math.round(vhea.getAscender() * scaling);
-            long w1 = Math.round(-vhea.getAdvanceHeightMax() * scaling);
+            long v_y = (long)Math.Round(vhea.Ascender * scaling);
+            long w1 = (long)Math.Round(-vhea.AdvanceHeightMax * scaling);
 
             PdfArray heights = new PdfArray();
             PdfArray w2 = new PdfArray();
-            int prev = Integer.MIN_VALUE;
+            int prev = int.MinValue;
             // Use a sorted list to get an optimal width array
-            ISet<Integer> keys = new TreeSet<>(cidToGid.keySet());
+            ISet<int> keys = new HashSet<int>(cidToGid.Keys);
             foreach (int cid in keys)
             {
                 // Unlike buildWidths, we look up with cid (not gid) here because this is
                 // the original TTF, not the rebuilt one.
-                GlyphData glyph = glyf.getGlyph(cid);
+                GlyphData glyph = glyf.GetGlyph(cid);
                 if (glyph == null)
                 {
                     continue;
                 }
-                long height = Math.round((glyph.getYMaximum() + vmtx.getTopSideBearing(cid)) * scaling);
-                long advance = Math.round(-vmtx.getAdvanceHeight(cid) * scaling);
+                long height = (long)Math.Round((glyph.YMaximum + vmtx.GetTopSideBearing(cid)) * scaling);
+                long advance = (long)Math.Round(-vmtx.GetAdvanceHeight(cid) * scaling);
                 if (height == v_y && advance == w1)
                 {
                     // skip default metrics
@@ -357,32 +354,32 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (prev != cid - 1)
                 {
                     w2 = new PdfArray();
-                    heights.Add(PdfInteger.get(cid)); // c
+                    heights.Add(PdfInteger.Get(cid)); // c
                     heights.Add(w2);
                 }
-                w2.Add(PdfInteger.get(advance)); // w1_iy
-                long width = Math.round(hmtx.getAdvanceWidth(cid) * scaling);
-                w2.Add(PdfInteger.get(width / 2)); // v_ix
-                w2.Add(PdfInteger.get(height)); // v_iy
+                w2.Add(PdfInteger.Get(advance)); // w1_iy
+                long width = (long)Math.Round(hmtx.GetAdvanceWidth(cid) * scaling);
+                w2.Add(PdfInteger.Get(width / 2)); // v_ix
+                w2.Add(PdfInteger.Get(height)); // v_iy
                 prev = cid;
             }
-            cidFont.setItem(COSName.W2, heights);
+            cidFont[PdfName.W2] = heights.Reference;
         }
 
         /**
          * Build widths with Identity CIDToGIDMap (for embedding full font).
          */
-        private void buildWidths(PdfDictionary cidFont)
+        private void BuildWidths(PdfDictionary cidFont)
         {
-            int cidMax = ttf.getNumberOfGlyphs();
+            int cidMax = ttf.NumberOfGlyphs;
             int[] gidwidths = new int[cidMax * 2];
             for (int cid = 0; cid < cidMax; cid++)
             {
                 gidwidths[cid * 2] = cid;
-                gidwidths[cid * 2 + 1] = ttf.getHorizontalMetrics().getAdvanceWidth(cid);
+                gidwidths[cid * 2 + 1] = ttf.HorizontalMetrics.GetAdvanceWidth(cid);
             }
 
-            cidFont.setItem(COSName.W, getWidths(gidwidths));
+            cidFont[PdfName.W] = GetWidths(gidwidths).Reference;
         }
 
         enum State
@@ -390,32 +387,32 @@ namespace PdfClown.Documents.Contents.Fonts
             FIRST, BRACKET, SERIAL
         }
 
-        private PdfArray getWidths(int[] widths)
+        private PdfArray GetWidths(int[] widths)
         {
             if (widths.Length == 0)
             {
-                throw new IllegalArgumentException("length of widths must be > 0");
+                throw new ArgumentException("length of widths must be > 0");
             }
 
-            float scaling = 1000f / ttf.getHeader().getUnitsPerEm();
+            float scaling = 1000f / ttf.Header.UnitsPerEm;
 
             long lastCid = widths[0];
-            long lastValue = Math.round(widths[1] * scaling);
+            long lastValue = (long)Math.Round(widths[1] * scaling);
 
             PdfArray inner = new PdfArray();
             PdfArray outer = new PdfArray();
-            outer.Add(PdfInteger.get(lastCid));
+            outer.Add(PdfInteger.Get(lastCid));
 
             State state = State.FIRST;
 
             for (int i = 2; i < widths.Length; i += 2)
             {
                 long cid = widths[i];
-                long value = Math.round(widths[i + 1] * scaling);
+                long value = (long)Math.Round(widths[i + 1] * scaling);
 
                 switch (state)
                 {
-                    case FIRST:
+                    case State.FIRST:
                         if (cid == lastCid + 1 && value == lastValue)
                         {
                             state = State.SERIAL;
@@ -424,41 +421,41 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             state = State.BRACKET;
                             inner = new PdfArray();
-                            inner.Add(PdfInteger.get(lastValue));
+                            inner.Add(PdfInteger.Get(lastValue));
                         }
                         else
                         {
                             inner = new PdfArray();
-                            inner.Add(PdfInteger.get(lastValue));
+                            inner.Add(PdfInteger.Get(lastValue));
                             outer.Add(inner);
-                            outer.Add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.Get(cid));
                         }
                         break;
-                    case BRACKET:
+                    case State.BRACKET:
                         if (cid == lastCid + 1 && value == lastValue)
                         {
                             state = State.SERIAL;
                             outer.Add(inner);
-                            outer.Add(PdfInteger.get(lastCid));
+                            outer.Add(PdfInteger.Get(lastCid));
                         }
                         else if (cid == lastCid + 1)
                         {
-                            inner.Add(PdfInteger.get(lastValue));
+                            inner.Add(PdfInteger.Get(lastValue));
                         }
                         else
                         {
                             state = State.FIRST;
-                            inner.Add(PdfInteger.get(lastValue));
+                            inner.Add(PdfInteger.Get(lastValue));
                             outer.Add(inner);
-                            outer.Add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.Get(cid));
                         }
                         break;
-                    case SERIAL:
+                    case State.SERIAL:
                         if (cid != lastCid + 1 || value != lastValue)
                         {
-                            outer.Add(PdfInteger.get(lastCid));
-                            outer.Add(PdfInteger.get(lastValue));
-                            outer.Add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.Get(lastCid));
+                            outer.Add(PdfInteger.Get(lastValue));
+                            outer.Add(PdfInteger.Get(cid));
                             state = State.FIRST;
                         }
                         break;
@@ -469,18 +466,18 @@ namespace PdfClown.Documents.Contents.Fonts
 
             switch (state)
             {
-                case FIRST:
+                case State.FIRST:
                     inner = new PdfArray();
-                    inner.Add(PdfInteger.get(lastValue));
+                    inner.Add(PdfInteger.Get(lastValue));
                     outer.Add(inner);
                     break;
-                case BRACKET:
-                    inner.Add(PdfInteger.get(lastValue));
+                case State.BRACKET:
+                    inner.Add(PdfInteger.Get(lastValue));
                     outer.Add(inner);
                     break;
-                case SERIAL:
-                    outer.Add(PdfInteger.get(lastCid));
-                    outer.Add(PdfInteger.get(lastValue));
+                case State.SERIAL:
+                    outer.Add(PdfInteger.Get(lastCid));
+                    outer.Add(PdfInteger.Get(lastValue));
                     break;
             }
             return outer;
@@ -489,70 +486,70 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
          * Build vertical metrics with Identity CIDToGIDMap (for embedding full font).
          */
-        private void buildVerticalMetrics(PdfDictionary cidFont)
+        private void BuildVerticalMetrics(PdfDictionary cidFont)
         {
-            if (!buildVerticalHeader(cidFont))
+            if (!BuildVerticalHeader(cidFont))
             {
                 return;
             }
 
-            int cidMax = ttf.getNumberOfGlyphs();
+            int cidMax = ttf.NumberOfGlyphs;
             int[]
         gidMetrics = new int[cidMax * 4];
             for (int cid = 0; cid < cidMax; cid++)
             {
-                GlyphData glyph = ttf.getGlyph().getGlyph(cid);
+                GlyphData glyph = ttf.Glyph.GetGlyph(cid);
                 if (glyph == null)
                 {
-                    gidMetrics[cid * 4] = Integer.MIN_VALUE;
+                    gidMetrics[cid * 4] = int.MinValue;
                 }
                 else
                 {
                     gidMetrics[cid * 4] = cid;
-                    gidMetrics[cid * 4 + 1] = ttf.getVerticalMetrics().getAdvanceHeight(cid);
-                    gidMetrics[cid * 4 + 2] = ttf.getHorizontalMetrics().getAdvanceWidth(cid);
-                    gidMetrics[cid * 4 + 3] = glyph.getYMaximum() + ttf.getVerticalMetrics().getTopSideBearing(cid);
+                    gidMetrics[cid * 4 + 1] = ttf.VerticalMetrics.GetAdvanceHeight(cid);
+                    gidMetrics[cid * 4 + 2] = ttf.HorizontalMetrics.GetAdvanceWidth(cid);
+                    gidMetrics[cid * 4 + 3] = glyph.YMaximum + ttf.VerticalMetrics.GetTopSideBearing(cid);
                 }
             }
 
-            cidFont.setItem(COSName.W2, getVerticalMetrics(gidMetrics));
+            cidFont[PdfName.W2] = GetVerticalMetrics(gidMetrics).Reference;
         }
 
-        private PdfArray getVerticalMetrics(int[] values)
+        private PdfArray GetVerticalMetrics(int[] values)
         {
             if (values.Length == 0)
             {
-                throw new IllegalArgumentException("length of values must be > 0");
+                throw new ArgumentException("length of values must be > 0");
             }
 
-            float scaling = 1000f / ttf.getHeader().getUnitsPerEm();
+            float scaling = 1000f / ttf.Header.UnitsPerEm;
 
             long lastCid = values[0];
-            long lastW1Value = Math.round(-values[1] * scaling);
-            long lastVxValue = Math.round(values[2] * scaling / 2f);
-            long lastVyValue = Math.round(values[3] * scaling);
+            long lastW1Value = (long)Math.Round(-values[1] * scaling);
+            long lastVxValue = (long)Math.Round(values[2] * scaling / 2f);
+            long lastVyValue = (long)Math.Round(values[3] * scaling);
 
             PdfArray inner = new PdfArray();
             PdfArray outer = new PdfArray();
-            outer.Add(PdfInteger.get(lastCid));
+            outer.Add(PdfInteger.Get(lastCid));
 
             State state = State.FIRST;
 
             for (int i = 4; i < values.Length; i += 4)
             {
                 long cid = values[i];
-                if (cid == Integer.MIN_VALUE)
+                if (cid == int.MinValue)
                 {
                     // no glyph for this cid
                     continue;
                 }
-                long w1Value = Math.round(-values[i + 1] * scaling);
-                long vxValue = Math.round(values[i + 2] * scaling / 2);
-                long vyValue = Math.round(values[i + 3] * scaling);
+                long w1Value = (long)Math.Round(-values[i + 1] * scaling);
+                long vxValue = (long)Math.Round(values[i + 2] * scaling / 2);
+                long vyValue = (long)Math.Round(values[i + 3] * scaling);
 
                 switch (state)
                 {
-                    case FIRST:
+                    case State.FIRST:
                         if (cid == lastCid + 1 && w1Value == lastW1Value && vxValue == lastVxValue && vyValue == lastVyValue)
                         {
                             state = State.SERIAL;
@@ -561,51 +558,51 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             state = State.BRACKET;
                             inner = new PdfArray();
-                            inner.Add(PdfInteger.get(lastW1Value));
-                            inner.Add(PdfInteger.get(lastVxValue));
-                            inner.Add(PdfInteger.get(lastVyValue));
+                            inner.Add(PdfInteger.Get(lastW1Value));
+                            inner.Add(PdfInteger.Get(lastVxValue));
+                            inner.Add(PdfInteger.Get(lastVyValue));
                         }
                         else
                         {
                             inner = new PdfArray();
-                            inner.Add(PdfInteger.get(lastW1Value));
-                            inner.Add(PdfInteger.get(lastVxValue));
-                            inner.Add(PdfInteger.get(lastVyValue));
+                            inner.Add(PdfInteger.Get(lastW1Value));
+                            inner.Add(PdfInteger.Get(lastVxValue));
+                            inner.Add(PdfInteger.Get(lastVyValue));
                             outer.Add(inner);
-                            outer.Add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.Get(cid));
                         }
                         break;
-                    case BRACKET:
+                    case State.BRACKET:
                         if (cid == lastCid + 1 && w1Value == lastW1Value && vxValue == lastVxValue && vyValue == lastVyValue)
                         {
                             state = State.SERIAL;
                             outer.Add(inner);
-                            outer.Add(PdfInteger.get(lastCid));
+                            outer.Add(PdfInteger.Get(lastCid));
                         }
                         else if (cid == lastCid + 1)
                         {
-                            inner.Add(PdfInteger.get(lastW1Value));
-                            inner.Add(PdfInteger.get(lastVxValue));
-                            inner.Add(PdfInteger.get(lastVyValue));
+                            inner.Add(PdfInteger.Get(lastW1Value));
+                            inner.Add(PdfInteger.Get(lastVxValue));
+                            inner.Add(PdfInteger.Get(lastVyValue));
                         }
                         else
                         {
                             state = State.FIRST;
-                            inner.Add(PdfInteger.get(lastW1Value));
-                            inner.Add(PdfInteger.get(lastVxValue));
-                            inner.Add(PdfInteger.get(lastVyValue));
+                            inner.Add(PdfInteger.Get(lastW1Value));
+                            inner.Add(PdfInteger.Get(lastVxValue));
+                            inner.Add(PdfInteger.Get(lastVyValue));
                             outer.Add(inner);
-                            outer.Add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.Get(cid));
                         }
                         break;
-                    case SERIAL:
+                    case State.SERIAL:
                         if (cid != lastCid + 1 || w1Value != lastW1Value || vxValue != lastVxValue || vyValue != lastVyValue)
                         {
-                            outer.Add(PdfInteger.get(lastCid));
-                            outer.Add(PdfInteger.get(lastW1Value));
-                            outer.Add(PdfInteger.get(lastVxValue));
-                            outer.Add(PdfInteger.get(lastVyValue));
-                            outer.Add(PdfInteger.get(cid));
+                            outer.Add(PdfInteger.Get(lastCid));
+                            outer.Add(PdfInteger.Get(lastW1Value));
+                            outer.Add(PdfInteger.Get(lastVxValue));
+                            outer.Add(PdfInteger.Get(lastVyValue));
+                            outer.Add(PdfInteger.Get(cid));
                             state = State.FIRST;
                         }
                         break;
@@ -618,24 +615,24 @@ namespace PdfClown.Documents.Contents.Fonts
 
             switch (state)
             {
-                case FIRST:
+                case State.FIRST:
                     inner = new PdfArray();
-                    inner.Add(PdfInteger.get(lastW1Value));
-                    inner.Add(PdfInteger.get(lastVxValue));
-                    inner.Add(PdfInteger.get(lastVyValue));
+                    inner.Add(PdfInteger.Get(lastW1Value));
+                    inner.Add(PdfInteger.Get(lastVxValue));
+                    inner.Add(PdfInteger.Get(lastVyValue));
                     outer.Add(inner);
                     break;
-                case BRACKET:
-                    inner.Add(PdfInteger.get(lastW1Value));
-                    inner.Add(PdfInteger.get(lastVxValue));
-                    inner.Add(PdfInteger.get(lastVyValue));
+                case State.BRACKET:
+                    inner.Add(PdfInteger.Get(lastW1Value));
+                    inner.Add(PdfInteger.Get(lastVxValue));
+                    inner.Add(PdfInteger.Get(lastVyValue));
                     outer.Add(inner);
                     break;
-                case SERIAL:
-                    outer.Add(PdfInteger.get(lastCid));
-                    outer.Add(PdfInteger.get(lastW1Value));
-                    outer.Add(PdfInteger.get(lastVxValue));
-                    outer.Add(PdfInteger.get(lastVyValue));
+                case State.SERIAL:
+                    outer.Add(PdfInteger.Get(lastCid));
+                    outer.Add(PdfInteger.Get(lastW1Value));
+                    outer.Add(PdfInteger.Get(lastVxValue));
+                    outer.Add(PdfInteger.Get(lastVyValue));
                     break;
             }
             return outer;
@@ -644,9 +641,9 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
          * Returns the descendant CIDFont.
          */
-        public PDCIDFont getCIDFont()
+        public CIDFont GetCIDFont()
         {
-            return new PDCIDFontType2(cidFont, parent, ttf);
+            return new CIDFontType2(cidFont, parent, ttf);
         }
     }
 }

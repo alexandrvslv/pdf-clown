@@ -61,10 +61,10 @@ namespace PdfClown.Documents.Contents.Fonts
             set => Dictionary[PdfName.FontWeight] = value.HasValue ? new PdfReal((float)value) : null;
         }
 
-        public int Flags
+        public FlagsEnum Flags
         {
-            get => ((PdfInteger)Dictionary[PdfName.Flags])?.IntValue ?? 0;
-            set => Dictionary[PdfName.Flags] = new PdfInteger(value);
+            get => (FlagsEnum)(((PdfInteger)Dictionary[PdfName.Flags])?.IntValue ?? 0);
+            set => Dictionary[PdfName.Flags] = new PdfInteger((int)value);
         }
 
         public Rectangle FontBBox
@@ -81,13 +81,13 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public float Ascent
         {
-            get => ((PdfReal)Dictionary[PdfName.Ascent])?.FloatValue ?? 0F;
+            get => ((PdfReal)Dictionary[PdfName.Ascent])?.FloatValue ?? 750F;
             set => Dictionary[PdfName.Ascent] = new PdfReal(value);
         }
 
         public float Descent
         {
-            get => ((PdfReal)Dictionary[PdfName.Descent])?.FloatValue ?? 0F;
+            get => ((PdfReal)Dictionary[PdfName.Descent])?.FloatValue ?? 250F;
             set => Dictionary[PdfName.Descent] = new PdfReal(value);
         }
 

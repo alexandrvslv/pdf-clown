@@ -35,7 +35,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
     {
         //private static readonly Log LOG = LogFactory.getLog(GlyphSubstitutionTable.class);
 
-        public static readonly string TAG = "GSUB";
+        public const string TAG = "GSUB";
 
         private Dictionary<string, ScriptTable> scriptList;
         // featureList and lookupList are not maps because we need to index into them
@@ -59,7 +59,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         }
 
         //@SuppressWarnings({"squid:S1854"})
-        protected override void Read(TrueTypeFont ttf, TTFDataStream data)
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
             long start = data.CurrentPosition;
             //@SuppressWarnings({"unused"})
@@ -86,7 +86,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private Dictionary<string, ScriptTable> ReadScriptList(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int scriptCount = data.ReadUnsignedShort();
             ScriptTable[] scriptTables = new ScriptTable[scriptCount];
             int[] scriptOffsets = new int[scriptCount];
@@ -111,7 +111,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private ScriptTable ReadScriptTable(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int defaultLangSys = data.ReadUnsignedShort();
             int langSysCount = data.ReadUnsignedShort();
             LangSysRecord[] langSysRecords = new LangSysRecord[langSysCount];
@@ -152,7 +152,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private LangSysTable ReadLangSysTable(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int lookupOrder = data.ReadUnsignedShort();
             int requiredFeatureIndex = data.ReadUnsignedShort();
             int featureIndexCount = data.ReadUnsignedShort();
@@ -167,7 +167,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private FeatureListTable ReadFeatureList(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int featureCount = data.ReadUnsignedShort();
             FeatureRecord[] featureRecords = new FeatureRecord[featureCount];
             int[] featureOffsets = new int[featureCount];
@@ -195,7 +195,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private FeatureTable ReadFeatureTable(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int featureParams = data.ReadUnsignedShort();
             int lookupIndexCount = data.ReadUnsignedShort();
             int[] lookupListIndices = new int[lookupIndexCount];
@@ -208,7 +208,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private LookupListTable ReadLookupList(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int lookupCount = data.ReadUnsignedShort();
             int[] lookups = new int[lookupCount];
             for (int i = 0; i < lookupCount; i++)
@@ -225,7 +225,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private LookupTable ReadLookupTable(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int lookupType = data.ReadUnsignedShort();
             int lookupFlag = data.ReadUnsignedShort();
             int subTableCount = data.ReadUnsignedShort();
@@ -274,7 +274,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private LookupSubTable ReadLookupSubTable(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int substFormat = data.ReadUnsignedShort();
             switch (substFormat)
             {
@@ -308,7 +308,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private LookupSubTable ReadLigatureSubstitutionSubtable(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int substFormat = data.ReadUnsignedShort();
 
             if (substFormat != 1)
@@ -353,7 +353,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private LigatureSetTable ReadLigatureSetTable(TTFDataStream data, long ligatureSetTableLocation,
                 int coverageGlyphId)
         {
-            data.seek(ligatureSetTableLocation);
+            data.Seek(ligatureSetTableLocation);
 
             int ligatureCount = data.ReadUnsignedShort();
             Debug.WriteLine("debug: ligatureCount=" + ligatureCount);
@@ -379,7 +379,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private LigatureTable ReadLigatureTable(TTFDataStream data, long ligatureTableLocation,
                 int coverageGlyphId)
         {
-            data.seek(ligatureTableLocation);
+            data.Seek(ligatureTableLocation);
 
             int ligatureGlyph = data.ReadUnsignedShort();
 
@@ -403,7 +403,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private CoverageTable ReadCoverageTable(TTFDataStream data, long offset)
         {
-            data.seek(offset);
+            data.Seek(offset);
             int coverageFormat = data.ReadUnsignedShort();
             switch (coverageFormat)
             {
@@ -456,7 +456,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     if (lastUsedSupportedScript == null)
                     {
                         // We have no past context and (currently) no way to get future context so we guess.
-                        lastUsedSupportedScript = scriptList.keySet().iterator().next();
+                        lastUsedSupportedScript = scriptList.Keys.FirstOrDefault();
                     }
                     // else use past context
 
@@ -554,10 +554,10 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private void RemoveFeature(List<FeatureRecord> featureRecords, string featureTag)
         {
-            Iterator<FeatureRecord> iter = featureRecords.iterator();
-            while (iter.hasNext())
+            var iter = featureRecords.GetEnumerator();
+            while (iter.MoveNext())
             {
-                if (iter.next().getFeatureTag().equals(featureTag))
+                if (iter.Current.FeatureTag.Equals(featureTag, StringComparison.Ordinal))
                 {
                     iter.remove();
                 }

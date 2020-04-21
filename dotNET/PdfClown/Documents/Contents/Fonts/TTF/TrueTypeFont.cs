@@ -14,757 +14,757 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
 using SkiaSharp;
 using System;
 using System.IO;
-
-
-
-
-
-
 using System.Collections.Generic;
-
-
 using System.Diagnostics;
+using PdfClown.Documents.Contents.Fonts.TTF.Model;
+using System.Text;
 
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.ttf.model.GsubData;
-import org.apache.fontbox.util.SKRect;
-
-/**
- * A TrueType font file.
- * 
- * @author Ben Litchfield
- */
-public class TrueTypeFont : FontBoxFont, IDisposable
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
 
-    //private static readonly Log LOG = LogFactory.getLog(TrueTypeFont.class);
-
-    private float version;
-    private int numberOfGlyphs = -1;
-    private int unitsPerEm = -1;
-    protected Dictionary<string,TTFTable> tables = new Dictionary<>();
-    private readonly TTFDataStream data;
-    private volatile Dictionary<string, int> postScriptNames;
-    
-    private readonly object lockReadtable = new object();
-    private readonly object lockPSNames = new object();
-    private readonly List<string> enabledGsubFeatures = new List<>();
-
     /**
-     * Constructor.  Clients should use the TTFParser to create a new TrueTypeFont object.
+     * A TrueType font file.
      * 
-     * @param fontData The font data.
+     * @author Ben Litchfield
      */
-    TrueTypeFont(TTFDataStream fontData)
+    public class TrueTypeFont : BaseFont, IDisposable
     {
-        data = fontData;
-    }
-    
-    public override void Dispose() 
-    {
-        data.Dispose();
-    }
 
-    /**
-     * @return Returns the version.
-     */
-    public float Version 
-    {
-        return version;
-    }
+        //private static readonly Log LOG = LogFactory.getLog(TrueTypeFont.class);
 
-    /**
-     * Set the version. Package-private, used by TTFParser only.
-     * @param versionValue The version to set.
-     */
-    void setVersion(float versionValue)
-    {
-        version = versionValue;
-    }
-    
-    /**
-     * Add a table definition. Package-private, used by TTFParser only.
-     * 
-     * @param table The table to add.
-     */
-    void addTable( TTFTable table )
-    {
-        tables[ table.getTag(), table );
-    }
-    
-    /**
-     * Get all of the tables.
-     * 
-     * @return All of the tables.
-     */
-    public Collection<TTFTable> Tables
-    {
-        return tables.Values;
-    }
+        private float version;
+        private int numberOfGlyphs = -1;
+        private int unitsPerEm = -1;
+        protected Dictionary<string, TTFTable> tables = new Dictionary<string, TTFTable>(StringComparer.Ordinal);
+        private readonly TTFDataStream data;
+        private volatile Dictionary<string, int> postScriptNames;
 
-    /**
-     * Get all of the tables.
-     *
-     * @return All of the tables.
-     */
-    public Dictionary<string, TTFTable> getTableMap()
-    {
-        return tables;
-    }
+        private readonly object lockReadtable = new object();
+        private readonly object lockPSNames = new object();
+        private readonly List<string> enabledGsubFeatures = new List<string>();
 
-    /**
-     * Returns the raw bytes of the given table.
-     * @param table the table to read.
-     * @ if there was an error accessing the table.
-     */
-    public byte[] getTableBytes(TTFTable table) 
-    {
-        synchronized (lockReadtable)
+        /**
+         * Constructor.  Clients should use the TTFParser to create a new TrueTypeFont object.
+         * 
+         * @param fontData The font data.
+         */
+        public TrueTypeFont(TTFDataStream fontData)
         {
-            // save current position
-            long currentPosition = data.getCurrentPosition();
-            data.seek(table.Offset);
-
-            // read all data
-            byte[] bytes = data.Read((int) table.Length);
-
-            // restore current position
-            data.seek(currentPosition);
-            return bytes;
+            data = fontData;
         }
-    }
 
-    /**
-     * This will get the table for the given tag.
-     * 
-     * @param tag the name of the table to be returned
-     * @return The table with the given tag.
-     * @ if there was an error reading the table.
-     */
-    protected TTFTable getTable(string tag) 
-    {
-        // after the initial parsing of the ttf there aren't any write operations
-        // to the HashMap anymore, so that we don't have to synchronize the read access
-        TTFTable ttfTable = tables.get(tag);
-        if (ttfTable != null && !ttfTable.initialized)
+        public void Dispose()
         {
-            synchronized (lockReadtable)
+            data.Dispose();
+        }
+
+        /**
+         * @return Returns the version.
+         */
+        public virtual float Version
+        {
+            get => version;
+            set => version = value;
+        }
+
+        /**
+         * Add a table definition. Package-private, used by TTFParser only.
+         * 
+         * @param table The table to add.
+         */
+        public void AddTable(TTFTable table)
+        {
+            tables[table.Tag] = table;
+        }
+
+        /**
+         * Get all of the tables.
+         * 
+         * @return All of the tables.
+         */
+        public ICollection<TTFTable> Tables
+        {
+            get => tables.Values;
+        }
+
+        /**
+         * Get all of the tables.
+         *
+         * @return All of the tables.
+         */
+        public Dictionary<string, TTFTable> TableMap
+        {
+            get => tables;
+        }
+
+        /**
+         * Returns the raw bytes of the given table.
+         * @param table the table to read.
+         * @ if there was an error accessing the table.
+         */
+        public byte[] GetTableBytes(TTFTable table)
+        {
+            lock (lockReadtable)
             {
-                if (!ttfTable.initialized)
+                // save current position
+                long currentPosition = data.CurrentPosition;
+                data.Seek(table.Offset);
+
+                // read all data
+                byte[] bytes = data.Read((int)table.Length);
+
+                // restore current position
+                data.Seek(currentPosition);
+                return bytes;
+            }
+        }
+
+        /**
+         * This will get the table for the given tag.
+         * 
+         * @param tag the name of the table to be returned
+         * @return The table with the given tag.
+         * @ if there was an error reading the table.
+         */
+        protected TTFTable GetTable(string tag)
+        {
+            // after the initial parsing of the ttf there aren't any write operations
+            // to the HashMap anymore, so that we don't have to synchronize the read access
+            if (tables.TryGetValue(tag, out TTFTable ttfTable) && !ttfTable.Initialized)
+            {
+                lock (lockReadtable)
                 {
-                    readTable(ttfTable);
+                    if (!ttfTable.Initialized)
+                    {
+                        ReadTable(ttfTable);
+                    }
                 }
             }
+            return ttfTable;
         }
-        return ttfTable;
-    }
 
-    /**
-     * This will get the naming table for the true type font.
-     * 
-     * @return The naming table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public NamingTable getNaming() 
-    {
-        return (NamingTable) getTable(NamingTable.TAG);
-    }
-    
-    /**
-     * Get the postscript table for this TTF.
-     * 
-     * @return The postscript table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public PostScriptTable PostScript 
-    {
-        return (PostScriptTable) getTable(PostScriptTable.TAG);
-    }
-    
-    /**
-     * Get the OS/2 table for this TTF.
-     * 
-     * @return The OS/2 table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public OS2WindowsMetricsTable getOS2Windows() 
-    {
-        return (OS2WindowsMetricsTable) getTable(OS2WindowsMetricsTable.TAG);
-    }
-
-    /**
-     * Get the maxp table for this TTF.
-     * 
-     * @return The maxp table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public MaximumProfileTable MaximumProfile 
-    {
-        return (MaximumProfileTable) getTable(MaximumProfileTable.TAG);
-    }
-    
-    /**
-     * Get the head table for this TTF.
-     * 
-     * @return The head table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public HeaderTable Header 
-    {
-        return (HeaderTable) getTable(HeaderTable.TAG);
-    }
-    
-    /**
-     * Get the hhea table for this TTF.
-     * 
-     * @return The hhea table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public HorizontalHeaderTable HorizontalHeader 
-    {
-        return (HorizontalHeaderTable) getTable(HorizontalHeaderTable.TAG);
-    }
-    
-    /**
-     * Get the hmtx table for this TTF.
-     * 
-     * @return The hmtx table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public HorizontalMetricsTable HorizontalMetrics 
-    {
-        return (HorizontalMetricsTable) getTable(HorizontalMetricsTable.TAG);
-    }
-    
-    /**
-     * Get the loca table for this TTF.
-     * 
-     * @return The loca table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public IndexToLocationTable IndexToLocation 
-    {
-        return (IndexToLocationTable) getTable(IndexToLocationTable.TAG);
-    }
-    
-    /**
-     * Get the glyf table for this TTF.
-     * 
-     * @return The glyf table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public GlyphTable Glyph 
-    {
-        return (GlyphTable) getTable(GlyphTable.TAG);
-    }
-    
-    /**
-     * Get the "cmap" table for this TTF.
-     * 
-     * @return The "cmap" table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public CmapTable getCmap() 
-    {
-        return (CmapTable) getTable(CmapTable.TAG);
-    }
-    
-    /**
-     * Get the vhea table for this TTF.
-     * 
-     * @return The vhea table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public VerticalHeaderTable getVerticalHeader() 
-    {
-        return (VerticalHeaderTable) getTable(VerticalHeaderTable.TAG);
-    }
-    
-    /**
-     * Get the vmtx table for this TTF.
-     * 
-     * @return The vmtx table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public VerticalMetricsTable getVerticalMetrics() 
-    {
-        return (VerticalMetricsTable) getTable(VerticalMetricsTable.TAG);
-    }
-    
-    /**
-     * Get the VORG table for this TTF.
-     * 
-     * @return The VORG table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public VerticalOriginTable getVerticalOrigin() 
-    {
-        return (VerticalOriginTable) getTable(VerticalOriginTable.TAG);
-    }
-    
-    /**
-     * Get the "kern" table for this TTF.
-     * 
-     * @return The "kern" table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public KerningTable getKerning() 
-    {
-        return (KerningTable) getTable(KerningTable.TAG);
-    }
-
-    /**
-     * Get the "gsub" table for this TTF.
-     *
-     * @return The "gsub" table or null if it doesn't exist.
-     * @ if there was an error reading the table.
-     */
-    public GlyphSubstitutionTable getGsub() 
-    {
-        return (GlyphSubstitutionTable) getTable(GlyphSubstitutionTable.TAG);
-    }
-
-    /**
-     * Get the data of the TrueType Font
-     * program representing the stream used to build this 
-     * object (normally from the TTFParser object).
-     * 
-     * @return COSStream TrueType font program stream
-     * 
-     * @ If there is an error getting the font data.
-     */
-    public Bytes.Buffer getOriginalData()  
-    {
-       return data.getOriginalData(); 
-    }
-
-    /**
-     * Get the data size of the TrueType Font program representing the stream used to build this
-     * object (normally from the TTFParser object).
-     *
-     * @return the size.
-     */
-    public long getOriginalDataSize()
-    {
-        return data.getOriginalDataSize();
-    }
-
-    /**
-     * Read the given table if necessary. Package-private, used by TTFParser only.
-     * 
-     * @param table the table to be initialized
-     * 
-     * @ if there was an error reading the table.
-     */
-    void readTable(TTFTable table) 
-    {
-        // PDFBOX-4219: synchronize on data because it is accessed by several threads
-        // when PDFBox is accessing a standard 14 font for the first time
-        synchronized (data)
+        /**
+         * This will get the naming table for the true type font.
+         * 
+         * @return The naming table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public NamingTable Naming
         {
-            // save current position
-            long currentPosition = data.getCurrentPosition();
-            data.seek(table.Offset);
-            table.Read(this, data);
-            // restore current position
-            data.seek(currentPosition);
+            get => (NamingTable)GetTable(NamingTable.TAG);
         }
-    }
 
-    /**
-     * Returns the number of glyphs (MaximumProfile.numGlyphs).
-     * 
-     * @return the number of glyphs
-     * @ if there was an error reading the table.
-     */
-    public int getNumberOfGlyphs() 
-    {
-        if (numberOfGlyphs == -1)
+        /**
+         * Get the postscript table for this TTF.
+         * 
+         * @return The postscript table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public PostScriptTable PostScript
         {
-            MaximumProfileTable maximumProfile = MaximumProfile;
-            if (maximumProfile != null)
+            get => (PostScriptTable)GetTable(PostScriptTable.TAG);
+        }
+
+        /**
+         * Get the OS/2 table for this TTF.
+         * 
+         * @return The OS/2 table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public OS2WindowsMetricsTable OS2Windows
+        {
+            get => (OS2WindowsMetricsTable)GetTable(OS2WindowsMetricsTable.TAG);
+        }
+
+        /**
+         * Get the maxp table for this TTF.
+         * 
+         * @return The maxp table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public MaximumProfileTable MaximumProfile
+        {
+            get => (MaximumProfileTable)GetTable(MaximumProfileTable.TAG);
+        }
+
+        /**
+         * Get the head table for this TTF.
+         * 
+         * @return The head table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public HeaderTable Header
+        {
+            get => (HeaderTable)GetTable(HeaderTable.TAG);
+        }
+
+        /**
+         * Get the hhea table for this TTF.
+         * 
+         * @return The hhea table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public HorizontalHeaderTable HorizontalHeader
+        {
+            get => (HorizontalHeaderTable)GetTable(HorizontalHeaderTable.TAG);
+        }
+
+        /**
+         * Get the hmtx table for this TTF.
+         * 
+         * @return The hmtx table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public HorizontalMetricsTable HorizontalMetrics
+        {
+            get => (HorizontalMetricsTable)GetTable(HorizontalMetricsTable.TAG);
+        }
+
+        /**
+         * Get the loca table for this TTF.
+         * 
+         * @return The loca table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public IndexToLocationTable IndexToLocation
+        {
+            get => (IndexToLocationTable)GetTable(IndexToLocationTable.TAG);
+        }
+
+        /**
+         * Get the glyf table for this TTF.
+         * 
+         * @return The glyf table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public virtual GlyphTable Glyph
+        {
+            get => (GlyphTable)GetTable(GlyphTable.TAG);
+        }
+
+        /**
+         * Get the "cmap" table for this TTF.
+         * 
+         * @return The "cmap" table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public CmapTable Cmap
+        {
+            get => (CmapTable)GetTable(CmapTable.TAG);
+        }
+
+        /**
+         * Get the vhea table for this TTF.
+         * 
+         * @return The vhea table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public VerticalHeaderTable VerticalHeader
+        {
+            get => (VerticalHeaderTable)GetTable(VerticalHeaderTable.TAG);
+        }
+
+        /**
+         * Get the vmtx table for this TTF.
+         * 
+         * @return The vmtx table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public VerticalMetricsTable VerticalMetrics
+        {
+            get => (VerticalMetricsTable)GetTable(VerticalMetricsTable.TAG);
+        }
+
+        /**
+         * Get the VORG table for this TTF.
+         * 
+         * @return The VORG table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public VerticalOriginTable VerticalOrigin
+        {
+            get => (VerticalOriginTable)GetTable(VerticalOriginTable.TAG);
+        }
+
+        /**
+         * Get the "kern" table for this TTF.
+         * 
+         * @return The "kern" table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public KerningTable Kerning
+        {
+            get => (KerningTable)GetTable(KerningTable.TAG);
+        }
+
+        /**
+         * Get the "gsub" table for this TTF.
+         *
+         * @return The "gsub" table or null if it doesn't exist.
+         * @ if there was an error reading the table.
+         */
+        public GlyphSubstitutionTable Gsub
+        {
+            get => (GlyphSubstitutionTable)GetTable(GlyphSubstitutionTable.TAG);
+        }
+
+        /**
+         * Get the data of the TrueType Font
+         * program representing the stream used to build this 
+         * object (normally from the TTFParser object).
+         * 
+         * @return COSStream TrueType font program stream
+         * 
+         * @ If there is an error getting the font data.
+         */
+        public Bytes.Buffer OriginalData
+        {
+            get => data.OriginalData;
+        }
+
+        /**
+         * Get the data size of the TrueType Font program representing the stream used to build this
+         * object (normally from the TTFParser object).
+         *
+         * @return the size.
+         */
+        public long OriginalDataSize
+        {
+            get => data.OriginalDataSize;
+        }
+
+        /**
+         * Read the given table if necessary. Package-private, used by TTFParser only.
+         * 
+         * @param table the table to be initialized
+         * 
+         * @ if there was an error reading the table.
+         */
+        public void ReadTable(TTFTable table)
+        {
+            // PDFBOX-4219: synchronize on data because it is accessed by several threads
+            // when PDFBox is accessing a standard 14 font for the first time
+            lock (data)
             {
-                numberOfGlyphs = maximumProfile.getNumGlyphs();
-            }
-            else
-            {
-                // this should never happen
-                numberOfGlyphs = 0;
+                // save current position
+                long currentPosition = data.CurrentPosition;
+                data.Seek(table.Offset);
+                table.Read(this, data);
+                // restore current position
+                data.Seek(currentPosition);
             }
         }
-        return numberOfGlyphs;
-    }
 
-    /**
-     * Returns the units per EM (Header.unitsPerEm).
-     * 
-     * @return units per EM
-     * @ if there was an error reading the table.
-     */
-    public int getUnitsPerEm() 
-    {
-        if (unitsPerEm == -1)
+        /**
+         * Returns the number of glyphs (MaximumProfile.numGlyphs).
+         * 
+         * @return the number of glyphs
+         * @ if there was an error reading the table.
+         */
+        public int NumberOfGlyphs
         {
-            HeaderTable header = Header;
-            if (header != null)
+            get
             {
-                unitsPerEm = header.getUnitsPerEm();
-            }
-            else
-            {
-                // this should never happen
-                unitsPerEm = 0;
-            }
-        }
-        return unitsPerEm;
-    }
-
-    /**
-     * Returns the width for the given GID.
-     * 
-     * @param gid the GID
-     * @return the width
-     * @ if there was an error reading the metrics table.
-     */
-    public int getAdvanceWidth(int gid) 
-    {
-        HorizontalMetricsTable hmtx = HorizontalMetrics;
-        if (hmtx != null)
-        {
-            return hmtx.GetAdvanceWidth(gid);
-        }
-        else
-        {
-            // this should never happen
-            return 250;
-        }
-    }
-
-    /**
-     * Returns the height for the given GID.
-     * 
-     * @param gid the GID
-     * @return the height
-     * @ if there was an error reading the metrics table.
-     */
-    public int getAdvanceHeight(int gid) 
-    {
-        VerticalMetricsTable vmtx = getVerticalMetrics();
-        if (vmtx != null)
-        {
-            return vmtx.getAdvanceHeight(gid);
-        }
-        else
-        {
-            // this should never happen
-            return 250;
-        }
-    }
-
-    public override string Name 
-    {
-        if (getNaming() != null)
-        {
-            return getNaming().getPostScriptName();
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private void readPostScriptNames() 
-    {
-        Dictionary<string, int> psnames = postScriptNames;
-        if (psnames == null)
-        {
-            // the getter is already synchronized
-            PostScriptTable post = PostScript;
-            synchronized (lockPSNames)
-            {
-                psnames = postScriptNames;
-                if (psnames == null)
+                if (numberOfGlyphs == -1)
                 {
-                    string[] names = post != null ? post.getGlyphNames() : null;
-                    if (names != null)
+                    MaximumProfileTable maximumProfile = MaximumProfile;
+                    if (maximumProfile != null)
                     {
-                        psnames = new Dictionary<>(names.Length);
-                        for (int i = 0; i < names.Length; i++)
-                        {
-                            psnames[names[i], i);
-                        }
+                        numberOfGlyphs = maximumProfile.NumGlyphs;
                     }
                     else
                     {
-                        psnames = new Dictionary<>();
+                        // this should never happen
+                        numberOfGlyphs = 0;
                     }
-                    postScriptNames = psnames;
                 }
+                return numberOfGlyphs;
             }
         }
-    }
 
-    /**
-     * Returns the best Unicode from the font (the most general). The PDF spec says that "The means
-     * by which this is accomplished are implementation-dependent."
-     *
-     * The returned cmap will perform glyph substitution.
-     *
-     * @ if the font could not be read
-     */
-    public CmapLookup getUnicodeCmapLookup() 
-    {
-        return getUnicodeCmapLookup(true);
-    }
-
-    /**
-     * Returns the best Unicode from the font (the most general). The PDF spec says that "The means
-     * by which this is accomplished are implementation-dependent."
-     *
-     * The returned cmap will perform glyph substitution.
-     *
-     * @param isStrict False if we allow falling back to any cmap, even if it's not Unicode.
-     * @ if the font could not be read, or there is no Unicode cmap
-     */
-    public CmapLookup getUnicodeCmapLookup(bool isStrict) 
-    {
-        CmapSubtable cmap = getUnicodeCmapImpl(isStrict);
-        if (!enabledGsubFeatures.isEmpty())
+        /**
+         * Returns the units per EM (Header.unitsPerEm).
+         * 
+         * @return units per EM
+         * @ if there was an error reading the table.
+         */
+        public int UnitsPerEm
         {
-            GlyphSubstitutionTable table = getGsub();
-            if (table != null)
+            get
             {
-                return new SubstitutingCmapLookup(cmap, table,
-                        Collections.unmodifiableList(enabledGsubFeatures));
+                if (unitsPerEm == -1)
+                {
+                    HeaderTable header = Header;
+                    if (header != null)
+                    {
+                        unitsPerEm = header.UnitsPerEm;
+                    }
+                    else
+                    {
+                        // this should never happen
+                        unitsPerEm = 0;
+                    }
+                }
+                return unitsPerEm;
             }
         }
-        return cmap;
-    }
 
-    private CmapSubtable getUnicodeCmapImpl(bool isStrict) 
-    {
-        CmapTable cmapTable = getCmap();
-        if (cmapTable == null)
+        /**
+         * Returns the width for the given GID.
+         * 
+         * @param gid the GID
+         * @return the width
+         * @ if there was an error reading the metrics table.
+         */
+        public int GetAdvanceWidth(int gid)
         {
-            if (isStrict)
+            HorizontalMetricsTable hmtx = HorizontalMetrics;
+            if (hmtx != null)
             {
-                throw new IOException("The TrueType font " + Name + " does not contain a 'cmap' table");
+                return hmtx.GetAdvanceWidth(gid);
             }
             else
             {
-                return null;
+                // this should never happen
+                return 250;
             }
         }
 
-        CmapSubtable cmap = cmapTable.getSubtable(CmapTable.PLATFORM_UNICODE,
-                                                  CmapTable.ENCODING_UNICODE_2_0_FULL);
-        if (cmap == null)
+        /**
+         * Returns the height for the given GID.
+         * 
+         * @param gid the GID
+         * @return the height
+         * @ if there was an error reading the metrics table.
+         */
+        public int GetAdvanceHeight(int gid)
         {
-            cmap = cmapTable.getSubtable(CmapTable.PLATFORM_WINDOWS,
-                                         CmapTable.ENCODING_WIN_UNICODE_FULL);
-        }
-        if (cmap == null)
-        {
-            cmap = cmapTable.getSubtable(CmapTable.PLATFORM_UNICODE,
-                                         CmapTable.ENCODING_UNICODE_2_0_BMP);
-        }
-        if (cmap == null)
-        {
-            cmap = cmapTable.getSubtable(CmapTable.PLATFORM_WINDOWS,
-                                         CmapTable.ENCODING_WIN_UNICODE_BMP);
-        }
-        if (cmap == null)
-        {
-            // Microsoft's "Recommendations for OpenType Fonts" says that "Symbol" encoding
-            // actually means "Unicode, non-standard character set"
-            cmap = cmapTable.getSubtable(CmapTable.PLATFORM_WINDOWS,
-                                         CmapTable.ENCODING_WIN_SYMBOL);
-        }
-        if (cmap == null)
-        {
-            if (isStrict)
+            VerticalMetricsTable vmtx = VerticalMetrics;
+            if (vmtx != null)
             {
-                throw new IOException("The TrueType font does not contain a Unicode cmap");
+                return vmtx.GetAdvanceHeight(gid);
             }
-            else if (cmapTable.getCmaps().Length > 0)
+            else
             {
-                // fallback to the first cmap (may not be Unicode, so may produce poor results)
-                cmap = cmapTable.getCmaps()[0];
-            }
-        }
-        return cmap;
-    }
-
-    /**
-     * Returns the GID for the given PostScript name, if the "post" table is present.
-     * @param name the PostScript name.
-     */
-    public int nameToGID(string name) 
-    {
-        // look up in 'post' table
-        readPostScriptNames();
-        if (postScriptNames != null)
-        {
-            int gid = postScriptNames.get(name);
-            if (gid != null && gid > 0 && gid < MaximumProfile.getNumGlyphs())
-            {
-                return gid;
+                // this should never happen
+                return 250;
             }
         }
 
-        // look up in 'cmap'
-        int uni = parseUniName(name);
-        if (uni > -1)
+        public override string Name
         {
-            CmapLookup cmap = getUnicodeCmapLookup(false);
-            return cmap.GetGlyphId(uni);
-        }
-        
-        return 0;
-    }
-
-    public GsubData getGsubData() 
-    {
-        GlyphSubstitutionTable table = getGsub();
-        if (table == null)
-        {
-            return GsubData.NO_DATA_FOUND;
-        }
-
-        return table.getGsubData();
-    }
-
-    /**
-     * Parses a Unicode PostScript name in the format uniXXXX.
-     */
-    private int parseUniName(string name)
-    {
-        if (name.startsWith("uni") && name.Length == 7)
-        {
-            int nameLength = name.Length;
-            StringBuilder uniStr = new StringBuilder();
-            try
+            get
             {
-                for (int chPos = 3; chPos + 4 <= nameLength; chPos += 4)
+                if (Naming != null)
                 {
-                    int codePoint = int.parseInt(name.substring(chPos, chPos + 4), 16);
-                    if (codePoint <= 0xD7FF || codePoint >= 0xE000) // disallowed code area
+                    return Naming.PostScriptName;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        private void ReadPostScriptNames()
+        {
+            Dictionary<string, int> psnames = postScriptNames;
+            if (psnames == null)
+            {
+                // the getter is already synchronized
+                PostScriptTable post = PostScript;
+                lock (lockPSNames)
+                {
+                    psnames = postScriptNames;
+                    if (psnames == null)
                     {
-                        uniStr.Append((char) codePoint);
+                        string[] names = post != null ? post.GlyphNames : null;
+                        if (names != null)
+                        {
+                            psnames = new Dictionary<string, int>(names.Length, StringComparer.Ordinal);
+                            for (int i = 0; i < names.Length; i++)
+                            {
+                                psnames[names[i]] = i;
+                            }
+                        }
+                        else
+                        {
+                            psnames = new Dictionary<string, int>(StringComparer.Ordinal);
+                        }
+                        postScriptNames = psnames;
                     }
                 }
-                string unicode = uniStr.ToString();
-                if (unicode.Length == 0)
+            }
+        }
+
+        /**
+         * Returns the best Unicode from the font (the most general). The PDF spec says that "The means
+         * by which this is accomplished are implementation-dependent."
+         *
+         * The returned cmap will perform glyph substitution.
+         *
+         * @ if the font could not be read
+         */
+        public CmapLookup GetUnicodeCmapLookup()
+        {
+            return GetUnicodeCmapLookup(true);
+        }
+
+        /**
+         * Returns the best Unicode from the font (the most general). The PDF spec says that "The means
+         * by which this is accomplished are implementation-dependent."
+         *
+         * The returned cmap will perform glyph substitution.
+         *
+         * @param isStrict False if we allow falling back to any cmap, even if it's not Unicode.
+         * @ if the font could not be read, or there is no Unicode cmap
+         */
+        public CmapLookup GetUnicodeCmapLookup(bool isStrict)
+        {
+            CmapSubtable cmap = GetUnicodeCmapImpl(isStrict);
+            if (enabledGsubFeatures.Count > 0)
+            {
+                GlyphSubstitutionTable table = Gsub;
+                if (table != null)
+                {
+                    return new SubstitutingCmapLookup(cmap, table, enabledGsubFeatures);
+                }
+            }
+            return cmap;
+        }
+
+        private CmapSubtable GetUnicodeCmapImpl(bool isStrict)
+        {
+            CmapTable cmapTable = Cmap;
+            if (cmapTable == null)
+            {
+                if (isStrict)
+                {
+                    throw new IOException("The TrueType font " + Name + " does not contain a 'cmap' table");
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            CmapSubtable cmap = cmapTable.GetSubtable(CmapTable.PLATFORM_UNICODE,
+                                                      CmapTable.ENCODING_UNICODE_2_0_FULL);
+            if (cmap == null)
+            {
+                cmap = cmapTable.GetSubtable(CmapTable.PLATFORM_WINDOWS,
+                                             CmapTable.ENCODING_WIN_UNICODE_FULL);
+            }
+            if (cmap == null)
+            {
+                cmap = cmapTable.GetSubtable(CmapTable.PLATFORM_UNICODE,
+                                             CmapTable.ENCODING_UNICODE_2_0_BMP);
+            }
+            if (cmap == null)
+            {
+                cmap = cmapTable.GetSubtable(CmapTable.PLATFORM_WINDOWS,
+                                             CmapTable.ENCODING_WIN_UNICODE_BMP);
+            }
+            if (cmap == null)
+            {
+                // Microsoft's "Recommendations for OpenType Fonts" says that "Symbol" encoding
+                // actually means "Unicode, non-standard character set"
+                cmap = cmapTable.GetSubtable(CmapTable.PLATFORM_WINDOWS,
+                                             CmapTable.ENCODING_WIN_SYMBOL);
+            }
+            if (cmap == null)
+            {
+                if (isStrict)
+                {
+                    throw new IOException("The TrueType font does not contain a Unicode cmap");
+                }
+                else if (cmapTable.Cmaps.Length > 0)
+                {
+                    // fallback to the first cmap (may not be Unicode, so may produce poor results)
+                    cmap = cmapTable.Cmaps[0];
+                }
+            }
+            return cmap;
+        }
+
+        /**
+         * Returns the GID for the given PostScript name, if the "post" table is present.
+         * @param name the PostScript name.
+         */
+        public int NameToGID(string name)
+        {
+            // look up in 'post' table
+            ReadPostScriptNames();
+            if (postScriptNames != null)
+            {
+                if (postScriptNames.TryGetValue(name, out int gid)
+                    && gid > 0
+                    && gid < MaximumProfile.NumGlyphs)
+                {
+                    return gid;
+                }
+            }
+
+            // look up in 'cmap'
+            int uni = ParseUniName(name);
+            if (uni > -1)
+            {
+                CmapLookup cmap = GetUnicodeCmapLookup(false);
+                return cmap.GetGlyphId(uni);
+            }
+
+            return 0;
+        }
+
+        public GsubData GsubData
+        {
+            get
+            {
+                GlyphSubstitutionTable table = Gsub;
+                if (table == null)
+                {
+                    return DefaultGsubData.NO_DATA_FOUND;
+                }
+
+                return table.GsubData;
+            }
+        }
+
+        /**
+         * Parses a Unicode PostScript name in the format uniXXXX.
+         */
+        private int ParseUniName(string name)
+        {
+            if (name.StartsWith("uni", StringComparison.Ordinal) && name.Length == 7)
+            {
+                int nameLength = name.Length;
+                var uniStr = new StringBuilder();
+                try
+                {
+                    for (int chPos = 3; chPos + 4 <= nameLength; chPos += 4)
+                    {
+                        int codePoint = int.parseInt(name.Substring(chPos, 4), 16);
+                        if (codePoint <= 0xD7FF || codePoint >= 0xE000) // disallowed code area
+                        {
+                            uniStr.Append((char)codePoint);
+                        }
+                    }
+                    string unicode = uniStr.ToString();
+                    if (unicode.Length == 0)
+                    {
+                        return -1;
+                    }
+                    return unicode.codePointAt(0);
+                }
+                catch (Exception e)
                 {
                     return -1;
                 }
-                return unicode.codePointAt(0);
             }
-            catch (NumberFormatException e)
+            return -1;
+        }
+
+        public override SKPath GetPath(string name)
+        {
+            int gid = NameToGID(name);
+
+            // some glyphs have no outlines (e.g. space, table, newline)
+            GlyphData glyph = Glyph.GetGlyph(gid);
+            if (glyph == null)
             {
-                return -1;
-            }
-        }
-        return -1;
-    }
-    
-    public override SKPath GetPath(string name) 
-    {
-        int gid = nameToGID(name);
-
-        // some glyphs have no outlines (e.g. space, table, newline)
-        GlyphData glyph = Glyph.getGlyph(gid);
-        if (glyph == null)
-        {
-            return new SKPath();
-        }
-        else
-        {
-            // must scaled by caller using FontMatrix
-            return glyph.getPath();
-        }
-    }
-
-    public override float getWidth(string name) 
-    {
-        int gid = nameToGID(name);
-        return getAdvanceWidth(gid);
-    }
-
-    public override bool hasGlyph(string name) 
-    {
-        return nameToGID(name) != 0;
-    }
-
-    public override SKRect getFontBBox() 
-    {
-        short xMin = Header.getXMin();
-        short xMax = Header.getXMax();
-        short yMin = Header.getYMin();
-        short yMax = Header.getYMax();
-        float scale = 1000f / getUnitsPerEm();
-        return new SKRect(xMin * scale, yMin * scale, xMax * scale, yMax * scale);
-    }
-
-    public override List<Number> getFontMatrix() 
-    {
-        float scale = 1000f / getUnitsPerEm();
-        return Array.<Number>asList(0.001f * scale, 0, 0, 0.001f * scale, 0, 0);
-    }
-
-    /**
-     * Enable a particular glyph substitution feature. This feature might not be supported by the
-     * font, or might not be implemented in PDFBox yet.
-     *
-     * @param featureTag The GSUB feature to enable
-     */
-    public void enableGsubFeature(string featureTag)
-    {
-        enabledGsubFeatures.Add(featureTag);
-    }
-
-    /**
-     * Disable a particular glyph substitution feature.
-     *
-     * @param featureTag The GSUB feature to disable
-     */
-    public void disableGsubFeature(string featureTag)
-    {
-        enabledGsubFeatures.remove(featureTag);
-    }
-
-    /**
-     * Enable glyph substitutions for vertical writing.
-     */
-    public void enableVerticalSubstitutions()
-    {
-        enableGsubFeature("vrt2");
-        enableGsubFeature("vert");
-    }
-
-    public override string ToString()
-    {
-        try
-        {
-            if (getNaming() != null)
-            {
-                return getNaming().getPostScriptName();
+                return new SKPath();
             }
             else
             {
-                return "(null)";
+                // must scaled by caller using FontMatrix
+                return glyph.getPath();
             }
         }
-        catch (IOException e)
+
+        public override float GetWidth(string name)
         {
-            Debug.WriteLine("debug: Error getting the NamingTable for the font", e);
-            return "(null - " + e.getMessage() + ")";
+            int gid = NameToGID(name);
+            return GetAdvanceWidth(gid);
+        }
+
+        public override bool HasGlyph(string name)
+        {
+            return NameToGID(name) != 0;
+        }
+
+        public override SKRect FontBBox
+        {
+            get
+            {
+                short xMin = Header.XMin;
+                short xMax = Header.XMax;
+                short yMin = Header.YMin;
+                short yMax = Header.YMax;
+                float scale = 1000f / UnitsPerEm;
+                return new SKRect(xMin * scale, yMin * scale, xMax * scale, yMax * scale);
+            }
+        }
+
+        public override List<float> FontMatrix
+        {
+            get
+            {
+                float scale = 1000f / UnitsPerEm;
+                return new List<float> { 0.001f * scale, 0, 0, 0.001f * scale, 0, 0 };
+            }
+        }
+
+        /**
+         * Enable a particular glyph substitution feature. This feature might not be supported by the
+         * font, or might not be implemented in PDFBox yet.
+         *
+         * @param featureTag The GSUB feature to enable
+         */
+        public void EnableGsubFeature(string featureTag)
+        {
+            enabledGsubFeatures.Add(featureTag);
+        }
+
+        /**
+         * Disable a particular glyph substitution feature.
+         *
+         * @param featureTag The GSUB feature to disable
+         */
+        public void DisableGsubFeature(string featureTag)
+        {
+            enabledGsubFeatures.Remove(featureTag);
+        }
+
+        /**
+         * Enable glyph substitutions for vertical writing.
+         */
+        public void enableVerticalSubstitutions()
+        {
+            EnableGsubFeature("vrt2");
+            EnableGsubFeature("vert");
+        }
+
+        public override string ToString()
+        {
+            try
+            {
+                if (Naming != null)
+                {
+                    return Naming.PostScriptName;
+                }
+                else
+                {
+                    return "(null)";
+                }
+            }
+            catch (IOException e)
+            {
+                Debug.WriteLine("debug: Error getting the NamingTable for the font", e);
+                return "(null - " + e.Message + ")";
+            }
         }
     }
-}
 }

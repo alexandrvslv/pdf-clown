@@ -27,7 +27,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Tag to identify this table.
          */
-        public static readonly string TAG = "DSIG";
+        public const string TAG = "DSIG";
 
         public DigitalSignatureTable(TrueTypeFont font)
             : base(font)

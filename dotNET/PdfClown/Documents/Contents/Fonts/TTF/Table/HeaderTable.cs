@@ -30,7 +30,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Tag to identify this table.
          */
-        public static readonly string TAG = "head";
+        public const string TAG = "head";
 
         /**
          * Bold macStyle flag.
@@ -71,7 +71,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param data The stream to read the data from.
          * @ If there is an error reading the data.
          */
-        protected override void Read(TrueTypeFont ttf, TTFDataStream data)
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
             version = data.Read32Fixed();
             fontRevision = data.Read32Fixed();
@@ -79,8 +79,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             magicNumber = data.ReadUnsignedInt();
             flags = data.ReadUnsignedShort();
             unitsPerEm = data.ReadUnsignedShort();
-            created = data.readInternationalDate();
-            modified = data.readInternationalDate();
+            created = data.ReadInternationalDate();
+            modified = data.ReadInternationalDate();
             xMin = data.ReadSignedShort();
             yMin = data.ReadSignedShort();
             xMax = data.ReadSignedShort();
@@ -114,7 +114,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * @return Returns the flags.
          */
-        public int GetFlags
+        public int Flags
         {
             get => flags;
             set => flags = value;

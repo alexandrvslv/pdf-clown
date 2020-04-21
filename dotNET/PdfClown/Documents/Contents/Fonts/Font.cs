@@ -48,49 +48,7 @@ namespace PdfClown.Documents.Contents.Fonts
     public abstract class Font : PdfObjectWrapper<PdfDictionary>
     {
         #region types
-        /**
-          <summary>Font descriptor flags [PDF:1.6:5.7.1].</summary>
-        */
-        [Flags]
-        public enum FlagsEnum
-        {
-            /**
-              <summary>All glyphs have the same width.</summary>
-            */
-            FixedPitch = 0x1,
-            /**
-              <summary>Glyphs have serifs.</summary>
-            */
-            Serif = 0x2,
-            /**
-              <summary>Font contains glyphs outside the Adobe standard Latin character set.</summary>
-            */
-            Symbolic = 0x4,
-            /**
-              <summary>Glyphs resemble cursive handwriting.</summary>
-            */
-            Script = 0x8,
-            /**
-              <summary>Font uses the Adobe standard Latin character set.</summary>
-            */
-            Nonsymbolic = 0x20,
-            /**
-              <summary>Glyphs have dominant vertical strokes that are slanted.</summary>
-            */
-            Italic = 0x40,
-            /**
-              <summary>Font contains no lowercase letters.</summary>
-            */
-            AllCap = 0x10000,
-            /**
-              <summary>Font contains both uppercase and lowercase letters.</summary>
-            */
-            SmallCap = 0x20000,
-            /**
-              <summary>Thicken bold glyphs at small text sizes.</summary>
-            */
-            ForceBold = 0x40000
-        }
+
         #endregion
 
         #region static
@@ -182,24 +140,24 @@ namespace PdfClown.Documents.Contents.Fonts
                       && ((PdfName)((PdfStream)fontDescriptor.Resolve(PdfName.FontFile3)).Header.Resolve(PdfName.Subtype)).Equals(PdfName.OpenType)) // OpenFont/CFF.
                         throw new NotImplementedException();
                     else // Non-OpenFont Type 1.
-                        return new Type1Font(reference);
+                        return new PdfType1Font(reference);
                 }
             }
             else if (fontType.Equals(PdfName.TrueType)) // TrueType.
-                return new TrueTypeFont(reference);
+                return new PdfTrueTypeFont(reference);
             else if (fontType.Equals(PdfName.Type0)) // OpenFont.
             {
                 PdfDictionary cidFontDictionary = (PdfDictionary)((PdfArray)fontDictionary.Resolve(PdfName.DescendantFonts)).Resolve(0);
                 PdfName cidFontType = (PdfName)cidFontDictionary[PdfName.Subtype];
                 if (cidFontType.Equals(PdfName.CIDFontType0)) // OpenFont/CFF.
-                    return new Type0Font(reference);
+                    return new PdfType0Font(reference);
                 else if (cidFontType.Equals(PdfName.CIDFontType2)) // OpenFont/TrueType.
-                    return new Type2Font(reference);
+                    return new PdfType2Font(reference);
                 else
                     throw new NotImplementedException("Type 0 subtype " + cidFontType + " not supported yet.");
             }
             else if (fontType.Equals(PdfName.Type3)) // Type 3.
-                return new Type3Font(reference);
+                return new PdfType3Font(reference);
             else if (fontType.Equals(PdfName.MMType1)) // MMType1.
                 return new MMType1Font(reference);
             else // Unknown.
@@ -273,7 +231,11 @@ namespace PdfClown.Documents.Contents.Fonts
           <summary>Creates a new font structure within the given document context.</summary>
         */
         protected Font(Document context)
-            : base(context, new PdfDictionary(new PdfName[1] { PdfName.Type }, new PdfDirectObject[1] { PdfName.Font }))
+            : this(context, new PdfDictionary(new PdfName[1] { PdfName.Type }, new PdfDirectObject[1] { PdfName.Font }))
+        { Initialize(); }
+
+        protected Font(Document context, PdfDictionary dictionary)
+            : base(context, dictionary)
         { Initialize(); }
 
         /**
@@ -289,17 +251,17 @@ namespace PdfClown.Documents.Contents.Fonts
 
         #region interface
         #region public
+
+        public abstract SKMatrix FontMatrix { get; }
+        public abstract SKRect BoundingBox { get; }
+
         /**
           <summary>Gets the unscaled vertical offset from the baseline to the ascender line (ascent).
           The value is a positive number.</summary>
         */
-        public virtual double Ascent
+        public virtual float Ascent
         {
-            get
-            {
-                IPdfNumber ascentObject = (IPdfNumber)GetDescriptorValue(PdfName.Ascent);
-                return ascentObject != null ? ascentObject.DoubleValue : 750;
-            }
+            get => FontDescriptor?.Ascent ?? 750;
         }
 
         /**
@@ -324,15 +286,11 @@ namespace PdfClown.Documents.Contents.Fonts
         */
         public virtual double Descent
         {
-            get
-            {
-                /*
+            /*
                   NOTE: Sometimes font descriptors specify positive descent, therefore normalization is
                   required [FIX:27].
                 */
-                IPdfNumber descentObject = (IPdfNumber)GetDescriptorValue(PdfName.Descent);
-                return -Math.Abs(descentObject != null ? descentObject.DoubleValue : 250);
-            }
+            get => -Math.Abs(FontDescriptor?.Descent ?? 250);
         }
 
         /**
@@ -357,13 +315,19 @@ namespace PdfClown.Documents.Contents.Fonts
             set => BaseDataObject[PdfName.Subtype] = new PdfName(value);
         }
 
+        public string BaseFont
+        {
+            get => ((PdfName)Dictionary[PdfName.BaseFont]).StringValue;
+            set => Dictionary[PdfName.BaseFont] = new PdfName(value);
+        }
+
         /**
           <summary>Gets the PostScript name of the font.</summary>
         */
-        public string Name
+        public virtual string Name
         {
-            get => ((PdfName)BaseDataObject[PdfName.BaseFont]).ToString();
-            set => BaseDataObject[PdfName.BaseFont] = new PdfName(value);
+            get => BaseFont;
+            set => BaseFont = value;
         }
 
         public int FirstChar
@@ -378,24 +342,63 @@ namespace PdfClown.Documents.Contents.Fonts
             set => BaseDataObject[PdfName.LastChar] = new PdfInteger(value);
         }
 
-        public PdfArray Widths
+        public virtual PdfArray Widths
         {
             get => (PdfArray)BaseDataObject.Resolve(PdfName.Widths);
             set => BaseDataObject[PdfName.Widths] = value.Reference;
         }
 
-        public FontDescriptor FontDescriptor
+        public virtual FontDescriptor FontDescriptor
         {
             get => Wrap<FontDescriptor>((PdfDictionary)BaseDataObject.Resolve(PdfName.FontDescriptor));
             set => BaseDataObject[PdfName.FontDescriptor] = value.BaseObject;
         }
 
         /**
+         <summary>Gets the font descriptor flags.</summary>
+       */
+        public virtual FlagsEnum Flags
+        {
+            get
+            {
+                var flagsObject = FontDescriptor?.Flags;
+                return flagsObject != null ? (FlagsEnum)Enum.ToObject(typeof(FlagsEnum), flagsObject) : 0;
+            }
+        }
+
+        public virtual bool IsVertical { get => false; set { } }
+        public virtual bool IsDamaged { get => false; }
+        public virtual bool IsEmbedded { get => false; }
+        public virtual bool IsStandard14 { get => false; }
+        public abstract float GetHeight(int code);
+        public abstract bool HasExplicitWidth(int code);
+        public abstract float AverageFontWidth { get; }
+        public abstract SKPoint GetPositionVector(int code);
+        public abstract SKPoint GetDefaultPositionVector(int cid);
+        public abstract float GetVerticalDisplacementVectorY(int code);
+        public abstract SKPath GetPath(int code);
+        public abstract SKPath GetNormalizedPath(int code);
+        public abstract bool HasGlyph(int code);
+        public abstract float GetWidthFromFont(int code);
+        /**
           <summary>Gets whether the font encoding is custom (that is non-Unicode).</summary>
         */
         public bool Symbolic => symbolic;
 
         public CMap CMap => cmap;
+
+        /**
+      * Returns the displacement vector (w0, w1) in text space, for the given character.
+      * For horizontal text only the x component is used, for vertical text only the y component.
+      *
+      * @param code character code
+      * @return displacement vector
+      * @throws IOException
+      */
+        public virtual SKPoint GetDisplacement(int code)
+        {
+            return new SKPoint(GetWidth(code) / 1000, 0);
+        }
 
         public ushort GetGlyph(int key)
         {
@@ -407,11 +410,11 @@ namespace PdfClown.Documents.Contents.Fonts
             var typeface = GetTypeface();
             var nameTypeface = GetTypefaceByName();
 
-            var text = this is Type1Font
+            var text = this is PdfType1Font
                 ? System.Text.Encoding.UTF8.GetBytes(new[] { textChar })
                 //: font is Type1Font && typeface != null
                 //? BitConverter.GetBytes(font.GetGlyph(textChar))
-                : this is Type2Font
+                : this is PdfType2Font
                 ? System.Text.Encoding.UTF8.GetBytes(new[] { textChar })
                 : Encode(textChar.ToString());
 
@@ -573,23 +576,13 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
+        public abstract byte[] Encode(int unicode);
+
         public override bool Equals(object obj)
         {
             return obj != null
               && obj.GetType().Equals(GetType())
               && ((Font)obj).Name.Equals(Name, StringComparison.Ordinal);
-        }
-
-        /**
-          <summary>Gets the font descriptor flags.</summary>
-        */
-        public virtual FlagsEnum Flags
-        {
-            get
-            {
-                PdfInteger flagsObject = (PdfInteger)GetDescriptorValue(PdfName.Flags);
-                return flagsObject != null ? (FlagsEnum)Enum.ToObject(typeof(FlagsEnum), flagsObject.RawValue) : 0;
-            }
         }
 
         /**
@@ -723,6 +716,62 @@ namespace PdfClown.Documents.Contents.Fonts
         public double GetLineHeight(double size)
         { return LineHeight * GetScalingFactor(size); }
 
+        public virtual float GetWidth(int code)
+        {
+            float width = codeToWidthMap.TryGet(code);
+            if (width != null)
+            {
+                return width;
+            }
+
+            // Acrobat overrides the widths in the font program on the conforming reader's system with
+            // the widths specified in the font dictionary." (Adobe Supplement to the ISO 32000)
+            //
+            // Note: The Adobe Supplement says that the override happens "If the font program is not
+            // embedded", however PDFBOX-427 shows that it also applies to embedded fonts.
+
+            // Type1, Type1C, Type3
+            if (Widths != null || Dictionary.containsKey(PdfName.MISSING_WIDTH))
+            {
+                int firstChar = FirstChar;
+                int lastChar = LastChar;
+                int siz = getWidths().size();
+                int idx = code - firstChar;
+                if (siz > 0 && code >= firstChar && code <= lastChar && idx < siz)
+                {
+                    width = getWidths().get(idx);
+                    if (width == null)
+                    {
+                        width = 0f;
+                    }
+                    codeToWidthMap.put(code, width);
+                    return width;
+                }
+
+                var fd = FontDescriptor;
+                if (fd != null)
+                {
+                    // get entry from /MissingWidth entry
+                    width = fd.getMissingWidth();
+                    codeToWidthMap.put(code, width);
+                    return width;
+                }
+            }
+
+            // standard 14 font widths are specified by an AFM
+            if (isStandard14())
+            {
+                width = getStandard14Width(code);
+                codeToWidthMap.put(code, width);
+                return width;
+            }
+
+            // if there's nothing to override with, then obviously we fall back to the font
+            width = GetWidthFromFont(code);
+            codeToWidthMap.put(code, width);
+            return width;
+        }
+
         /**
           <summary>Gets the unscaled width of the given character.</summary>
           <param name="textChar">Character whose width has to be calculated.</param>
@@ -787,60 +836,49 @@ namespace PdfClown.Documents.Contents.Fonts
             if (typeface != null)
                 return typeface;
 
-            var fontDescription = GetFontDescription();
-            if (fontDescription != null)
+            var fontDescriptor = FontDescriptor;
+            if (fontDescriptor != null)
             {
-                if (fontDescription.Resolve(PdfName.FontFile) is PdfStream stream)
+                if (fontDescriptor.FontFile?.BaseDataObject is PdfStream stream)
                 {
-                    return typeface = GetTypeface(fontDescription, stream);
+                    return typeface = GetTypeface(fontDescriptor, stream);
                 }
-                if (fontDescription.Resolve(PdfName.FontFile2) is PdfStream stream2)
+                if (fontDescriptor.FontFile2?.BaseDataObject is PdfStream stream2)
                 {
-                    return typeface = GetTypeface(fontDescription, stream2);
+                    return typeface = GetTypeface(fontDescriptor, stream2);
                 }
-                if (fontDescription.Resolve(PdfName.FontFile3) is PdfStream stream3)
+                if (fontDescriptor.FontFile3?.BaseDataObject is PdfStream stream3)
                 {
-                    return typeface = GetTypeface(fontDescription, stream3);
+                    return typeface = GetTypeface(fontDescriptor, stream3);
                 }
-                if (fontDescription.Resolve(PdfName.FontName) is PdfName fontName)
+                if (fontDescriptor.FontName is string fonName)
                 {
-                    return typeface = ParseName(fontName.StringValue, fontDescription);
+                    return typeface = ParseName(fonName, fontDescriptor);
                 }
             }
-            else if (BaseDataObject.Resolve(PdfName.BaseFont) is PdfName baseFont)
+            else if (BaseFont is string baseFont)
             {
-                return typeface = ParseName(baseFont.StringValue, Dictionary);
+                return typeface = ParseName(baseFont, fontDescriptor);
             }
 
-            return null;
-        }
-
-        public PdfDictionary GetFontDescription()
-        {
-            if (BaseDataObject.Resolve(PdfName.FontDescriptor) is PdfDictionary fontDescription)
-                return fontDescription;
-            if (BaseDataObject.Resolve(PdfName.DescendantFonts) is PdfArray array
-                && array.Resolve(0) is PdfDictionary descendant
-                && descendant.Resolve(PdfName.FontDescriptor) is PdfDictionary descendantDescription)
-                return descendantDescription;
             return null;
         }
 
         public virtual SKTypeface GetTypefaceByName()
         {
-            var fontDescription = GetFontDescription();
+            var fontDescription = FontDescriptor;
             if (fontDescription != null)
             {
-                return ParseName(fontDescription.Resolve(PdfName.FontName)?.ToString(), fontDescription);
+                return ParseName(fontDescription.FontName, fontDescription);
             }
             else if (BaseDataObject.Resolve(PdfName.BaseFont) is PdfName baseFont)
             {
-                return typeface = ParseName(baseFont.StringValue, Dictionary);
+                return typeface = ParseName(baseFont.StringValue, null);
             }
             return null;
         }
 
-        protected virtual SKTypeface ParseName(string name, PdfDictionary header)
+        protected virtual SKTypeface ParseName(string name, FontDescriptor header)
         {
             if (cache == null)
             { cache = new Dictionary<string, SKTypeface>(StringComparer.Ordinal); }
@@ -873,13 +911,13 @@ namespace PdfClown.Documents.Contents.Fonts
             return cache[name] = SKTypeface.FromFamilyName(fontName, style);
         }
 
-        protected virtual SKFontStyle GetStyle(string name, PdfDictionary fontDescription)
+        protected virtual SKFontStyle GetStyle(string name, FontDescriptor fontDescription)
         {
             var weight = name.IndexOf("Bold", StringComparison.OrdinalIgnoreCase) > -1 ? 700 : 400;
-            var weightParam = (IPdfNumber)fontDescription?.Resolve(PdfName.FontWeight);
+            var weightParam = fontDescription?.FontWeight;
             if (weightParam != null)
             {
-                weight = weightParam.IntValue;
+                weight = (int)weightParam;
             }
             return new SKFontStyle(
                 weight,
@@ -891,9 +929,9 @@ namespace PdfClown.Documents.Contents.Fonts
                         : SKFontStyleSlant.Upright);
         }
 
-        protected virtual SKTypeface GetTypeface(PdfDictionary fontDescription, PdfStream stream)
+        protected virtual SKTypeface GetTypeface(FontDescriptor fontDescription, PdfStream stream)
         {
-            var name = fontDescription.Resolve(PdfName.FontName)?.ToString();
+            var name = fontDescription.BaseDataObject.Resolve(PdfName.FontName)?.ToString();
 
             var body = stream.GetBody(true).ToByteArray();
             //System.IO.File.WriteAllBytes($"export{name}.ttf", body);
@@ -917,7 +955,7 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
           <summary>Gets/Sets the average glyph width.</summary>
         */
-        protected int AverageWidth
+        public virtual int AverageWidth
         {
             get
             {
@@ -941,7 +979,7 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
           <summary>Gets/Sets the default glyph width.</summary>
         */
-        protected int DefaultWidth
+        public virtual int DefaultWidth
         {
             get
             {
@@ -952,11 +990,6 @@ namespace PdfClown.Documents.Contents.Fonts
             set => defaultWidth = value;
         }
 
-
-        /**
-          <summary>Gets the specified font descriptor entry value.</summary>
-        */
-        protected abstract PdfDataObject GetDescriptorValue(PdfName key);
 
         /**
           <summary>Loads font information from existing PDF font structure.</summary>

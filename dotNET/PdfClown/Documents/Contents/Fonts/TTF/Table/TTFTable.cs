@@ -103,7 +103,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param data The stream to read the data from.
          * @ If there is an error reading the data.
          */
-        protected virtual void Read(TrueTypeFont ttf, TTFDataStream data)
+        public virtual void Read(TrueTypeFont ttf, TTFDataStream data)
         {
         }
     }

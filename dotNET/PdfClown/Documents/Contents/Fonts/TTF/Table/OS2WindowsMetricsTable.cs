@@ -31,121 +31,121 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_THIN = 100;
+        public const int WEIGHT_CLASS_THIN = 100;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_ULTRA_LIGHT = 200;
+        public const int WEIGHT_CLASS_ULTRA_LIGHT = 200;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_LIGHT = 300;
+        public const int WEIGHT_CLASS_LIGHT = 300;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_NORMAL = 400;
+        public const int WEIGHT_CLASS_NORMAL = 400;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_MEDIUM = 500;
+        public const int WEIGHT_CLASS_MEDIUM = 500;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_SEMI_BOLD = 600;
+        public const int WEIGHT_CLASS_SEMI_BOLD = 600;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_BOLD = 700;
+        public const int WEIGHT_CLASS_BOLD = 700;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_EXTRA_BOLD = 800;
+        public const int WEIGHT_CLASS_EXTRA_BOLD = 800;
         /**
          * Weight class constant.
          */
-        public static readonly int WEIGHT_CLASS_BLACK = 900;
+        public const int WEIGHT_CLASS_BLACK = 900;
 
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_ULTRA_CONDENSED = 1;
+        public const int WIDTH_CLASS_ULTRA_CONDENSED = 1;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_EXTRA_CONDENSED = 2;
+        public const int WIDTH_CLASS_EXTRA_CONDENSED = 2;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_CONDENSED = 3;
+        public const int WIDTH_CLASS_CONDENSED = 3;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_SEMI_CONDENSED = 4;
+        public const int WIDTH_CLASS_SEMI_CONDENSED = 4;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_MEDIUM = 5;
+        public const int WIDTH_CLASS_MEDIUM = 5;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_SEMI_EXPANDED = 6;
+        public const int WIDTH_CLASS_SEMI_EXPANDED = 6;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_EXPANDED = 7;
+        public const int WIDTH_CLASS_EXPANDED = 7;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_EXTRA_EXPANDED = 8;
+        public const int WIDTH_CLASS_EXTRA_EXPANDED = 8;
         /**
          * Width class constant.
          */
-        public static readonly int WIDTH_CLASS_ULTRA_EXPANDED = 9;
+        public const int WIDTH_CLASS_ULTRA_EXPANDED = 9;
 
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_NO_CLASSIFICATION = 0;
+        public const int FAMILY_CLASS_NO_CLASSIFICATION = 0;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_OLDSTYLE_SERIFS = 1;
+        public const int FAMILY_CLASS_OLDSTYLE_SERIFS = 1;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_TRANSITIONAL_SERIFS = 2;
+        public const int FAMILY_CLASS_TRANSITIONAL_SERIFS = 2;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_MODERN_SERIFS = 3;
+        public const int FAMILY_CLASS_MODERN_SERIFS = 3;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_CLAREDON_SERIFS = 4;
+        public const int FAMILY_CLASS_CLAREDON_SERIFS = 4;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_SLAB_SERIFS = 5;
+        public const int FAMILY_CLASS_SLAB_SERIFS = 5;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_FREEFORM_SERIFS = 7;
+        public const int FAMILY_CLASS_FREEFORM_SERIFS = 7;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_SANS_SERIF = 8;
+        public const int FAMILY_CLASS_SANS_SERIF = 8;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_ORNAMENTALS = 9;
+        public const int FAMILY_CLASS_ORNAMENTALS = 9;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_SCRIPTS = 10;
+        public const int FAMILY_CLASS_SCRIPTS = 10;
         /**
          * Family class constant.
          */
-        public static readonly int FAMILY_CLASS_SYMBOLIC = 12;
+        public const int FAMILY_CLASS_SYMBOLIC = 12;
 
         /**
          * Restricted License embedding: must not be modified, embedded or exchanged in any manner.
@@ -553,7 +553,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * A tag that identifies this table type.
          */
-        public static readonly string TAG = "OS/2";
+        public const string TAG = "OS/2";
 
         /**
          * This will read the required data from the stream.
@@ -562,7 +562,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param data The stream to read the data from.
          * @ If there is an error reading the data.
          */
-        protected override void Read(TrueTypeFont ttf, TTFDataStream data)
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
             version = data.ReadUnsignedShort();
             averageCharWidth = data.ReadSignedShort();

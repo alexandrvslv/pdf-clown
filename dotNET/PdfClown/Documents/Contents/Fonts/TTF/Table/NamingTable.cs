@@ -31,7 +31,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * A tag that identifies this table type.
          */
-        public static readonly string TAG = "name";
+        public const string TAG = "name";
 
         private List<NameRecord> nameRecords;
 
@@ -53,7 +53,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param data The stream to read the data from.
          * @ If there is an error reading the data.
          */
-        protected override void Read(TrueTypeFont ttf, TTFDataStream data)
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
             int formatSelector = data.ReadUnsignedShort();
             int numberOfNameRecords = data.ReadUnsignedShort();
@@ -75,7 +75,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     continue;
                 }
 
-                data.seek(Offset + (2 * 3) + numberOfNameRecords * 2 * 6 + nr.StringOffset);
+                data.Seek(Offset + (2 * 3) + numberOfNameRecords * 2 * 6 + nr.StringOffset);
                 int platform = nr.PlatformId;
                 int encoding = nr.PlatformEncodingId;
                 var charset = Charset.ISO88591;

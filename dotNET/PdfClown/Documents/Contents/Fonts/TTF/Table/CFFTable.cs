@@ -31,7 +31,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private CFFFont cffFont;
 
-        CFFTable(TrueTypeFont font) : base(font)
+        public CFFTable(TrueTypeFont font) : base(font)
         {
         }
 
@@ -42,13 +42,12 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param data The stream to read the data from.
          * @throws java.io.IOException If there is an error reading the data.
          */
-        override
-        void Read(TrueTypeFont ttf, TTFDataStream data)
+        public override void Read(TrueTypeFont ttf, TTFDataStream data)
         {
             byte[] bytes = data.Read((int)Length);
 
             CFFParser parser = new CFFParser();
-            cffFont = parser.Parse(bytes, new CFFBytesource(font)).get(0);
+            cffFont = parser.Parse(bytes, new CFFBytesource(font))[0];
 
             initialized = true;
         }
@@ -56,7 +55,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Returns the CFF font, which is a compact representation of a PostScript Type 1, or CIDFont
          */
-        public CFFFont getFont()
+        public CFFFont GetFont()
         {
             return cffFont;
         }
@@ -64,19 +63,18 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Allows bytes to be re-read later by CFFParser.
          */
-        private static class CFFBytesource : CFFParser.ByteSource
+        internal class CFFBytesource : CFFParser.IByteSource
         {
             private readonly TrueTypeFont ttf;
 
-            CFFBytesource(TrueTypeFont ttf)
+            public CFFBytesource(TrueTypeFont ttf)
             {
                 this.ttf = ttf;
             }
 
-            override
-            public byte[] getBytes()
+            public byte[] GetBytes()
             {
-                return ttf.getTableBytes(ttf.getTableMap().get(CFFTable.TAG));
+                return ttf.GetTableBytes(ttf.TableMap.TryGetValue(CFFTable.TAG, out var ccfTable) ? ccfTable : null);
             }
         }
     }

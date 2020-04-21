@@ -123,6 +123,9 @@ namespace PdfClown.Documents.Contents.Fonts
         private int maxCodeLength;
         private string cmapName;
         private int cMapType;
+        private string registry;
+        private string ordering;
+        private int wMode;
 
         // code lengths
         private readonly List<CodespaceRange> codespaceRanges = new List<CodespaceRange>();
@@ -152,6 +155,23 @@ namespace PdfClown.Documents.Contents.Fonts
             set => cMapType = value;
         }
 
+        public string Registry
+        {
+            get => registry;
+            set => registry = value;
+        }
+
+        public string Ordering
+        {
+            get => ordering;
+            set => ordering = value;
+        }
+
+        public int WMode
+        {
+            get => wMode;
+            set => wMode = value;
+        }
         /**
          * This will tell if this cmap has any CID mappings.
          * 

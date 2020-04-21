@@ -16,194 +16,196 @@
    limitations under the License.
 
  */
-namespace PdfClown.Documents.Contents.Fonts.TTF{
-
-using System.IO;
-using System.Diagnostics;
-
-
-/**
- * This class is based on code from Apache Batik a subproject of Apache XMLGraphics. see
- * http://xmlgraphics.apache.org/batik/ for further details.
- */
-public class GlyfSimpleDescript : GlyfDescript
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
 
-    /**
-     * Log instance.
-     */
-    //private static readonly Log LOG = LogFactory.getLog(GlyfSimpleDescript.class);
+    using System.IO;
+    using System.Diagnostics;
 
-    private int[] endPtsOfContours;
-    private byte[] flags;
-    private short[] xCoordinates;
-    private short[] yCoordinates;
-    private readonly int pointCount;
 
     /**
-     * Constructor.
-     * 
-     * @param numberOfContours number of contours
-     * @param bais the stream to be read
-     * @param x0 the initial X-position
-     * @ is thrown if something went wrong
+     * This class is based on code from Apache Batik a subproject of Apache XMLGraphics. see
+     * http://xmlgraphics.apache.org/batik/ for further details.
      */
-    GlyfSimpleDescript(short numberOfContours, TTFDataStream bais, short x0) 
+    public class GlyfSimpleDescript : GlyfDescript
     {
-        :base(numberOfContours, bais);
 
-        /*
-         * https://developer.apple.com/fonts/TTRefMan/RM06/Chap6glyf.html
-         * "If a glyph has zero contours, it need not have any glyph data." set the pointCount to zero to initialize
-         * attributes and avoid nullpointer but maybe there shouldn't have GlyphDescript in the GlyphData?
+        /**
+         * Log instance.
          */
-        if (numberOfContours == 0)
+        //private static readonly Log LOG = LogFactory.getLog(GlyfSimpleDescript.class);
+
+        private int[] endPtsOfContours;
+        private byte[] flags;
+        private short[] xCoordinates;
+        private short[] yCoordinates;
+        private readonly int pointCount;
+
+        /**
+         * Constructor.
+         * 
+         * @param numberOfContours number of contours
+         * @param bais the stream to be read
+         * @param x0 the initial X-position
+         * @ is thrown if something went wrong
+         */
+        public GlyfSimpleDescript(short numberOfContours, TTFDataStream bais, short x0)
+            : base(numberOfContours, bais)
         {
-            pointCount = 0;
-            return;
-        }
 
-        // Simple glyph description
-        endPtsOfContours = bais.readUnsignedShortArray(numberOfContours);
-
-        int lastEndPt = endPtsOfContours[numberOfContours - 1];
-        if (numberOfContours == 1 && lastEndPt == 65535)
-        {
-            // PDFBOX-2939: assume an empty glyph
-            pointCount = 0;
-            return;
-        }
-        // The last end point index reveals the total number of points
-        pointCount = lastEndPt + 1;
-
-        flags = new byte[pointCount];
-        xCoordinates = new short[pointCount];
-        yCoordinates = new short[pointCount];
-
-        int instructionCount = bais.ReadUnsignedShort();
-        readInstructions(bais, instructionCount);
-        readFlags(pointCount, bais);
-        readCoords(pointCount, bais, x0);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public override int getEndPtOfContours(int i)
-    {
-        return endPtsOfContours[i];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public override byte GetFlags(int i)
-    {
-        return flags[i];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public override short getXCoordinate(int i)
-    {
-        return xCoordinates[i];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public override short getYCoordinate(int i)
-    {
-        return yCoordinates[i];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public override bool isComposite()
-    {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public override int getPointCount()
-    {
-        return pointCount;
-    }
-
-    /**
-     * The table is stored as relative values, but we'll store them as absolutes.
-     */
-    private void readCoords(int count, TTFDataStream bais, short x0) 
-    {
-        short x = x0;
-        short y = 0;
-        for (int i = 0; i < count; i++)
-        {
-            if ((flags[i] & X_DUAL) != 0)
+            /*
+             * https://developer.apple.com/fonts/TTRefMan/RM06/Chap6glyf.html
+             * "If a glyph has zero contours, it need not have any glyph data." set the pointCount to zero to initialize
+             * attributes and avoid nullpointer but maybe there shouldn't have GlyphDescript in the GlyphData?
+             */
+            if (numberOfContours == 0)
             {
-                if ((flags[i] & X_SHORT_VECTOR) != 0)
-                {
-                    x += (short) bais.readUnsignedByte();
-                }
+                pointCount = 0;
+                return;
             }
-            else
+
+            // Simple glyph description
+            endPtsOfContours = bais.ReadUnsignedShortArray(numberOfContours);
+
+            int lastEndPt = endPtsOfContours[numberOfContours - 1];
+            if (numberOfContours == 1 && lastEndPt == 65535)
             {
-                if ((flags[i] & X_SHORT_VECTOR) != 0)
+                // PDFBOX-2939: assume an empty glyph
+                pointCount = 0;
+                return;
+            }
+            // The last end point index reveals the total number of points
+            pointCount = lastEndPt + 1;
+
+            flags = new byte[pointCount];
+            xCoordinates = new short[pointCount];
+            yCoordinates = new short[pointCount];
+
+            int instructionCount = bais.ReadUnsignedShort();
+            ReadInstructions(bais, instructionCount);
+            readFlags(pointCount, bais);
+            ReadCoords(pointCount, bais, x0);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public override int GetEndPtOfContours(int i)
+        {
+            return endPtsOfContours[i];
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public override byte GetFlags(int i)
+        {
+            return flags[i];
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public override short GetXCoordinate(int i)
+        {
+            return xCoordinates[i];
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public override short GetYCoordinate(int i)
+        {
+            return yCoordinates[i];
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public override bool IsComposite
+        {
+            get => false;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public override int PointCount
+        {
+            get => pointCount;
+        }
+
+        /**
+         * The table is stored as relative values, but we'll store them as absolutes.
+         */
+        private void ReadCoords(int count, TTFDataStream bais, short x0)
+        {
+            short x = x0;
+            short y = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if ((flags[i] & X_DUAL) != 0)
                 {
-                    x += (short) -((short) bais.readUnsignedByte());
+                    if ((flags[i] & X_SHORT_VECTOR) != 0)
+                    {
+                        x += (short)bais.ReadUnsignedByte();
+                    }
                 }
                 else
                 {
-                    x += bais.ReadSignedShort();
+                    if ((flags[i] & X_SHORT_VECTOR) != 0)
+                    {
+                        x += (short)-((short)bais.ReadUnsignedByte());
+                    }
+                    else
+                    {
+                        x += bais.ReadSignedShort();
+                    }
                 }
+                xCoordinates[i] = x;
             }
-            xCoordinates[i] = x;
-        }
 
-        for (int i = 0; i < count; i++)
-        {
-            if ((flags[i] & Y_DUAL) != 0)
+            for (int i = 0; i < count; i++)
             {
-                if ((flags[i] & Y_SHORT_VECTOR) != 0)
+                if ((flags[i] & Y_DUAL) != 0)
                 {
-                    y += (short) bais.readUnsignedByte();
-                }
-            }
-            else
-            {
-                if ((flags[i] & Y_SHORT_VECTOR) != 0)
-                {
-                    y += (short) -((short) bais.readUnsignedByte());
+                    if ((flags[i] & Y_SHORT_VECTOR) != 0)
+                    {
+                        y += (short)bais.ReadUnsignedByte();
+                    }
                 }
                 else
                 {
-                    y += bais.ReadSignedShort();
+                    if ((flags[i] & Y_SHORT_VECTOR) != 0)
+                    {
+                        y += (short)-((short)bais.ReadUnsignedByte());
+                    }
+                    else
+                    {
+                        y += bais.ReadSignedShort();
+                    }
                 }
+                yCoordinates[i] = y;
             }
-            yCoordinates[i] = y;
         }
-    }
 
-    /**
-     * The flags are run-length encoded.
-     */
-    private void readFlags(int flagCount, TTFDataStream bais) 
-    {
-        for (int index = 0; index < flagCount; index++)
+        /**
+         * The flags are run-length encoded.
+         */
+        private void readFlags(int flagCount, TTFDataStream bais)
         {
-            flags[index] = (byte) bais.readUnsignedByte();
-            if ((flags[index] & REPEAT) != 0)
+            for (int index = 0; index < flagCount; index++)
             {
-                int repeats = bais.readUnsignedByte();
-                for (int i = 1; i <= repeats && index + i < flags.Length; i++)
+                flags[index] = (byte)bais.ReadUnsignedByte();
+                if ((flags[index] & REPEAT) != 0)
                 {
-                    flags[index + i] = flags[index];
+                    int repeats = bais.ReadUnsignedByte();
+                    for (int i = 1; i <= repeats && index + i < flags.Length; i++)
+                    {
+                        flags[index + i] = flags[index];
+                    }
+                    index += repeats;
                 }
-                index += repeats;
             }
         }
     }

@@ -1,8 +1,8 @@
-﻿/*
-  Copyright 2006-2015 Stefano Chizzolini. http://www.pdfclown.org
+/*
+  Copyright 2009-2015 Stefano Chizzolini. http://www.pdfclown.org
 
   Contributors:
-    * Alexandr Vasilyev alexandr_vslv@mail.ru
+    * Stefano Chizzolini (original code developer, http://www.stefanochizzolini.it)
 
   This file should be part of the source code distribution of "PDF Clown library" (the
   Program): see the accompanying README files for more info.
@@ -23,39 +23,29 @@
   this list of conditions.
 */
 
+using PdfClown.Documents;
+using PdfClown.Files;
+using PdfClown.Objects;
+using PdfClown.Util;
+
 using System;
-using SkiaSharp;
-using SkiaSharp.HarfBuzz;
-using HarfBuzzSharp;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
-namespace SkiaSharp.HarfBuzz
+namespace PdfClown.Documents.Contents.Fonts
 {
-    public class SKHarfBuzzFontFace
+    /**
+      <summary>TrueType font [PDF:1.6:5;OFF:2009].</summary>
+    */
+    [PDF(VersionEnum.PDF10)]
+    public sealed class PdfTrueTypeFont : SimpleFont
     {
-        public SKHarfBuzzFontFace()
+        #region dynamic
+        #region constructors
+        internal PdfTrueTypeFont(PdfDirectObject baseObject) : base(baseObject)
         { }
-
-        public void Load(byte[] data)
-        {
-            Load(new SKMemoryStream(data));
-        }
-
-        private void Load(SKMemoryStream stream, uint index = 0)
-        {
-            Load(stream.ToHarfBuzzBlob());
-        }
-
-        private void Load(Blob blob, uint index = 0)
-        {
-            Face = new Face(blob, index);
-            if (Face.Handle != IntPtr.Zero)
-            {
-                Font = new HarfBuzzSharp.Font(Face);
-                Font.SetFunctionsOpenType();
-            }
-        }
-
-        public Face Face { get; set; }
-        public HarfBuzzSharp.Font Font { get; set; }
+        #endregion
+        #endregion
     }
 }

@@ -57,6 +57,10 @@ namespace PdfClown.Documents.Contents.Fonts
 
         private static readonly string CMapName = PdfName.CMapName.StringValue;
         private static readonly string CMapType = PdfName.CMapType.StringValue;
+        private static readonly string Registry = PdfName.Registry.StringValue;
+        private static readonly string Ordering = PdfName.Ordering.StringValue;
+        private static readonly string WMode = PdfName.WMode.StringValue;
+
         #endregion
         #endregion
 
@@ -119,9 +123,21 @@ namespace PdfClown.Documents.Contents.Fonts
                                     {
                                         codes.CMapName = (string)operands[1];
                                     }
-                                    if (CMapType.Equals((string)operands[0], StringComparison.Ordinal))
+                                    else if (CMapType.Equals((string)operands[0], StringComparison.Ordinal))
                                     {
                                         codes.CMapType = (int)operands[1];
+                                    }
+                                    else if (Registry.Equals((string)operands[0], StringComparison.Ordinal))
+                                    {
+                                        codes.Registry = (string)operands[1];
+                                    }
+                                    else if (Ordering.Equals((string)operands[0], StringComparison.Ordinal))
+                                    {
+                                        codes.Ordering = (string)operands[1];
+                                    }
+                                    else if (WMode.Equals((string)operands[0], StringComparison.Ordinal))
+                                    {
+                                        codes.WMode = (int)operands[1];
                                     }
                                 }
                                 operands.Clear();

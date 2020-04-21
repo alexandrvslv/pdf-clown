@@ -267,4 +267,22 @@ namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
             return hashcode;
         }
     }
+
+    public class ArrayComparer<T> : IEqualityComparer<T[]>
+    {
+        public bool Equals(T[] x, T[] y)
+        {
+            return x.SequenceEqual(y);
+        }
+
+        public int GetHashCode(T[] obj)
+        {
+            int hashcode = 0;
+            foreach (T t in obj)
+            {
+                hashcode ^= t.GetHashCode();
+            }
+            return hashcode;
+        }
+    }
 }
