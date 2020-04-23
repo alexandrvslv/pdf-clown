@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System;
+using System.Diagnostics;
+using System.IO;
+
 namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    using System;
-    using System.IO;
+
 
     /**
      * This class is a version of the one published at
@@ -31,18 +34,6 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
      */
     public class BufferedRandomAccessFile : BinaryReader
     {
-        /**
-         * Uses a byte instead of a char buffer for efficiency reasons.
-         */
-        private readonly byte[] buffer;
-        private int bufend = 0;
-        private int bufpos = 0;
-
-        /**
-         * The position inside the actual file.
-         */
-        private long realpos = 0;
-
         /**
          * Buffer size.
          */
@@ -60,10 +51,13 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * an existing, writable regular file and a new regular file of that name cannot be created, or
          * if some other error occurs while opening or creating the file.
          */
-        public BufferedRandomAccessFile(string filename, System.Text.Encoding mode, int bufsize)
-            : this(new FileStream(filename, FileMode.Open), mode, bufsize)
-        {
-        }
+        public BufferedRandomAccessFile(string filename, System.Text.Encoding encoding, int bufsize)
+            : this(new FileStream(filename, FileMode.Open), encoding, bufsize)
+        { }
+
+        public BufferedRandomAccessFile(string filename, int bufsize)
+           : this(new FileStream(filename, FileMode.Open), System.Text.Encoding.Default, bufsize)
+        { }
 
         /**
          * Creates a new instance of the BufferedRandomAccessFile.
@@ -77,62 +71,61 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * an existing, writable regular file and a new regular file of that name cannot be created, or
          * if some other error occurs while opening or creating the file.
          */
-        public BufferedRandomAccessFile(Stream file, System.Text.Encoding mode, int bufsize)
-            : base(file, mode)
+        public BufferedRandomAccessFile(Stream file, System.Text.Encoding encoding, int bufsize)
+            : base(file, encoding, false)
         {
             BUFSIZE = bufsize;
-            buffer = new byte[BUFSIZE];
         }
+
+        public BufferedRandomAccessFile(Stream file, int bufsize)
+          : this(file, System.Text.Encoding.Default, bufsize)
+        { }
 
         /**
          * {@inheritDoc}
          */
         public override int Read()
         {
-            if (bufpos >= bufend && FillBuffer() < 0)
+            try
             {
-                return -1;
+                FillBuffer(BUFSIZE);
             }
-            if (bufend == 0)
+            catch (Exception ex)
             {
+                Debug.WriteLine("error: FillBuffer " + ex);
                 return -1;
             }
 
-            return buffer[bufpos++];//TODO test + 256) & 0xFF
+            return base.Read();//TODO test + 256) & 0xFF
             // End of fix
         }
 
-        /**
-         * Reads the next BUFSIZE bytes into the internal buffer.
-         *
-         * @return The total number of bytes read into the buffer, or -1 if there is no more data
-         * because the end of the file has been reached.
-         * @ If the first byte cannot be read for any reason other than end of file,
-         * or if the random access file has been closed, or if some other I/O error occurs.
-         */
-        private int FillBuffer()
+        public short ReadShort()
         {
-            int n = base.Read(buffer, 0, BUFSIZE);
-
-            if (n >= 0)
+            try
             {
-                realpos += n;
-                bufend = n;
-                bufpos = 0;
+                FillBuffer(BUFSIZE);
             }
-            return n;
+            catch (Exception ex)
+            {
+                Debug.WriteLine("error: FillBuffer " + ex);
+                return -1;
+            }
+            return base.ReadInt16();
         }
 
-        /**
-         * Clears the local buffer.
-         *
-         * @ If an I/O error occurs.
-         */
-        private void Invalidate()
+        public ushort ReadUnsignedShort()
         {
-            bufend = 0;
-            bufpos = 0;
-            realpos = base.BaseStream.Position;
+            try
+            {
+                FillBuffer(BUFSIZE);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("error: FillBuffer " + ex);
+                return 0;
+            }
+            return base.ReadUInt16();
         }
 
         /**
@@ -140,24 +133,15 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public override int Read(byte[] b, int off, int len)
         {
-            int leftover = bufend - bufpos;
-            if (len <= leftover)
+            try
             {
-                Array.Copy(buffer, bufpos, b, off, len);
-                bufpos += len;
-                return len;
+                FillBuffer(BUFSIZE);
             }
-            Array.Copy(buffer, bufpos, b, off, leftover);
-            bufpos += leftover;
-            if (FillBuffer() > 0)
+            catch (Exception ex)
             {
-                int bytesRead = Read(b, off + leftover, len - leftover);
-                if (bytesRead > 0)
-                {
-                    leftover += bytesRead;
-                }
+                Debug.WriteLine("error: FillBuffer " + ex);
             }
-            return leftover > 0 ? leftover : -1;
+            return base.Read(b, off, len);
         }
 
         /**
@@ -165,7 +149,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public long FilePointer
         {
-            get => realpos - bufend + bufpos;
+            get => base.BaseStream.Position;
         }
 
         /**
@@ -173,16 +157,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public virtual void Seek(long pos)
         {
-            int n = (int)(realpos - pos);
-            if (n >= 0 && n <= bufend)
-            {
-                bufpos = bufend - n;
-            }
-            else
-            {
-                base.BaseStream.Seek(pos, SeekOrigin.Begin);
-                Invalidate();
-            }
+            base.BaseStream.Seek(pos, SeekOrigin.Begin);
+
         }
     }
 

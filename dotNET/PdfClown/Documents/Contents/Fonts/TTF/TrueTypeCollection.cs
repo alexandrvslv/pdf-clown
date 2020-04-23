@@ -40,8 +40,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param file The TTC file.
          * @ If the font could not be parsed.
          */
-        public TrueTypeCollection(File file)
-                : this(new RAFDataStream(file, "r"))
+        public TrueTypeCollection(FileInfo file)
+                : this(new RAFDataStream(file.FullName, FileAccess.Read))
         {
         }
 
@@ -94,16 +94,16 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param trueTypeFontProcessor the object with the callback method.
          * @ 
          */
-        public void ProcessAllFonts(TrueTypeFontProcessor trueTypeFontProcessor)
+        public void ProcessAllFonts(ITrueTypeFontProcessor trueTypeFontProcessor, object tag)
         {
             for (int i = 0; i < numFonts; i++)
             {
-                TrueTypeFont font = getFontAtIndex(i);
-                trueTypeFontProcessor.Process(font);
+                TrueTypeFont font = GetFontAtIndex(i);
+                trueTypeFontProcessor(font, tag);
             }
         }
 
-        private TrueTypeFont getFontAtIndex(int idx)
+        private TrueTypeFont GetFontAtIndex(int idx)
         {
             stream.Seek(fontOffsets[idx]);
             TTFParser parser;
@@ -126,11 +126,11 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return The found font, nor null if none is found.
          * @ 
          */
-        public TrueTypeFont getFontByName(string name)
+        public TrueTypeFont GetFontByName(string name)
         {
             for (int i = 0; i < numFonts; i++)
             {
-                TrueTypeFont font = getFontAtIndex(i);
+                TrueTypeFont font = GetFontAtIndex(i);
                 if (font.Name.Equals(name, StringComparison.Ordinal))
                 {
                     return font;
@@ -143,10 +143,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * Implement the callback method to call {@link TrueTypeCollection#processAllFonts(TrueTypeFontProcessor)}.
          */
         //@FunctionalInterface
-        public interface TrueTypeFontProcessor
-        {
-            void Process(TrueTypeFont ttf);
-        }
+        public delegate void ITrueTypeFontProcessor(TrueTypeFont ttf, object tag);
 
         public void Dispose()
         {

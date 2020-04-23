@@ -39,8 +39,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * 
          * @see RandomAccessFile#RandomAccessFile( string, string )
          */
-        public RAFDataStream(string name, System.Text.Encoding mode)
-            : this(new FileStream(name, FileMode.Open), mode)
+        public RAFDataStream(string name, FileAccess mode)
+            : this(new FileStream(name, FileMode.Open, mode))
         {
         }
 
@@ -54,9 +54,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * 
          * @see RandomAccessFile#RandomAccessFile( File, string )
          */
-        public RAFDataStream(Stream file, System.Text.Encoding mode)
+        public RAFDataStream(Stream file)
         {
-            raf = new BufferedRandomAccessFile(file, mode, BUFFERSIZE);
+            raf = new BufferedRandomAccessFile(file, BUFFERSIZE);
             ttfFile = file;
         }
 
@@ -161,9 +161,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * {@inheritDoc}
          */
-        public override bytes.Buffer OriginalData
+        public override Bytes.Buffer OriginalData
         {
-            get => new FileInputStream(ttfFile);
+            get => new Bytes.Buffer(ttfFile);
         }
 
         /**

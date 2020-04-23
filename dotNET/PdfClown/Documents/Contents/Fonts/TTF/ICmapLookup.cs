@@ -14,33 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
-using System;
-
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-    /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
-     *
-     */
-    public class GsubWorkerFactory
-    {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
 
-        }
+    using System.Collections.Generic;
+
+    /**
+     * An interface that abstracts the cid &lt;-&gt; codepoint lookup functionality of cmap.
+     *
+     * @author Aaron Madlon-Kay
+     */
+    public interface ICmapLookup
+    {
+
+        /**
+         * Returns the GlyphId linked with the given character code.
+         *
+         * @param codePointAt the given character code to be mapped
+         * @return glyphId the corresponding glyph id for the given character code
+         */
+        int GetGlyphId(int codePointAt);
+
+        /**
+         * Returns all possible character codes for the given gid, or null if there is none.
+         *
+         * @param gid glyph id
+         * @return a list with all character codes the given gid maps to
+         */
+        List<int> GetCharCodes(int gid);
 
     }
 }

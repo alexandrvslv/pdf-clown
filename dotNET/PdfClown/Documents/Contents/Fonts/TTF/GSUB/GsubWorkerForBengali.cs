@@ -50,14 +50,14 @@ namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
             new BeforeAndAfterSpanComponent('\u09CB', '\u09C7', '\u09BE'),
             new BeforeAndAfterSpanComponent('\u09CC', '\u09C7', '\u09D7') };
 
-        private readonly CmapLookup cmapLookup;
+        private readonly ICmapLookup cmapLookup;
         private readonly GsubData gsubData;
 
         private readonly List<int> beforeHalfGlyphIds;
         private readonly Dictionary<int, BeforeAndAfterSpanComponent> beforeAndAfterSpanGlyphIds;
 
 
-        public GsubWorkerForBengali(CmapLookup cmapLookup, GsubData gsubData)
+        public GsubWorkerForBengali(ICmapLookup cmapLookup, GsubData gsubData)
         {
             this.cmapLookup = cmapLookup;
             this.gsubData = gsubData;

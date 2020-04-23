@@ -80,7 +80,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public TrueTypeFont Parse(Stream ttfFile)
         {
-            RAFDataStream raf = new RAFDataStream(ttfFile, "r");
+            RAFDataStream raf = new RAFDataStream(ttfFile);
             try
             {
                 return Parse(raf);
@@ -135,7 +135,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             int rangeShift = raf.ReadUnsignedShort();
             for (int i = 0; i < numberOfTables; i++)
             {
-                TTFTable table = readTableDirectory(font, raf);
+                TTFTable table = ReadTableDirectory(font, raf);
 
                 // skip tables with zero length
                 if (table != null)
@@ -235,7 +235,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             return false;
         }
 
-        private TTFTable readTableDirectory(TrueTypeFont font, TTFDataStream raf)
+        private TTFTable ReadTableDirectory(TrueTypeFont font, TTFDataStream raf)
         {
             TTFTable table;
             string tag = raf.ReadString(4);

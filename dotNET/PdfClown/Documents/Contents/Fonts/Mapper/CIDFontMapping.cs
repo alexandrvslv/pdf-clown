@@ -14,33 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using PdfClown.Documents.Contents.Fonts.TTF;
 
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
-using System;
-
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts
 {
-    /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
+	/**
+     * A CIDFontMapping is a kind of FontMapping which allows for an additional TrueTypeFont substitute
+     * to be provided if a CID font is not available.
      *
+     * @author John Hewson
      */
-    public class GsubWorkerFactory
-    {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
+	public sealed class CIDFontMapping : FontMapping<OpenTypeFont>
+	{
+		private readonly BaseFont ttf;
 
-        }
+		public CIDFontMapping(OpenTypeFont font, BaseFont fontBoxFont, bool isFallback)
+			: base(font, isFallback)
+		{
+			this.ttf = fontBoxFont;
+		}
 
-    }
+		/**
+		 * Returns a TrueType font when isCIDFont() is true, otherwise null.
+		 */
+		public BaseFont TrueTypeFont
+		{
+			get => ttf;
+		}
+
+		/**
+		 * Returns true if this is a CID font.
+		 */
+		public bool IsCIDFont
+		{
+			get => Font != null;
+		}
+	}
 }

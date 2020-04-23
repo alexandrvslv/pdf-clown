@@ -26,6 +26,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
     using System.Linq;
     using System.ComponentModel;
     using System.Runtime.InteropServices;
+    using System.Collections.Concurrent;
 
 
     /**
@@ -43,7 +44,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private static readonly byte[] PAD_BUF = new byte[] { 0, 0, 0 };
 
         private readonly TrueTypeFont ttf;
-        private readonly CmapLookup unicodeCmap;
+        private readonly ICmapLookup unicodeCmap;
         private readonly SortedDictionary<int, int> uniToGID;
 
         private readonly List<string> keepTables;
@@ -145,8 +146,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             output.Write(0x00010000);
             output.Write((short)nTables);
 
-            short mask = int.highestOneBit(nTables);
-            short searchRange = mask * 16;
+            short mask = (short)((uint)nTables).HighestOneBit();
+            short searchRange = (short)(mask * 16);
             output.Write((short)searchRange);
 
             var entrySelector = (short)log2(mask);
@@ -488,7 +489,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                             Debug.WriteLine("debug: Tried skipping " + (offset - lastOff) + " bytes but skipped only " + isResult + " bytes");
                         }
 
-                        byte[] buf = new byte[(int)len];
+                        sbyte[] buf = new sbyte[(int)len];
                         isResult = input.Read(buf);
 
                         if (isResult.CompareTo(len) != 0)
@@ -848,7 +849,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 WriteUint16(output, glyphIds.Count);
 
                 // glyphNameIndex[numGlyphs]
-                Dictionary<string, int> names = new Dictionary<string, int>(StringComparer.Ordinal);
+                ConcurrentDictionary<string, int> names = new ConcurrentDictionary<string, int>(StringComparer.Ordinal);
                 foreach (int gid in glyphIds)
                 {
                     string name = post.GetName(gid);
@@ -860,7 +861,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     else
                     {
                         // the name will be written explicitly
-                        int ordinal = names.computeIfAbsent(name, dummy->names.Count);
+                        int ordinal = names.GetOrAdd(name, (p) => names.Count);
                         WriteUint16(output, 258 + ordinal);
                     }
                 }
@@ -929,7 +930,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                         }
 
                         // copy lsb only, as we are beyond numOfHMetrics
-                        offset = h.NumberOfHMetrics * 4l + (glyphId - h.NumberOfHMetrics) * 2l;
+                        offset = h.NumberOfHMetrics * 4L + (glyphId - h.NumberOfHMetrics) * 2L;
                         lastOffset = ÑopyBytes(input, bos, offset, lastOffset, 2);
                     }
                 }
@@ -1109,6 +1110,18 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         public void AddGlyphIds(ISet<int> allGlyphIds)
         {
             glyphIds.AddAll(allGlyphIds);
+        }
+    }
+    public static class IntExtension
+    {
+        public static uint HighestOneBit(this uint i)
+        {
+            i |= (i >> 1);
+            i |= (i >> 2);
+            i |= (i >> 4);
+            i |= (i >> 8);
+            i |= (i >> 16);
+            return i - (i >> 1);
         }
     }
 }

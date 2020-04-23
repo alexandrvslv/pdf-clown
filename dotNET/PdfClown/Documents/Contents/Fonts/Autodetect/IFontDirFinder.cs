@@ -15,32 +15,25 @@
  * limitations under the License.
  */
 
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
-using System;
+using System.Collections.Generic;
+using System.IO;
 
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts.Autodetect
 {
+
     /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
+     * Implementers provide find method for searching native operating system for available fonts.
+     * This class is based on a class provided by Apache FOP.
      *
+     * See org.apache.fop.fonts.autodetect.FontDirFinder
      */
-    public class GsubWorkerFactory
+    public interface IFontDirFinder
     {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
-
-        }
-
+        /**
+         * Finds a list of font files.
+         * 
+         * @return list of font files.
+         */
+        List<DirectoryInfo> Find();
     }
 }

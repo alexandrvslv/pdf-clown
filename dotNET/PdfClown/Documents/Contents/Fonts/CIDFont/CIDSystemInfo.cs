@@ -28,6 +28,8 @@ namespace PdfClown.Documents.Contents.Fonts
      */
     public sealed class CIDSystemInfo : PdfObjectWrapper<PdfDictionary>
     {
+        private string registry;
+
         public CIDSystemInfo(Document document, string registry, string ordering, int supplement)
             : base(document, new PdfDictionary(
                 new PdfName[] { PdfName.Registry, PdfName.Ordering, PdfName.Supplement },
@@ -46,7 +48,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public string Registry
         {
             get => ((PdfString)Dictionary[PdfName.Registry])?.StringValue;
-            set => Dictionary[PdfName.Registry] = new PdfString(value);
+            set => Dictionary[PdfName.Registry] = new PdfString(registry = value);
         }
 
         public string Ordering

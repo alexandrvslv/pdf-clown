@@ -14,34 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-namespace PdfClown.Documents.Contents.Fonts.TTF
+namespace PdfClown.Documents.Contents.Fonts
 {
 
-    using System.Collections.Generic;
-
     /**
-     * An interface that abstracts the cid &lt;-&gt; codepoint lookup functionality of cmap.
+     * A font mapping from a PDF font to a FontBox font.
      *
-     * @author Aaron Madlon-Kay
+     * @author John Hewson
      */
-    public interface CmapLookup
+    public class FontMapping<T> where T : BaseFont
     {
+        private readonly T font;
+        private readonly bool isFallback;
+
+        public FontMapping(T font, bool isFallback)
+        {
+            this.font = font;
+            this.isFallback = isFallback;
+        }
 
         /**
-         * Returns the GlyphId linked with the given character code.
-         *
-         * @param codePointAt the given character code to be mapped
-         * @return glyphId the corresponding glyph id for the given character code
+         * Returns the mapped, FontBox font. This is never null.
          */
-        int GetGlyphId(int codePointAt);
+        public T Font
+        {
+            get => font;
+        }
 
         /**
-         * Returns all possible character codes for the given gid, or null if there is none.
-         *
-         * @param gid glyph id
-         * @return a list with all character codes the given gid maps to
+         * Returns true if the mapped font is a fallback, i.e. a substitute based on basic font style,
+         * such as bold/italic, rather than font name.
          */
-        List<int> GetCharCodes(int gid);
-
+        public bool IsFallback
+        {
+            get => isFallback;
+        }
     }
 }

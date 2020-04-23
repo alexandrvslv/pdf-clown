@@ -55,9 +55,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Returns the CFF font, which is a compact representation of a PostScript Type 1, or CIDFont
          */
-        public CFFFont GetFont()
+        public CFFFont Font
         {
-            return cffFont;
+            get => cffFont;
         }
 
         /**

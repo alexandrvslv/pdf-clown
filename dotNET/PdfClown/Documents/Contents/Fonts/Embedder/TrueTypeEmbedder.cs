@@ -42,7 +42,7 @@ namespace PdfClown.Documents.Contents.Fonts
         protected TrueTypeFont ttf;
         protected FontDescriptor fontDescriptor;
 
-        protected readonly CmapLookup cmapLookup;
+        protected readonly ICmapLookup cmapLookup;
         private readonly ISet<int> subsetCodePoints = new HashSet<int>();
         private readonly bool embedSubset;
 
@@ -69,7 +69,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 // full embedding
                 PdfStream stream = new PdfStream(document, ttf.OriginalData, PdfName.FlateDecode);
                 stream.Header[PdfName.Length1] = PdfInteger.Get(ttf.OriginalDataSize);
-                fontDescriptor.FontFile2 = stream;
+                fontDescriptor.FontFile2 = new FontFile(document, stream);
             }
 
             dict[PdfName.BaseFont] = new PdfName(ttf.Name);
@@ -96,7 +96,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
             }
             stream.Header[PdfName.Length1] = PdfInteger.Get(ttf.OriginalDataSize);
-            fontDescriptor.FontFile2 = stream;
+            fontDescriptor.FontFile2 = new FontFile(document, stream);
         }
 
         /**

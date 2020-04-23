@@ -142,6 +142,6 @@ namespace PdfClown.Bytes
         /**
           <summary>Sets the pointer relative position.</summary>
         */
-        void Skip(long offset);
+        long Skip(long offset);
     }
 }

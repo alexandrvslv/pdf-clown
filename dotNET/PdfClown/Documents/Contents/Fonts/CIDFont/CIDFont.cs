@@ -34,7 +34,7 @@ namespace PdfClown.Documents.Contents.Fonts
      */
     public abstract class CIDFont : Font// PDFontLike, PDVectorFont
     {
-        public static CIDFont WrapFont(PdfDictionary pdfDictionary, CompositeFont compositeFont)
+        public static CIDFont WrapFont(PdfDictionary pdfDictionary, PdfType0Font PdfType0Font)
         {
             if (pdfDictionary.Wrapper is CIDFont cidFont)
                 return cidFont;
@@ -43,15 +43,15 @@ namespace PdfClown.Documents.Contents.Fonts
 
             var subType = (PdfName)pdfDictionary[PdfName.Subtype];
             if (subType.Equals(PdfName.CIDFontType0))
-                cidFont = new CIDFontType0(pdfDictionary, compositeFont);
+                cidFont = new CIDFontType0(pdfDictionary, PdfType0Font);
             else if (subType.Equals(PdfName.CIDFontType2))
-                cidFont = new CIDFontType2(pdfDictionary, compositeFont);
+                cidFont = new CIDFontType2(pdfDictionary, PdfType0Font);
             else
                 throw new NotSupportedException();
             return cidFont;
         }
 
-        protected readonly CompositeFont parent;
+        protected readonly PdfType0Font parent;
 
         private Dictionary<int, float> widths;
         private int? defaultWidth;
@@ -83,7 +83,7 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @param fontDictionary The font dictionary according to the PDF specification.
          */
-        public CIDFont(PdfDictionary fontDictionary, CompositeFont parent)
+        public CIDFont(PdfDictionary fontDictionary, PdfType0Font parent)
             : base(fontDictionary)
         {
             this.parent = parent;
@@ -144,7 +144,7 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @return parent Type 0 font
          */
-        public virtual CompositeFont Parent
+        public virtual PdfType0Font Parent
         {
             get => parent;
         }

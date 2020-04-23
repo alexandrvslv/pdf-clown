@@ -14,33 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
-using System;
-
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts
 {
     /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
+     * FontMapper factory class.
      *
+     * @author John Hewson
      */
-    public class GsubWorkerFactory
+    public sealed class FontMappers
     {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
+        private static IFontMapper instance;
 
+        private FontMappers()
+        {
         }
+
+        /**
+         * Returns the singleton FontMapper instance.
+         */
+        public static IFontMapper Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new FontMapperImpl();
+                }
+                return instance;
+            }
+            set => instance = value;
+        }
+        /**
+         * Sets the singleton FontMapper instance.
+         */
 
     }
 }

@@ -15,32 +15,28 @@
  * limitations under the License.
  */
 
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
-using System;
-
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts
 {
-    /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
+	/**
+     * Font file format.
      *
+     * @author John Hewson
      */
-    public class GsubWorkerFactory
-    {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
+	public enum FontFormat
+	{
+		/**
+		 * TrueType font.
+		 */
+		TTF,
 
-        }
+		/**
+		 * OpenType font.
+		 */
+		OTF,
 
-    }
+		/**
+		 * Type 1 (binary) font.
+		 */
+		PFB
+	}
 }

@@ -15,32 +15,32 @@
  * limitations under the License.
  */
 
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
+
 using System;
 
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts.Autodetect
 {
     /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
-     *
+     * Mac font directory finder. This class is based on a class provided by Apache FOP. see
+     * org.apache.fop.fonts.autodetect.MacFontDirFinder
      */
-    public class GsubWorkerFactory
+    public class MacFontDirFinder : NativeFontDirFinder
     {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
+
+        /**
+         * Some guesses at possible unix font directory locations.
+         * 
+         * @return a array of possible font directory locations
+         */
+        protected override string[] GetSearchableDirectories()
         {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
-
+            string fontsfolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+            return new string[] {
+                fontsfolder, // user
+                "/Library/Fonts/", // local
+                "/System/Library/Fonts/", // system
+                "/Network/Library/Fonts/" // network
+        };
         }
-
     }
 }

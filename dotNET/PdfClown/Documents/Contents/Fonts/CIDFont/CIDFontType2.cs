@@ -37,7 +37,7 @@ namespace PdfClown.Documents.Contents.Fonts
         private readonly int[] cid2gid;
         private readonly bool isEmbedded;
         private readonly bool isDamaged;
-        private readonly CmapLookup cmap; // may be null
+        private readonly ICmapLookup cmap; // may be null
         private SKMatrix? fontMatrix;
         private SKRect? fontBBox;
         private readonly HashSet<int> noMapping = new HashSet<int>();
@@ -58,7 +58,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param parent The parent font.
          * @throws IOException
          */
-        public CIDFontType2(PdfDictionary fontDictionary, CompositeFont parent)
+        public CIDFontType2(PdfDictionary fontDictionary, PdfType0Font parent)
             : this(fontDictionary, parent, null)
         {
         }
@@ -71,7 +71,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param trueTypeFont The true type font used to create the parent font
          * @throws IOException
          */
-        public CIDFontType2(PdfDictionary fontDictionary, CompositeFont parent, TrueTypeFont trueTypeFont)
+        public CIDFontType2(PdfDictionary fontDictionary, PdfType0Font parent, TrueTypeFont trueTypeFont)
             : base(fontDictionary, parent)
         {
 
@@ -391,7 +391,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 // we're not supposed to have CFF fonts inside PDCIDFontType2, but if we do,
                 // then we treat their CIDs as GIDs, see PDFBOX-3344
                 int cid = CodeToGID(code);
-                Type2CharString charstring = ((OpenTypeFont)ttf).CFF.GetFont().GetType2CharString(cid);
+                Type2CharString charstring = ((OpenTypeFont)ttf).CFF.Font().GetType2CharString(cid);
                 return charstring.Path;
             }
             else

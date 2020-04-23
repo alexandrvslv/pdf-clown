@@ -14,33 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
 using System;
+using System.Diagnostics;
 
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts.Autodetect
 {
-    /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
-     *
+
+
+	/**
+     * FontFinder for native Windows platforms. This class is based on a class provided by Apache FOP. see
+     * org.apache.fop.fonts.autodetect.WindowsFontDirFinder
      */
-    public class GsubWorkerFactory
-    {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
+	public class WindowsFontDirFinder : NativeFontDirFinder
+	{
 
-        }
+		/**
+         * Some guesses at possible unix font directory locations.
+         * 
+         * @return a list of possible font locations
+         */
 
-    }
+		protected override string[] GetSearchableDirectories()
+		{
+			string fontsfolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+			return new string[] {
+				fontsfolder, // user               
+            };
+		}
+	}
 }

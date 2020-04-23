@@ -817,7 +817,7 @@ namespace PdfClown.Documents.Contents.Composition
                   composite fonts are always treated as multi-byte encodings which require explicit word
                   spacing adjustment.
                 */
-                double wordSpaceAdjust = font is fonts::CompositeFont ? -state.WordSpace * 1000 * state.Scale / fontSize : 0;
+                double wordSpaceAdjust = font is fonts::PdfType0Font ? -state.WordSpace * 1000 * state.Scale / fontSize : 0;
 
                 // Vertical alignment.
                 double y;

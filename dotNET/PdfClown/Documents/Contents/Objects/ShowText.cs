@@ -130,7 +130,7 @@ namespace PdfClown.Documents.Contents.Objects
                 return;
             double fontSize = state.FontSize;
             double scaledFactor = Font.GetScalingFactor(fontSize) * state.Scale;
-            bool wordSpaceSupported = !(font is CompositeFont);
+            bool wordSpaceSupported = !(font is PdfType0Font);
             double wordSpace = wordSpaceSupported ? state.WordSpace * state.Scale : 0;
             double charSpace = state.CharSpace * state.Scale;
             SKMatrix ctm = state.Ctm;

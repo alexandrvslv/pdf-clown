@@ -435,6 +435,7 @@ namespace PdfClown.Objects
         public static readonly PdfName Outlines = new PdfName("Outlines");
         public static readonly PdfName Overlay = new PdfName("Overlay");
         public static readonly PdfName P = new PdfName("P");
+        public static readonly PdfName Panose = new PdfName("Panose");
         public static readonly PdfName Page = new PdfName("Page");
         public static readonly PdfName PageElement = new PdfName("PageElement");
         public static readonly PdfName PageLabel = new PdfName("PageLabel");

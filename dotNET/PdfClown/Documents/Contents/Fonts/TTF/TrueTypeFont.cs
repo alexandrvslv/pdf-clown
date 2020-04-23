@@ -41,7 +41,6 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         protected Dictionary<string, TTFTable> tables = new Dictionary<string, TTFTable>(StringComparer.Ordinal);
         private readonly TTFDataStream data;
         private volatile Dictionary<string, int> postScriptNames;
-
         private readonly object lockReadtable = new object();
         private readonly object lockPSNames = new object();
         private readonly List<string> enabledGsubFeatures = new List<string>();
@@ -508,7 +507,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          *
          * @ if the font could not be read
          */
-        public CmapLookup GetUnicodeCmapLookup()
+        public ICmapLookup GetUnicodeCmapLookup()
         {
             return GetUnicodeCmapLookup(true);
         }
@@ -522,7 +521,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param isStrict False if we allow falling back to any cmap, even if it's not Unicode.
          * @ if the font could not be read, or there is no Unicode cmap
          */
-        public CmapLookup GetUnicodeCmapLookup(bool isStrict)
+        public ICmapLookup GetUnicodeCmapLookup(bool isStrict)
         {
             CmapSubtable cmap = GetUnicodeCmapImpl(isStrict);
             if (enabledGsubFeatures.Count > 0)
@@ -612,7 +611,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             int uni = ParseUniName(name);
             if (uni > -1)
             {
-                CmapLookup cmap = GetUnicodeCmapLookup(false);
+                ICmapLookup cmap = GetUnicodeCmapLookup(false);
                 return cmap.GetGlyphId(uni);
             }
 
@@ -646,7 +645,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 {
                     for (int chPos = 3; chPos + 4 <= nameLength; chPos += 4)
                     {
-                        int codePoint = int.parseInt(name.Substring(chPos, 4), 16);
+                        int codePoint = Convert.ToInt32(name.Substring(chPos, 4), 16);
                         if (codePoint <= 0xD7FF || codePoint >= 0xE000) // disallowed code area
                         {
                             uniStr.Append((char)codePoint);
@@ -657,10 +656,11 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     {
                         return -1;
                     }
-                    return unicode.codePointAt(0);
+                    return unicode[0];
                 }
                 catch (Exception e)
                 {
+                    Debug.WriteLine("error: ParseUniName " + e);
                     return -1;
                 }
             }
@@ -741,7 +741,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * Enable glyph substitutions for vertical writing.
          */
-        public void enableVerticalSubstitutions()
+        public void EnableVerticalSubstitutions()
         {
             EnableGsubFeature("vrt2");
             EnableGsubFeature("vert");

@@ -61,7 +61,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param fontDictionary The font dictionary according to the PDF specification.
          * @param parent The parent font.
          */
-        public CIDFontType0(PdfDictionary fontDictionary, CompositeFont parent)
+        public CIDFontType0(PdfDictionary fontDictionary, PdfType0Font parent)
             : base(fontDictionary, parent)
         {
             FontDescriptor fd = FontDescriptor;

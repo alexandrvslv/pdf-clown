@@ -14,33 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+using System.Collections.Generic;
 
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
-using System;
-
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts
 {
     /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
+     * External font service provider interface.
      *
+     * @author John Hewson
      */
-    public class GsubWorkerFactory
+    public abstract class FontProvider
     {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
+        /**
+		 * Returns a string containing debugging information. This will be written to the log if no
+		 * suitable fonts are found and no fallback fonts are available. May be null.
+		 */
+        public abstract string ToDebugString();
 
-        }
-
+        /**
+		 * Returns a list of information about fonts on the system.
+		 */
+        public abstract IEnumerable<FontInfo> FontInfo { get; }
     }
 }

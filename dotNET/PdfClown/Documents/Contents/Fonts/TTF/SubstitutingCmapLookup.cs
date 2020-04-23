@@ -24,7 +24,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
      *
      * @author Aaron Madlon-Kay
      */
-    public class SubstitutingCmapLookup : CmapLookup
+    public class SubstitutingCmapLookup : ICmapLookup
     {
         private readonly CmapSubtable cmap;
         private readonly GlyphSubstitutionTable gsub;

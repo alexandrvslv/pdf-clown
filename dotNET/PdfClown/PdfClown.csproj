@@ -21,6 +21,8 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
+
+
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -166,6 +168,20 @@
     <RestoreSources>../FreeImage.NETCore/Package;$(RestoreSources);</RestoreSources>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Documents\Contents\Fonts\AFM\AFMParser.cs" />
+    <None Include="Documents\Contents\Fonts\AFM\CharMetric.cs" />
+    <None Include="Documents\Contents\Fonts\AFM\Composite.cs" />
+    <None Include="Documents\Contents\Fonts\AFM\CompositePart.cs" />
+    <None Include="Documents\Contents\Fonts\AFM\FontMetrics.cs" />
+    <None Include="Documents\Contents\Fonts\AFM\KernPair.cs" />
+    <None Include="Documents\Contents\Fonts\AFM\Ligature.cs" />
+    <None Include="Documents\Contents\Fonts\AFM\TrackKern.cs" />
+    <None Include="Documents\Contents\Fonts\Autodetect\IFontDirFinder.cs" />
+    <None Include="Documents\Contents\Fonts\Autodetect\FontFileFinder.cs" />
+    <None Include="Documents\Contents\Fonts\Autodetect\MacFontDirFinder.cs" />
+    <None Include="Documents\Contents\Fonts\Autodetect\NativeFontDirFinder.cs" />
+    <None Include="Documents\Contents\Fonts\Autodetect\UnixFontDirFinder.cs" />
+    <None Include="Documents\Contents\Fonts\Autodetect\WindowsFontDirFinder.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFCharset.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFCIDFont.cs" />
     <None Include="Documents\Contents\Fonts\CFF\CFFDataInput.cs" />
@@ -197,6 +213,19 @@
     <None Include="Documents\Contents\Fonts\CMap\CIDRange.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CodespaceRange.cs" />
     <None Include="Documents\Contents\Fonts\Embedder\TrueTypeEmbedder.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\CIDFontMapping.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FileSystemFontProvider.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FontCache.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FontFormat.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FontInfo.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\IFontMapper.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FontMapperImpl.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FontMappers.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FontMapping.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\FontProvider.cs" />
+    <None Include="Documents\Contents\Fonts\Mapper\Standard14Fonts.cs" />
+    <None Include="Documents\Contents\Fonts\Panose\Panose.cs" />
+    <None Include="Documents\Contents\Fonts\Panose\PanoseClassification.cs" />
     <None Include="Documents\Contents\Fonts\TTF\GSUB\CompoundCharacterTokenizer.cs" />
     <None Include="Documents\Contents\Fonts\Type1\DamagedFontException.cs" />
     <None Include="Documents\Contents\Fonts\Type1\PfbParser.cs" />

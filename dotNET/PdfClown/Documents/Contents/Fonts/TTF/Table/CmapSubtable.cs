@@ -28,7 +28,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
      * 
      * @author Ben Litchfield
      */
-    public class CmapSubtable : CmapLookup
+    public class CmapSubtable : ICmapLookup
     {
         //private static readonly Log LOG = LogFactory.getLog(CmapSubtable.class);
 

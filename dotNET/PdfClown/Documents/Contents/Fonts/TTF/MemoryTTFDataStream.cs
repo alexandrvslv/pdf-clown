@@ -39,14 +39,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         {
             try
             {
-                MemoryStream output = new MemoryStream(isource.available());
-                byte[] buffer = new byte[1024];
-                int amountRead;
-                while ((amountRead = isource.Read(buffer)) != -1)
-                {
-                    output.Write(buffer, 0, amountRead);
-                }
-                data = output.ToArray();
+                data = isource.GetBuffer();
             }
             finally
             {
@@ -189,9 +182,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * {@inheritDoc}
          */
-        public override bytes.Buffer OriginalData
+        public override Bytes.Buffer OriginalData
         {
-            get => new ByteArrayInputStream(data);
+            get => new Bytes.Buffer(data);
         }
 
         /**

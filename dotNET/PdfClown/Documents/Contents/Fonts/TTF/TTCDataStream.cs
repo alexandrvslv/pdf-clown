@@ -26,11 +26,11 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
      *
      * @author John Hewson
      */
-    class TTCDataStream : TTFDataStream
+    public class TTCDataStream : TTFDataStream
     {
         private readonly TTFDataStream stream;
 
-        TTCDataStream(TTFDataStream stream)
+        public TTCDataStream(TTFDataStream stream)
         {
             this.stream = stream;
         }
@@ -45,7 +45,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             return stream.ReadLong();
         }
 
-        public override int ReadUnsignedShort()
+        public override ushort ReadUnsignedShort()
         {
             return stream.ReadUnsignedShort();
         }
@@ -76,7 +76,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             get => stream.CurrentPosition;
         }
 
-        public override bytes.Buffer OriginalData
+        public override Bytes.Buffer OriginalData
         {
             get => stream.OriginalData;
         }

@@ -37,7 +37,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SkiaSharp;
-
+using PdfClown.Documents.Contents.Fonts.CCF;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -78,7 +78,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public static Font Get(Document context, IInputStream fontData)
         {
             if (OpenFontParser.IsOpenFont(fontData))
-                return CompositeFont.Get(context, fontData);
+                return PdfType0Font.Get(context, fontData);
             else
                 throw new NotImplementedException();
         }
@@ -132,36 +132,34 @@ namespace PdfClown.Documents.Contents.Fonts
             if (fontType.Equals(PdfName.Type1)) // Type 1.
             {
                 if (!fontDictionary.ContainsKey(PdfName.FontDescriptor)) // Standard Type 1.
+                {
                     return new StandardType1Font(reference);
+                }
                 else // Custom Type 1.
                 {
-                    PdfDictionary fontDescriptor = (PdfDictionary)fontDictionary.Resolve(PdfName.FontDescriptor);
-                    if (fontDescriptor.ContainsKey(PdfName.FontFile3)
-                      && ((PdfName)((PdfStream)fontDescriptor.Resolve(PdfName.FontFile3)).Header.Resolve(PdfName.Subtype)).Equals(PdfName.OpenType)) // OpenFont/CFF.
-                        throw new NotImplementedException();
-                    else // Non-OpenFont Type 1.
-                        return new PdfType1Font(reference);
+                    return new PdfType1Font(reference);
                 }
             }
             else if (fontType.Equals(PdfName.TrueType)) // TrueType.
+            {
                 return new PdfTrueTypeFont(reference);
+            }
             else if (fontType.Equals(PdfName.Type0)) // OpenFont.
             {
-                PdfDictionary cidFontDictionary = (PdfDictionary)((PdfArray)fontDictionary.Resolve(PdfName.DescendantFonts)).Resolve(0);
-                PdfName cidFontType = (PdfName)cidFontDictionary[PdfName.Subtype];
-                if (cidFontType.Equals(PdfName.CIDFontType0)) // OpenFont/CFF.
-                    return new PdfType0Font(reference);
-                else if (cidFontType.Equals(PdfName.CIDFontType2)) // OpenFont/TrueType.
-                    return new PdfType2Font(reference);
-                else
-                    throw new NotImplementedException("Type 0 subtype " + cidFontType + " not supported yet.");
+                return new PdfType0Font(reference);
             }
             else if (fontType.Equals(PdfName.Type3)) // Type 3.
+            {
                 return new PdfType3Font(reference);
+            }
             else if (fontType.Equals(PdfName.MMType1)) // MMType1.
+            {
                 return new MMType1Font(reference);
+            }
             else // Unknown.
+            {
                 throw new NotSupportedException("Unknown font type: " + fontType + " (reference: " + reference + ")");
+            }
         }
         #endregion
         #endregion
@@ -224,6 +222,8 @@ namespace PdfClown.Documents.Contents.Fonts
           <summary>Default glyph width.</summary>
         */
         private int defaultWidth = UndefinedWidth;
+        private double textHeight = -1; // TODO: temporary until glyph bounding boxes are implemented.
+        private static Dictionary<string, SKTypeface> cache;
         #endregion
 
         #region constructors
@@ -380,6 +380,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public abstract SKPath GetNormalizedPath(int code);
         public abstract bool HasGlyph(int code);
         public abstract float GetWidthFromFont(int code);
+        public abstract int ReadCode(Bytes.Buffer input, out byte[] bytes);
         /**
           <summary>Gets whether the font encoding is custom (that is non-Unicode).</summary>
         */
@@ -413,9 +414,7 @@ namespace PdfClown.Documents.Contents.Fonts
             var text = this is PdfType1Font
                 ? System.Text.Encoding.UTF8.GetBytes(new[] { textChar })
                 //: font is Type1Font && typeface != null
-                //? BitConverter.GetBytes(font.GetGlyph(textChar))
-                : this is PdfType2Font
-                ? System.Text.Encoding.UTF8.GetBytes(new[] { textChar })
+                //? BitConverter.GetBytes(font.GetGlyph(textChar))                
                 : Encode(textChar.ToString());
 
             if (fill != null)
@@ -603,9 +602,6 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override int GetHashCode()
         { return Name.GetHashCode(); }
-
-        private double textHeight = -1; // TODO: temporary until glyph bounding boxes are implemented.
-        private static Dictionary<string, SKTypeface> cache;
 
         /**
           <summary>Gets the unscaled height of the given character.</summary>

@@ -191,11 +191,18 @@ namespace PdfClown.Documents.Contents.Fonts
 
     public class Style : PdfObjectWrapper<PdfDictionary>
     {
+        private Panose panose;
+
         public Style(PdfDirectObject baseObject) : base(baseObject)
         { }
 
         public Style(Document document, PdfDictionary dictionary) : base(document, dictionary)
         { }
 
+        public Panose Panose
+        {
+            get => panose ?? (panose = new Panose(((PdfString)Dictionary.Resolve(PdfName.Panose)).GetBuffer()));
+            set => Dictionary[PdfName.Panose] = new PdfString( value?.Bytes);
+        }
     }
 }

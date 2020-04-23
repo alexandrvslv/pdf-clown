@@ -14,33 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-using PdfClown.Documents.Contents.Fonts.TTF.Model;
-using System;
-
-namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
+namespace PdfClown.Documents.Contents.Fonts.AFM
 {
     /**
-     * Gets a {@link Language} specific instance of a {@link GsubWorker}
-     * 
-     * @author Palash Ray
+     * This class represents a ligature, which is an entry of the CharMetrics.
      *
+     * @author Ben Litchfield
      */
-    public class GsubWorkerFactory
+    public class Ligature
     {
-        public GsubWorker GetGsubWorker(ICmapLookup cmapLookup, GsubData gsubData)
-        {
-            switch (gsubData.Language)
-            {
-                case Language.beng:
-                case Language.bng2:
-                    return new GsubWorkerForBengali(cmapLookup, gsubData);
-                default:
-                    throw new NotSupportedException(
-                            "The language " + gsubData.Language + " is not yet supported");
-            }
+        private string successor;
+        private string ligature;
 
+        /** Getter for property ligature.
+         * @return Value of property ligature.
+         */
+        public string LigatureValue
+        {
+            get => ligature;
+            set => ligature = value;
         }
 
+        /** Getter for property successor.
+         * @return Value of property successor.
+         */
+        public string Successor
+        {
+            get => successor;
+            set => successor = value;
+        }
     }
 }

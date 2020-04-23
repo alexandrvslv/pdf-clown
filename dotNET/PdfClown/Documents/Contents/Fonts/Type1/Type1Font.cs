@@ -70,7 +70,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 *
 		 * @throws IOException if something went wrong
 		 */
-        public static Type1Font createWithPFB(byte[] pfbBytes)
+        public static Type1Font CreateWithPFB(byte[] pfbBytes)
         {
             PfbParser pfb = new PfbParser(pfbBytes);
             Type1Parser parser = new Type1Parser();
@@ -85,7 +85,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 * @return A new Type1Font instance
 		 * @throws IOException if something went wrong
 		 */
-        public static Type1Font createWithSegments(byte[] segment1, byte[] segment2)
+        public static Type1Font CreateWithSegments(byte[] segment1, byte[] segment2)
         {
             Type1Parser parser = new Type1Parser();
             return parser.Parse(segment1, segment2);
