@@ -83,7 +83,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @return A Type0 font with a CIDFontType2 descendant.
          * @throws IOException If there is an error reading the font stream.
          */
-        public static PdfType0Font Load(Document doc, bytes.Buffer input)
+        public static PdfType0Font Load(Document doc, bytes.IInputStream input)
         {
             return new PdfType0Font(doc, new TTFParser().Parse(input), true, true, false);
         }
@@ -180,7 +180,7 @@ namespace PdfClown.Documents.Contents.Fonts
         private bool isCMapPredefined;
         private bool isDescendantCJK;
         private CMap cMapUCS2;
-        private PDCIDFontType2Embedder embedder;
+        private PdfCIDFontType2Embedder embedder;
         private GsubData gsubData;
         private ICmapLookup cmapLookup;
         private TrueTypeFont ttf;
@@ -199,7 +199,7 @@ namespace PdfClown.Documents.Contents.Fonts
             gsubData = ttf.GsubData;
             cmapLookup = ttf.GetUnicodeCmapLookup();
 
-            embedder = new PDCIDFontType2Embedder(document, Dictionary, ttf, embedSubset, this, vertical);
+            embedder = new PdfCIDFontType2Embedder(document, Dictionary, ttf, embedSubset, this, vertical);
             CIDFont = embedder.GetCIDFont();
             LoadEncoding();
             if (closeTTF)
@@ -269,7 +269,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override bool IsVertical
         {
-            get => cmap.WMode == 1;
+            get => toUnicodeCMap.WMode == 1;
         }
 
         public override bool IsEmbedded
@@ -351,10 +351,10 @@ namespace PdfClown.Documents.Contents.Fonts
                 // if the font is composite and uses a predefined cmap (excluding Identity-H/V) then
                 // or if its descendant font uses Adobe-GB1/CNS1/Japan1/Korea1
 
-                // a) Map the character code to a character identifier (CID) according to the font?s CMap
+                // a) Dictionary the character code to a character identifier (CID) according to the font?s CMap
                 int cid = CodeToCID(code);
 
-                // e) Map the CID according to the CMap from step d), producing a Unicode value
+                // e) Dictionary the CID according to the CMap from step d), producing a Unicode value
                 return cMapUCS2.ToUnicode(cid);
             }
             else
@@ -364,7 +364,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 {
                     // if no value has been produced, there is no way to obtain Unicode for the character.
                     String cid = "CID+" + CodeToCID(code);
-                    Debug.WriteLine("warning: No Unicode mapping for " + cid + " (" + code + ") in font " + Name);
+                    Debug.WriteLine("warn: No Unicode mapping for " + cid + " (" + code + ") in font " + Name);
                     // we keep track of which warnings have been issued, so we don't log multiple times
                     noUnicode.add(code);
                 }
@@ -426,6 +426,11 @@ namespace PdfClown.Documents.Contents.Fonts
             return CIDFont.HasGlyph(code);
         }
 
+        public CMap CMapUCS2
+        {
+            get => cMapUCS2;
+        }
+
         public GsubData GsubData
         {
             get => gsubData;
@@ -442,8 +447,8 @@ namespace PdfClown.Documents.Contents.Fonts
             if (encoding is PdfName encodingName)
             {
                 // predefined CMap
-                cmap = CMap.Get(encodingName);
-                if (cmap != null)
+                toUnicodeCMap = CMap.Get(encodingName);
+                if (toUnicodeCMap != null)
                 {
                     isCMapPredefined = true;
                 }
@@ -454,12 +459,12 @@ namespace PdfClown.Documents.Contents.Fonts
             }
             else if (encoding != null)
             {
-                cmap = CMap.Get(encoding);
-                if (cmap == null)
+                toUnicodeCMap = CMap.Get(encoding);
+                if (toUnicodeCMap == null)
                 {
                     throw new IOException("Missing required CMap");
                 }
-                else if (!cmap.HasCIDMappings)
+                else if (!toUnicodeCMap.HasCIDMappings)
                 {
                     Debug.WriteLine("warning Invalid Encoding CMap in font " + Name);
                 }
@@ -484,11 +489,11 @@ namespace PdfClown.Documents.Contents.Fonts
             if (isCMapPredefined && !(encoding == PdfName.IdentityH || encoding == PdfName.IdentityV) ||
                 isDescendantCJK)
             {
-                // a) Map the character code to a CID using the font's CMap
+                // a) Dictionary the character code to a CID using the font's CMap
                 // b) Obtain the ROS from the font's CIDSystemInfo
                 // c) Construct a second CMap name by concatenating the ROS in the format "R-O-UCS2"
                 // d) Obtain the CMap with the constructed name
-                // e) Map the CID according to the CMap from step d), producing a Unicode value
+                // e) Dictionary the CID according to the CMap from step d), producing a Unicode value
 
                 // todo: not sure how to interpret the PDF spec here, do we always override? or only when Identity-H/V?
                 string strName = null;

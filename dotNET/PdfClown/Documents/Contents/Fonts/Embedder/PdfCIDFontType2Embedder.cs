@@ -25,8 +25,6 @@ using System.Linq;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
-
-
     /**
      * Embedded PDCIDFontType2 builder. Helper class to populate a PDCIDFontType2 and its parent
      * PDType0Font from a TTF.
@@ -34,7 +32,7 @@ namespace PdfClown.Documents.Contents.Fonts
      * @author Keiji Suzuki
      * @author John Hewson
      */
-    sealed class PDCIDFontType2Embedder : TrueTypeEmbedder
+    internal sealed class PdfCIDFontType2Embedder : TrueTypeEmbedder
     {
         private readonly Document document;
         private readonly PdfType0Font parent;
@@ -51,8 +49,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param parent parent Type 0 font
          * @ if the TTF could not be read
          */
-        public PDCIDFontType2Embedder(Document document, PdfDictionary dict, TrueTypeFont ttf,
-                bool embedSubset, PdfType0Font parent, bool vertical)
+        public PdfCIDFontType2Embedder(Document document, PdfDictionary dict, TrueTypeFont ttf, bool embedSubset, PdfType0Font parent, bool vertical)
                 : base(document, dict, ttf, embedSubset)
         {
             this.document = document;
@@ -144,7 +141,7 @@ namespace PdfClown.Documents.Contents.Fonts
             toUniWriter.writeTo(output);
             var cMapStream = new Bytes.Buffer(output.ToArray());
 
-            PdfStream stream = new PdfStream(document, cMapStream, PdfName.FlateDecode);
+            PdfStream stream = new PdfStream(cMapStream);
 
             // surrogate code points, requires PDF 1.5
             if (hasSurrogates)
@@ -223,7 +220,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
 
             var input = new Bytes.Buffer(output.ToArray());
-            PdfStream stream = new PdfStream(document, input, PdfName.FlateDecode);
+            PdfStream stream = new PdfStream(input);
 
             cidFont[PdfName.CIDToGIDMap] = stream.Reference;
         }
@@ -243,7 +240,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
 
             var input = new Bytes.Buffer(bytes);
-            PdfStream stream = new PdfStream(document, input, PdfName.FlateDecode);
+            PdfStream stream = new PdfStream(input);
 
             fontDescriptor.CIDSet = stream;
         }
@@ -287,7 +284,7 @@ namespace PdfClown.Documents.Contents.Fonts
             VerticalHeaderTable vhea = ttf.VerticalHeader;
             if (vhea == null)
             {
-                Debug.WriteLine("warning: Font to be subset is set to vertical, but has no 'vhea' table");
+                Debug.WriteLine("warn: Font to be subset is set to vertical, but has no 'vhea' table");
                 return false;
             }
 

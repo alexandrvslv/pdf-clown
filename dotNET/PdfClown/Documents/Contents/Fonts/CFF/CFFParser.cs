@@ -365,7 +365,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                         case 0xb:
                             if (hasExponent)
                             {
-                                Debug.WriteLine("warning: duplicate 'E' ignored after " + sb);
+                                Debug.WriteLine("warn: duplicate 'E' ignored after " + sb);
                                 break;
                             }
                             sb.Append("E");
@@ -375,7 +375,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                         case 0xc:
                             if (hasExponent)
                             {
-                                Debug.WriteLine("warning: duplicate 'E-' ignored after " + sb);
+                                Debug.WriteLine("warn: duplicate 'E-' ignored after " + sb);
                                 break;
                             }
                             sb.Append("E-");
@@ -542,7 +542,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 ParseCIDFontDicts(input, topDict, (CFFCIDFont)font, numEntries);
 
                 List<float> privMatrix = null;
-                List<Dictionary<string, Object>> fontDicts = ((CFFCIDFont)font).FontDicts;
+                List<Dictionary<string, object>> fontDicts = ((CFFCIDFont)font).FontDicts;
                 if (fontDicts.Count > 0 && fontDicts[0].ContainsKey("FontMatrix"))
                 {
                     privMatrix = (List<float>)fontDicts[0]["FontMatrix"];
@@ -624,8 +624,8 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             input.Position = fontDictOffset;
             byte[][] fdIndex = ReadIndexData(input);
 
-            List<Dictionary<string, Object>> privateDictionaries = new List<Dictionary<string, Object>>();
-            List<Dictionary<string, Object>> fontDictionaries = new List<Dictionary<string, Object>>();
+            List<Dictionary<string, object>> privateDictionaries = new List<Dictionary<string, object>>();
+            List<Dictionary<string, object>> fontDictionaries = new List<Dictionary<string, object>>();
 
             foreach (byte[] bytes in fdIndex)
             {
@@ -640,7 +640,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 }
 
                 // font dict
-                Dictionary<string, Object> fontDictMap = new Dictionary<string, Object>(4, StringComparer.Ordinal);
+                Dictionary<string, object> fontDictMap = new Dictionary<string, object>(4, StringComparer.Ordinal);
                 fontDictMap["FontName"] = GetString(fontDict, "FontName");
                 fontDictMap["FontType"] = fontDict.GetNumber("FontType", 0);
                 fontDictMap["FontBBox"] = fontDict.GetArray("FontBBox", null);
@@ -654,7 +654,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 DictData privateDict = ReadDictData(input, privateSize);
 
                 // populate private dict
-                Dictionary<string, Object> privDict = ReadPrivateDict(privateDict);
+                Dictionary<string, object> privDict = ReadPrivateDict(privateDict);
                 privateDictionaries.Add(privDict);
 
                 // local subrs
@@ -681,9 +681,9 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             font.FdSelect = fdSelect;
         }
 
-        private Dictionary<string, Object> ReadPrivateDict(DictData privateDict)
+        private Dictionary<string, object> ReadPrivateDict(DictData privateDict)
         {
-            Dictionary<string, Object> privDict = new Dictionary<string, Object>(17);
+            Dictionary<string, object> privDict = new Dictionary<string, object>(17, StringComparer.Ordinal);
             privDict["BlueValues"] = privateDict.GetDelta("BlueValues", null);
             privDict["OtherBlues"] = privateDict.GetDelta("OtherBlues", null);
             privDict["FamilyBlues"] = privateDict.GetDelta("FamilyBlues", null);
@@ -740,7 +740,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             DictData privateDict = ReadDictData(input, privateSize);
 
             // populate private dict
-            Dictionary<string, Object> privDict = ReadPrivateDict(privateDict);
+            Dictionary<string, object> privDict = ReadPrivateDict(privateDict);
             foreach (var entry in privDict) font.AddToPrivateDict(entry.Key, entry.Value);
 
             // local subrs
@@ -1157,7 +1157,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
          */
         internal class DictData
         {
-            private readonly Dictionary<string, Entry> entries = new Dictionary<string, Entry>();
+            private readonly Dictionary<string, Entry> entries = new Dictionary<string, Entry>(StringComparer.Ordinal);
 
             public void Add(Entry entry)
             {

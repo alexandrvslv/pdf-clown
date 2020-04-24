@@ -37,7 +37,7 @@ namespace PdfClown.Samples.CLI
                     Console.WriteLine("\nIterating through the fields collection...\n");
 
                     // 3. Showing the acroform fields...
-                    Dictionary<string, int> objCounters = new Dictionary<string, int>();
+                    Dictionary<string, int> objCounters = new Dictionary<string, int>(StringComparer.Ordinal);
                     foreach (Field field in form.Fields.Values)
                     {
                         Console.WriteLine("* Field '" + field.FullName + "' (" + field.BaseObject + ")");

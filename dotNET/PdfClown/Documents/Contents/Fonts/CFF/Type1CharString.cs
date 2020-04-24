@@ -309,7 +309,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             else if (string.Equals("return", name, StringComparison.Ordinal))
             {
                 // indicates an invalid charstring
-                Debug.WriteLine("warning: Unexpected charstring command: " + command.Key + " in glyph " + glyphName + " of font " + fontName);
+                Debug.WriteLine("warn: Unexpected charstring command: " + command.Key + " in glyph " + glyphName + " of font " + fontName);
             }
             else if (name != null)
             {
@@ -319,7 +319,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             else
             {
                 // indicates an invalid charstring
-                Debug.WriteLine("warning: Unknown charstring command: " + command.Key + " in glyph " + glyphName +
+                Debug.WriteLine("warn: Unknown charstring command: " + command.Key + " in glyph " + glyphName +
                          " of font " + fontName);
             }
             return new List<float>();
@@ -347,7 +347,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 
                 if (flexPoints.Count < 7)
                 {
-                    Debug.WriteLine("warning: flex without moveTo in font " + fontName + ", glyph " + glyphName + ", command " + commandCount);
+                    Debug.WriteLine("warn: flex without moveTo in font " + fontName + ", glyph " + glyphName + ", command " + commandCount);
                     return;
                 }
 
@@ -471,7 +471,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             }
             catch (Exception e)
             {
-                Debug.WriteLine("warning: invalid seac character in glyph " + glyphName + " of font " + fontName, e);
+                Debug.WriteLine("warn: invalid seac character in glyph " + glyphName + " of font " + fontName, e);
             }
             // accent character
             string accentName = StandardEncoding.Instance.GetName((int)achar);
@@ -485,7 +485,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             }
             catch (Exception e)
             {
-                Debug.WriteLine("warning: invalid seac character in glyph " + glyphName + " of font " + fontName, e);
+                Debug.WriteLine("warn: invalid seac character in glyph " + glyphName + " of font " + fontName, e);
             }
         }
 

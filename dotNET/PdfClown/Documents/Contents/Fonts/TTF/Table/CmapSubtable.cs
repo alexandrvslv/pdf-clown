@@ -157,7 +157,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             characterCodeToGlyphId = new Dictionary<int, int>(numGlyphs);
             if (numGlyphs == 0)
             {
-                Debug.WriteLine("warning: subtable has no glyphs");
+                Debug.WriteLine("warn: subtable has no glyphs");
                 return;
             }
             // -- Read all sub header
@@ -255,7 +255,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             characterCodeToGlyphId = new Dictionary<int, int>(numGlyphs);
             if (numGlyphs == 0)
             {
-                Debug.WriteLine("warning: subtable has no glyphs");
+                Debug.WriteLine("warn: subtable has no glyphs");
                 return;
             }
             for (long i = 0; i < nbGroups; ++i)
@@ -282,13 +282,13 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     long glyphIndex = startGlyph + j;
                     if (glyphIndex >= numGlyphs)
                     {
-                        Debug.WriteLine("warning: Format 12 cmap contains an invalid glyph index");
+                        Debug.WriteLine("warn: Format 12 cmap contains an invalid glyph index");
                         break;
                     }
 
                     if (firstCode + j > 0x10FFFF)
                     {
-                        Debug.WriteLine("warning: Format 12 cmap contains character beyond UCS-4");
+                        Debug.WriteLine("warn: Format 12 cmap contains character beyond UCS-4");
                     }
 
                     glyphIdToCharacterCode[(int)glyphIndex] = (int)(firstCode + j);
@@ -311,7 +311,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             characterCodeToGlyphId = new Dictionary<int, int>(numGlyphs);
             if (numGlyphs == 0)
             {
-                Debug.WriteLine("warning: subtable has no glyphs");
+                Debug.WriteLine("warn: subtable has no glyphs");
                 return;
             }
             for (long i = 0; i < nbGroups; ++i)
@@ -322,7 +322,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                 if (glyphId > numGlyphs)
                 {
-                    Debug.WriteLine("warning: Format 13 cmap contains an invalid glyph index");
+                    Debug.WriteLine("warn: Format 13 cmap contains an invalid glyph index");
                     break;
                 }
 
@@ -346,7 +346,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                     if (firstCode + j > 0x10FFFF)
                     {
-                        Debug.WriteLine("warning: Format 13 cmap contains character beyond UCS-4");
+                        Debug.WriteLine("warn: Format 13 cmap contains character beyond UCS-4");
                     }
 
                     glyphIdToCharacterCode[(int)glyphId] = (int)(firstCode + j);
@@ -366,7 +366,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         {
             // Unicode Variation Sequences (UVS)
             // see http://blogs.adobe.com/CCJKType/2013/05/opentype-cmap-table-ramblings.html
-            Debug.WriteLine("warning: Format 14 cmap table is not supported and will be ignored");
+            Debug.WriteLine("warn: Format 14 cmap table is not supported and will be ignored");
         }
 
         /**
@@ -459,7 +459,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
              */
             if (characterCodeToGlyphId.Count == 0)
             {
-                Debug.WriteLine("warning: cmap format 4 subtable is empty");
+                Debug.WriteLine("warn: cmap format 4 subtable is empty");
                 return;
             }
             BuildGlyphIdToCharacterCodeLookup(maxGlyphId);
@@ -524,7 +524,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             characterCodeToGlyphId = new Dictionary<int, int>(numGlyphs);
             if (numGlyphs == 0)
             {
-                Debug.WriteLine("warning: subtable has no glyphs");
+                Debug.WriteLine("warn: subtable has no glyphs");
                 return;
             }
             for (int i = 0; i <= maxSubHeaderIndex; ++i)
@@ -558,7 +558,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                     if (p >= numGlyphs)
                     {
-                        Debug.WriteLine("warning: glyphId " + p + " for charcode " + charCode + " ignored, numGlyphs is " + numGlyphs);
+                        Debug.WriteLine("warn: glyphId " + p + " for charcode " + charCode + " ignored, numGlyphs is " + numGlyphs);
                         continue;
                     }
 

@@ -37,7 +37,7 @@ namespace PdfClown.Documents.Contents.Fonts
         private readonly int[] cid2gid;
         private readonly bool isEmbedded;
         private readonly bool isDamaged;
-        private readonly ICmapLookup cmap; // may be null
+        private readonly ICmapLookup cmapLookup; // may be null
         private SKMatrix? fontMatrix;
         private SKRect? fontBBox;
         private readonly HashSet<int> noMapping = new HashSet<int>();
@@ -114,13 +114,13 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             // PDFBOX-3344 contains PostScript outlines instead of TrueType
                             fontIsDamaged = true;
-                            Debug.WriteLine("warning: Found CFF/OTF but expected embedded TTF font " + fd.FontName);
+                            Debug.WriteLine($"warning: Found CFF/OTF but expected embedded TTF font {fd.FontName}");
                         }
                     }
                     catch (IOException e)
                     {
                         fontIsDamaged = true;
-                        Debug.WriteLine("warning: Could not read embedded OTF for font " + BaseFont, e);
+                        Debug.WriteLine($"warning: Could not read embedded OTF for font {BaseFont} {e}");
                     }
                 }
                 isEmbedded = ttfFont != null;
@@ -132,7 +132,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
                 ttf = ttfFont;
             }
-            cmap = ttf.GetUnicodeCmapLookup(false);
+            cmapLookup = ttf.GetUnicodeCmapLookup(false);
             cid2gid = ReadCIDToGIDMap();
         }
 
@@ -140,20 +140,18 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             TrueTypeFont ttfFont;
 
-            CIDFontMapping mapping = FontMappers.instance()
-                    .getCIDFont(BaseFont, FontDescriptor,
-                            CIDSystemInfo);
-            if (mapping.isCIDFont())
+            CIDFontMapping mapping = FontMappers.Instance.GetCIDFont(BaseFont, FontDescriptor, CIDSystemInfo);
+            if (mapping.IsCIDFont)
             {
-                ttfFont = mapping.getFont();
+                ttfFont = mapping.Font;
             }
             else
             {
-                ttfFont = (PdfTrueTypeFont)mapping.getTrueTypeFont();
+                ttfFont = (TrueTypeFont)mapping.TrueTypeFont;
             }
-            if (mapping.isFallback())
+            if (mapping.IsFallback)
             {
-                Debug.WriteLine("warning: Using fallback font " + ttfFont.Name + " for CID-keyed TrueType font " + BaseFont);
+                Debug.WriteLine($"warning: Using fallback font {ttfFont.Name} for CID-keyed TrueType font {BaseFont}");
             }
             return ttfFont;
         }
@@ -200,7 +198,11 @@ namespace PdfClown.Documents.Contents.Fonts
             return ttf.FontBBox;
         }
 
-        override public int CodeToCID(int code)
+        protected override void OnLoad()
+        {
+        }
+
+        public override int CodeToCID(int code)
         {
             CMap cMap = parent.CMap;
 
@@ -220,7 +222,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @return GID
          * @throws IOException
          */
-        override public int CodeToGID(int code)
+        public override int CodeToGID(int code)
         {
             if (!isEmbedded)
             {
@@ -232,7 +234,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (cid2gid != null && !isDamaged)
                 {
                     // Acrobat allows non-embedded GIDs - todo: can we find a test PDF for this?
-                    Debug.WriteLine("warning: Using non-embedded GIDs in font " + Name);
+                    Debug.WriteLine("warn: Using non-embedded GIDs in font " + Name);
                     int cid = CodeToCID(code);
                     return cid2gid[cid];
                 }
@@ -246,7 +248,7 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             // we keep track of which warnings have been issued, so we don't log multiple times
                             noMapping.Add(code);
-                            Debug.WriteLine("warning: Failed to find a character mapping for " + code + " in " + Name);
+                            Debug.WriteLine("warn: Failed to find a character mapping for " + code + " in " + Name);
                         }
                         // Acrobat is willing to use the CID as a GID, even when the font isn't embedded
                         // see PDFBOX-2599
@@ -254,11 +256,11 @@ namespace PdfClown.Documents.Contents.Fonts
                     }
                     else if (unicode > char.MaxValue)
                     {
-                        Debug.WriteLine("warning: Trying to map multi-byte character using 'cmap', result will be poor");
+                        Debug.WriteLine("warn: Trying to map multi-byte character using 'cmap', result will be poor");
                     }
 
                     // a non-embedded font always has a cmap (otherwise FontMapper won't load it)
-                    return cmap.GetGlyphId(unicode);
+                    return cmapLookup.GetGlyphId(unicode);
                 }
             }
             else
@@ -306,13 +308,18 @@ namespace PdfClown.Documents.Contents.Fonts
         override public float GetWidthFromFont(int code)
         {
             int gid = CodeToGID(code);
-            int width = ttf.GetAdvanceWidth(gid);
+            float width = ttf.GetAdvanceWidth(gid);
             int unitsPerEM = ttf.UnitsPerEm;
             if (unitsPerEM != 1000)
             {
                 width *= 1000f / unitsPerEM;
             }
             return width;
+        }
+
+        public override int ReadCode(Bytes.Buffer input, out byte[] bytes)
+        {
+            throw new NotImplementedException();
         }
 
         public override byte[] Encode(int unicode)
@@ -323,9 +330,9 @@ namespace PdfClown.Documents.Contents.Fonts
                 // embedded fonts always use CIDToGIDMap, with Identity as the default
                 if (parent.CMap.CMapName.StartsWith("Identity-", StringComparison.Ordinal))
                 {
-                    if (cmap != null)
+                    if (cmapLookup != null)
                     {
-                        cid = cmap.GetGlyphId(unicode);
+                        cid = cmapLookup.GetGlyphId(unicode);
                     }
                 }
                 else
@@ -348,7 +355,7 @@ namespace PdfClown.Documents.Contents.Fonts
             else
             {
                 // a non-embedded font always has a cmap (otherwise it we wouldn't load it)
-                cid = cmap.GetGlyphId(unicode);
+                cid = cmapLookup.GetGlyphId(unicode);
             }
 
             if (cid == 0)
@@ -391,7 +398,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 // we're not supposed to have CFF fonts inside PDCIDFontType2, but if we do,
                 // then we treat their CIDs as GIDs, see PDFBOX-3344
                 int cid = CodeToGID(code);
-                Type2CharString charstring = ((OpenTypeFont)ttf).CFF.Font().GetType2CharString(cid);
+                Type2CharString charstring = ((OpenTypeFont)ttf).CFF.Font.GetType2CharString(cid);
                 return charstring.Path;
             }
             else

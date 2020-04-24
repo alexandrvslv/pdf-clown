@@ -168,8 +168,8 @@ namespace PdfClown.Bytes
         public void Seek(long offset)
         { stream.Seek(offset, SeekOrigin.Begin); }
 
-        public void Skip(long offset)
-        { stream.Seek(offset, SeekOrigin.Current); }
+        public long Skip(long offset)
+        { return stream.Seek(offset, SeekOrigin.Current); }
 
         #region IDataWrapper
         public byte[] ToByteArray()

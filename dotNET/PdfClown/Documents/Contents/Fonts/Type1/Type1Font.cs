@@ -45,7 +45,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      *
      * @author John Hewson
      */
-    public sealed class Type1Font : BaseFont, IType1CharStringReader//, EncodedFont, 
+    public sealed class Type1Font : BaseFont, IType1CharStringReader, IEncodedFont
     {
         /**
 		 * Constructs a new Type1Font object from a .pfb stream.
@@ -560,10 +560,9 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             return charstrings.TryGetValue(name, out _);
         }
 
-        public Type1CharString GetType1CharString(ByteArray key)
-        {
-
-        }
+        //public Type1CharString GetType1CharString(ByteArray key)
+        //{
+        //}
 
         public Type1CharString GetType1CharString(string name)
         {

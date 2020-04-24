@@ -32,8 +32,9 @@ namespace PdfClown.Documents.Contents.Fonts
     /**
       <summary>Mac OS standard latin encoding [PDF:1.6:D].</summary>
     */
-    internal sealed class MacRomanEncoding : Encoding
+    internal class MacRomanEncoding : Encoding
     {
+        public static MacRomanEncoding Instance;
         public MacRomanEncoding()
         {
             Put(65, "A");
@@ -243,6 +244,11 @@ namespace PdfClown.Documents.Contents.Fonts
             Put(180, "yen");
             Put(122, "z");
             Put(48, "zero");
+        }
+
+        public override PdfDirectObject GetPdfObject()
+        {
+            return PdfName.MacRomanEncoding;
         }
     }
 }

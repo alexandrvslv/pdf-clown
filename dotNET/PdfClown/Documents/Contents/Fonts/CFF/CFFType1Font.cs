@@ -29,9 +29,9 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
      * @author Villu Ruusmann
      * @author John Hewson
      */
-    public class CFFType1Font : CFFFont, IType1CharStringReader //, EncodedFont
+    public class CFFType1Font : CFFFont, IType1CharStringReader, IEncodedFont
     {
-        private readonly Dictionary<string, object> privateDict = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> privateDict = new Dictionary<string, object>(StringComparer.Ordinal);
         private CFFEncoding encoding;
 
         private readonly Dictionary<int, Type2CharString> charStringCache = new Dictionary<int, Type2CharString>();
@@ -153,10 +153,10 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 *
 		 * @return the encoding
 		 */
-        public CFFEncoding Encoding
+        public Encoding Encoding
         {
             get => encoding;
-            set => encoding = value;
+            set => encoding = (CFFEncoding)value;
         }
 
         private byte[][] LocalSubrIndex

@@ -36,7 +36,7 @@ namespace PdfClown.Documents.Contents.Fonts
         private Dictionary<string, FontInfo> fontInfoByName;
         private readonly TrueTypeFont lastResortFont;
 
-        /** Map of PostScript name substitutes, in priority order. */
+        /** Dictionary of PostScript name substitutes, in priority order. */
         private readonly Dictionary<string, List<string>> substitutes = new Dictionary<string, List<string>>(StringComparer.Ordinal);
 
         public FontMapperImpl()

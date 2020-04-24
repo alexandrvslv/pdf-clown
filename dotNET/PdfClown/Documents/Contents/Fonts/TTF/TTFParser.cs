@@ -100,7 +100,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @return A TrueType font.
          * @ If there is an error parsing the TrueType font.
          */
-        public TrueTypeFont Parse(Bytes.Buffer inputStream)
+        public TrueTypeFont Parse(Bytes.IInputStream inputStream)
         {
             return Parse(new MemoryTTFDataStream(inputStream));
         }

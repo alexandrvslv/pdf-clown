@@ -14,40 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using PdfClown.Documents.Contents.Fonts.TTF;
+
+using System;
+
 
 namespace PdfClown.Documents.Contents.Fonts
 {
-    /**
-     * A CIDFontMapping is a kind of FontMapping which allows for an additional TrueTypeFont substitute
-     * to be provided if a CID font is not available.
+	/**
+     * A PostScript font which uses an encoding vector.
      *
      * @author John Hewson
      */
-    public sealed class CIDFontMapping : FontMapping<OpenTypeFont>
-    {
-        private readonly BaseFont ttf;
-
-        public CIDFontMapping(OpenTypeFont font, BaseFont fontBoxFont, bool isFallback)
-            : base(font, isFallback)
-        {
-            this.ttf = fontBoxFont;
-        }
-
-        /**
-		 * Returns a TrueType font when isCIDFont() is true, otherwise null.
-		 */
-        public BaseFont TrueTypeFont
-        {
-            get => ttf;
-        }
-
-        /**
-		 * Returns true if this is a CID font.
-		 */
-        public bool IsCIDFont
-        {
-            get => Font != null;
-        }
-    }
+	public interface IEncodedFont
+	{
+		/**
+         * Returns the PostScript Encoding vector for the font.
+         */
+		Encoding Encoding { get; }
+	}
 }

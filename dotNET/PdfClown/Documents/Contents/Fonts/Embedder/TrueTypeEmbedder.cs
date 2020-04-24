@@ -67,7 +67,7 @@ namespace PdfClown.Documents.Contents.Fonts
             if (!embedSubset)
             {
                 // full embedding
-                PdfStream stream = new PdfStream(document, ttf.OriginalData, PdfName.FlateDecode);
+                PdfStream stream = new PdfStream(ttf.OriginalData);
                 stream.Header[PdfName.Length1] = PdfInteger.Get(ttf.OriginalDataSize);
                 fontDescriptor.FontFile2 = new FontFile(document, stream);
             }
@@ -80,7 +80,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public void BuildFontFile2(Bytes.Buffer ttfStream)
         {
-            PdfStream stream = new PdfStream(document, ttfStream, PdfName.FlateDecode);
+            PdfStream stream = new PdfStream(ttfStream);
 
             // as the stream was closed within the PdfStream constructor, we have to recreate it
             using (var input = (Bytes.Buffer)stream.ExtractBody(true))
@@ -192,9 +192,10 @@ namespace PdfClown.Documents.Contents.Fonts
             float scaling = 1000f / header.UnitsPerEm;
             var skRect = new SKRect(
                 header.XMin * scaling,
-                header.YMax * scaling,
+                header.YMin * scaling,
                 header.XMax * scaling,
-                header.YMin * scaling);
+                header.YMax * scaling
+                );
 
 
             Rectangle rect = new Rectangle(skRect);
@@ -301,11 +302,13 @@ namespace PdfClown.Documents.Contents.Fonts
             subsetter.SetPrefix(tag);
 
             // save the subset font
-            var output = new MemoryStream();
-            subsetter.WriteToStream(output);
+            using (var output = new MemoryStream())
+            {
+                subsetter.WriteToStream(output);
 
-            // re-build the embedded font
-            BuildSubset(output, tag, gidToCid);
+                // re-build the embedded font
+                BuildSubset(new Bytes.Buffer(output), tag, gidToCid);
+            }
             ttf.Dispose();
         }
 
@@ -320,7 +323,7 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
 		 * Rebuild a font subset.
 		 */
-        protected abstract void BuildSubset(Stream ttfSubset, string tag, Dictionary<int, int> gidToCid);
+        protected abstract void BuildSubset(Bytes.Buffer ttfSubset, string tag, Dictionary<int, int> gidToCid);
         /**
 		 * Returns an uppercase 6-character unique tag for the given subset.
 		 */

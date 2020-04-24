@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using PdfClown.Documents.Contents.Fonts.TTF.GSUB;
 using System;
 using System.Linq;
+using System.Globalization;
 
 namespace PdfClown.Documents.Contents.Fonts.TTF
 {
@@ -55,7 +56,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         static OpenTypeScript()
         {
-            UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP = new Dictionary<string, string[]>()
+            UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP = new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
             {"Adlam", new string[] { "adlm" }},
             {"Ahom", new string[] { "ahom" }},
@@ -201,22 +202,24 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             {"Yi", new string[] { "yi  " }}
         };
 
-            string path = "/org/apache/fontbox/unicode/Scripts.txt";
+            string path = "Scripts.txt";
             try
             {
-                Bytes.Buffer input = OpenTypeScript.getResourceAsStream(path);
-                if (input != null)
+                using (var input = typeof(OpenTypeScript).Assembly.GetManifestResourceStream(path))
                 {
-                    ParseScriptsFile(input);
-                }
-                else
-                {
-                    Debug.WriteLine("warning: Could not find '" + path + "', mirroring char map will be empty: ");
+                    if (input != null)
+                    {
+                        ParseScriptsFile(input);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("warn: Could not find '" + path + "', mirroring char map will be empty: ");
+                    }
                 }
             }
             catch (IOException e)
             {
-                Debug.WriteLine("warning: Could not parse Scripts.txt, mirroring char map will be empty: "
+                Debug.WriteLine("warn: Could not parse Scripts.txt, mirroring char map will be empty: "
                         + e.Message, e);
             }
         }
@@ -265,12 +268,12 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     int rangeDelim = characters.IndexOf("..", StringComparison.Ordinal);
                     if (rangeDelim == -1)
                     {
-                        range[0] = range[1] = int.parseInt(characters, 16);
+                        range[0] = range[1] = Convert.ToInt32(characters, 16);
                     }
                     else
                     {
-                        range[0] = int.parseInt(characters.Substring(0, rangeDelim), 16);
-                        range[1] = int.parseInt(characters.Substring(rangeDelim + 2), 16);
+                        range[0] = Convert.ToInt32(characters.Substring(0, rangeDelim), 16);
+                        range[1] = Convert.ToInt32(characters.Substring(rangeDelim + 2), 16);
                     }
                     if (range[0] == lastRange[1] + 1 && script.Equals(lastScript, StringComparison.Ordinal))
                     {
@@ -307,8 +310,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private string GetUnicodeScript(int codePoint)
         {
             EnsureValidCodePoint(codePoint);
-            int type = Character.getType(codePoint);
-            if (type == Char.UNASSIGNED)
+            var type = char.GetUnicodeCategory((char)codePoint);
+            if (type == UnicodeCategory.OtherNotAssigned)
             {
                 return UNKNOWN;
             }
@@ -340,7 +343,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private void EnsureValidCodePoint(int codePoint)
         {
-            if (codePoint < Character.MIN_CODE_POINT || codePoint > Character.MAX_CODE_POINT)
+            if (codePoint < char.MinValue || codePoint > char.MaxValue)
             {
                 throw new ArgumentException("Invalid codepoint: " + codePoint);
             }

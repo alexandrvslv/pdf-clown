@@ -37,7 +37,7 @@ namespace PdfClown.Samples.CLI
                 int mode;
                 try
                 {
-                    IDictionary<string, string> options = new Dictionary<string, string>();
+                    IDictionary<string, string> options = new Dictionary<string, string>(StringComparer.Ordinal);
                     options["0"] = "Automatic filling";
                     options["1"] = "Manual filling";
                     mode = Int32.Parse(PromptChoice(options));

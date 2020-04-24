@@ -363,6 +363,7 @@ namespace PdfClown.Objects
         public static readonly PdfName M = new PdfName("M");
         public static readonly PdfName Mac = new PdfName("Mac");
         public static readonly PdfName MacRomanEncoding = new PdfName("MacRomanEncoding");
+        public static readonly PdfName MacExpertEncoding = new PdfName("MacExpertEncoding");
         public static readonly PdfName Matrix = new PdfName("Matrix");
         public static readonly PdfName Matte = new PdfName("Matte");
         public static readonly PdfName max = new PdfName("max");

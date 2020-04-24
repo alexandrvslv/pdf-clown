@@ -65,17 +65,30 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public Encoding(Dictionary<int, string> codeToName)
         {
-            names = codeToName;
+            this.codeToName = codeToName;
         }
 
         #region dynamic
         #region fields
-        private readonly Dictionary<int, string> names = new Dictionary<int, string>();
-        private readonly Dictionary<int, int> codes = new Dictionary<int, int>();
+        protected internal readonly Dictionary<int, string> codeToName = new Dictionary<int, string>();
+        protected internal readonly Dictionary<string, int> inverted = new Dictionary<string, int>(StringComparer.Ordinal);
+        protected internal readonly Dictionary<int, int> codes = new Dictionary<int, int>();
+        private HashSet<string> names;
         #endregion
 
         #region interface
         #region public
+
+        public Dictionary<int, string> CodeToNameMap
+        {
+            get => codeToName;
+        }
+
+        public Dictionary<string, int> NameToCodeMap
+        {
+            get => inverted;
+        }
+
         public Dictionary<int, int> GetCodes()
         { return new Dictionary<int, int>(codes); }
 
@@ -83,19 +96,74 @@ namespace PdfClown.Documents.Contents.Fonts
         { return codes.TryGetValue(key, out var unicode) ? unicode : 0; }
 
         public virtual string GetName(int key)
-        { return names.TryGetValue(key, out var name) ? name : null; }
+        { return codeToName.TryGetValue(key, out var name) ? name : null; }
         #endregion
 
         #region protected
         protected void Put(int charCode, string charName)
         {
-            names[charCode] = charName;
+            codeToName[charCode] = charName;
+            if (!inverted.ContainsKey(charName))
+            {
+                inverted[charName] = charCode;
+            }
             Put(charCode, GlyphMapping.Default.NameToCode(charName).Value);
         }
 
         protected void Put(int charCode, int unicode)
         {
             codes[charCode] = unicode;
+        }
+
+        /**
+         * This will add a character encoding. An already existing mapping is overwritten when creating the reverse mapping.
+         * 
+         * @see Encoding#add(int, string)
+         *
+         * @param code character code
+         * @param name PostScript glyph name
+         */
+        protected void Overwrite(int code, string name)
+        {
+            // remove existing reverse mapping first
+            if (codeToName.TryGetValue(code, out string oldName))
+            {
+                if (inverted.TryGetValue(oldName, out int oldCode) && oldCode == code)
+                {
+                    inverted.Remove(oldName);
+                }
+            }
+            inverted[name] = code;
+            codeToName[code] = name;
+        }
+
+        /**
+         * Determines if the encoding has a mapping for the given name value.
+         * 
+         * @param name PostScript glyph name
+         */
+        public bool Contains(string name)
+        {
+            // we have to wait until all add() calls are done before building the name cache
+            // otherwise /Differences won't be accounted for
+            if (names == null)
+            {
+                lock (this)
+                {
+                    // PDFBOX-3404: avoid possibility that one thread ends up with newly created empty map from other thread
+                    HashSet<string> tmpSet = new HashSet<string>(codeToName.Values, StringComparer.Ordinal);
+                    // make sure that assignment is done after initialisation is complete
+                    names = tmpSet;
+                    // note that it might still happen that 'names' is initialized twice, but this is harmless
+                }
+                // at this point, names will never be null.
+            }
+            return names.Contains(name);
+        }
+
+        public virtual PdfDirectObject GetPdfObject()
+        {
+            return null;
         }
         #endregion
         #endregion

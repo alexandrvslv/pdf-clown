@@ -32,6 +32,7 @@ using PdfClown.Util.Collections.Generic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using text = System.Text;
 
 namespace PdfClown.Objects
@@ -74,8 +75,8 @@ namespace PdfClown.Objects
             Updateable = true;
         }
 
-        public PdfArray(IList<PdfDirectObject> items)
-            : this(items.Count)
+        public PdfArray(IEnumerable<PdfDirectObject> items)
+            : this(items.Count())
         {
             Updateable = false;
             this.AddAll(items);

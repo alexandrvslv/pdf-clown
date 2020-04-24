@@ -23,6 +23,8 @@
   this list of conditions.
 */
 
+using PdfClown.Objects;
+
 namespace PdfClown.Documents.Contents.Fonts
 {
     /**
@@ -30,6 +32,7 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal sealed class ZapfDingbatsEncoding : Encoding
     {
+        public static ZapfDingbatsEncoding Instance;
         public ZapfDingbatsEncoding()
         {
             Put(32, '\u0020');
@@ -238,6 +241,11 @@ namespace PdfClown.Documents.Contents.Fonts
             Put(252, '\u27BC');
             Put(253, '\u27BD');
             Put(254, '\u27BE');
+        }
+
+        public override PdfDirectObject GetPdfObject()
+        {
+            return PdfName.Get("ZapfDingbatsEncoding");
         }
     }
 }

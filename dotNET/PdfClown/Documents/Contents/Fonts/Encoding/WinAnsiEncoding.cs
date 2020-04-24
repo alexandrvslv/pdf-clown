@@ -34,6 +34,7 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal sealed class WinAnsiEncoding : Encoding
     {
+        public static WinAnsiEncoding Instance;
         public WinAnsiEncoding()
         {
             Put(65, "A");
@@ -252,6 +253,21 @@ namespace PdfClown.Documents.Contents.Fonts
             Put(122, "z");
             Put(158, "zcaron");
             Put(48, "zero");
+
+            // From the PDF specification:
+            // In WinAnsiEncoding, all unused codes greater than 40 map to the bullet character.
+            for (int i = 041; i <= 255; i++)
+            {
+                if (!codes.ContainsKey(i))
+                {
+                    Put(i, "bullet");
+                }
+            }
+        }
+
+        public override PdfDirectObject GetPdfObject()
+        {
+            return PdfName.WinAnsiEncoding;
         }
     }
 }

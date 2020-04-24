@@ -41,7 +41,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 * @param code character code
 		 * @return PostScript glyph name
 		 */
-        override public string GetName(int code)
+        public override string GetName(int code)
         {
             if (!codeToName.TryGetValue(code, out var name))
             {

@@ -184,8 +184,12 @@ namespace PdfClown.Documents.Contents
                 }
             }
 
-            public void Skip(long offset)
-            { Seek(Position + offset); }
+            public long Skip(long offset)
+            {
+                var newPosition = Position + offset;
+                Seek(newPosition);
+                return newPosition;
+            }
 
             public byte[] ToByteArray()
             { return stream?.ToByteArray(); }

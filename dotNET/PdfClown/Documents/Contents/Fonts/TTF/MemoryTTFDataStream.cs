@@ -35,7 +35,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param is The stream to read from. It will be closed by this method.
          * @ If an error occurs while reading from the stream.
          */
-        public MemoryTTFDataStream(Bytes.Buffer isource)
+        public MemoryTTFDataStream(Bytes.IInputStream isource)
         {
             try
             {

@@ -23,6 +23,8 @@
   this list of conditions.
 */
 
+using PdfClown.Objects;
+
 namespace PdfClown.Documents.Contents.Fonts
 {
     /**
@@ -30,6 +32,7 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal sealed class SymbolEncoding : Encoding
     {
+        public static SymbolEncoding Instance;
         public SymbolEncoding()
         {
             Put(32, "space");
@@ -221,6 +224,11 @@ namespace PdfClown.Documents.Contents.Fonts
             Put(252, "bracerighttp");
             Put(253, "bracerightmid");
             Put(254, "bracerightbt");
+        }
+
+        public override PdfDirectObject GetPdfObject()
+        {
+            return PdfName.Get("SymbolEncoding");
         }
     }
 }

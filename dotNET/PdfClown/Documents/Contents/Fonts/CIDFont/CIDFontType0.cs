@@ -25,7 +25,6 @@ using System.IO;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
-
     /**
      * Type 0 CIDFont (CFF).
      * 
@@ -34,7 +33,6 @@ namespace PdfClown.Documents.Contents.Fonts
      */
     public class CIDFontType0 : CIDFont
     {
-
         private readonly CFFCIDFont cidFont;  // Top DICT that uses CIDFont operators
         private readonly BaseFont t1Font; // Top DICT that does not use CIDFont operators
 
@@ -80,7 +78,7 @@ namespace PdfClown.Documents.Contents.Fonts
             if (bytes != null && bytes.Length > 0 && (bytes[0] & 0xff) == '%')
             {
                 // PDFBOX-2642 contains a corrupt PFB font instead of a CFF
-                Debug.WriteLine("warning: Found PFB but expected embedded CFF font " + fd.FontName);
+                Debug.WriteLine("warn: Found PFB but expected embedded CFF font " + fd.FontName);
                 fontIsDamaged = true;
             }
             else if (bytes != null)
@@ -117,12 +115,11 @@ namespace PdfClown.Documents.Contents.Fonts
             else
             {
                 // find font or substitute
-                CIDFontMapping mapping = FontMappers.instance()
-                                                    .GetCIDFont(BaseFont, FontDescriptor, CIDSystemInfo);
+                CIDFontMapping mapping = FontMappers.Instance.GetCIDFont(BaseFont, FontDescriptor, CIDSystemInfo);
                 BaseFont font;
-                if (mapping.isCIDFont())
+                if (mapping.IsCIDFont)
                 {
-                    cffFont = mapping.getFont().getCFF().getFont();
+                    cffFont = mapping.Font.CFF.Font;
                     if (cffFont is CFFCIDFont)
                     {
                         cidFont = (CFFCIDFont)cffFont;
@@ -141,13 +138,13 @@ namespace PdfClown.Documents.Contents.Fonts
                 else
                 {
                     cidFont = null;
-                    t1Font = mapping.getTrueTypeFont();
+                    t1Font = mapping.TrueTypeFont;
                     font = t1Font;
                 }
 
-                if (mapping.isFallback())
+                if (mapping.IsFallback)
                 {
-                    Debug.WriteLine("warning: Using fallback " + font.Name + " for CID-keyed font " + BaseFont);
+                    Debug.WriteLine($"warning: Using fallback {font.Name} for CID-keyed font {BaseFont}");
                 }
                 isEmbedded = false;
                 isDamaged = fontIsDamaged;
@@ -296,7 +293,7 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 return ".notdef";
             }
-            return GetUniNameOfCodePoint(unicodes);
+            return UniUtil.GetUniNameOfCodePoint(unicodes);
         }
 
         public override SKPath GetPath(int code)
@@ -370,6 +367,10 @@ namespace PdfClown.Documents.Contents.Fonts
                 // The CIDs shall be used directly as GID values
                 return cid;
             }
+        }
+        public override int ReadCode(Bytes.Buffer input, out byte[] bytes)
+        {
+            throw new NotSupportedException();
         }
 
         public override byte[] Encode(int unicode)

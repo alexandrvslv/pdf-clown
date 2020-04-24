@@ -179,7 +179,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 {
                     // catch corrupt file
                     // https://docs.microsoft.com/en-us/typography/opentype/spec/chapter2#flTbl
-                    Debug.WriteLine("warning: FeatureRecord array not alphabetically sorted by FeatureTag: " +
+                    Debug.WriteLine("warn: FeatureRecord array not alphabetically sorted by FeatureTag: " +
                               featureTags[i] + " < " + featureTags[i - 1]);
                     return new FeatureListTable(0, new FeatureRecord[0]);
                 }
@@ -647,7 +647,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         {
             if (!reverseLookup.TryGetValue(sgid, out int gid))
             {
-                Debug.WriteLine("warning: Trying to un-substitute a never-before-seen gid: " + sgid);
+                Debug.WriteLine("warn: Trying to un-substitute a never-before-seen gid: " + sgid);
                 return sgid;
             }
             return gid;

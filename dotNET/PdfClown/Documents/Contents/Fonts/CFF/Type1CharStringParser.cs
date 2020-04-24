@@ -68,7 +68,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                     object obj = sequence.RemoveAtValue(sequence.Count - 1);
                     if (!(obj is int))
                     {
-                        Debug.WriteLine("warning: Parameter " + obj + " for CALLSUBR is ignored, integer expected in glyph '"
+                        Debug.WriteLine("warn: Parameter " + obj + " for CALLSUBR is ignored, integer expected in glyph '"
                                 + glyphName + "' of font " + fontName);
                         continue;
                     }
@@ -87,7 +87,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                     }
                     else
                     {
-                        Debug.WriteLine("warning: CALLSUBR is ignored, operand: " + operand
+                        Debug.WriteLine("warn: CALLSUBR is ignored, operand: " + operand
                                 + ", subrs.Count: " + subrs.Count + " in glyph '"
                                 + glyphName + "' of font " + fontName);
                         // remove all parameters (there can be more than one)
@@ -145,7 +145,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 
                     if (results.Count > 0)
                     {
-                        Debug.WriteLine("warning: Value left on the PostScript stack in glyph " + glyphName + " of font " + fontName);
+                        Debug.WriteLine("warn: Value left on the PostScript stack in glyph " + glyphName + " of font " + fontName);
                     }
                 }
                 else if (b0 >= 0 && b0 <= 31)

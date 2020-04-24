@@ -275,17 +275,11 @@ namespace PdfClown.Samples.CLI
             }
         }
 
-        private ActionEnum PromptAction(
-          )
+        private ActionEnum PromptAction()
         {
             ActionEnum[] actions = (ActionEnum[])Enum.GetValues(typeof(ActionEnum));
-            IDictionary<string, string> options = new Dictionary<string, string>();
-            for (
-              int actionIndex = 0,
-                actionsLength = actions.Length;
-              actionIndex < actionsLength;
-              actionIndex++
-              )
+            IDictionary<string, string> options = new Dictionary<string, string>(StringComparer.Ordinal);
+            for (int actionIndex = 0, actionsLength = actions.Length; actionIndex < actionsLength; actionIndex++)
             { options[actionIndex.ToString()] = actions[actionIndex].GetDescription(); }
 
             try

@@ -155,7 +155,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             else
             {
-                Debug.WriteLine("warning: No kerning subtable data available due to an unsupported kerning subtable version");
+                Debug.WriteLine("warn: No kerning subtable data available due to an unsupported kerning subtable version");
             }
             return kerning;
         }
@@ -171,7 +171,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         {
             if (pairs == null)
             {
-                Debug.WriteLine("warning: No kerning subtable data available due to an unsupported kerning subtable version");
+                Debug.WriteLine("warn: No kerning subtable data available due to an unsupported kerning subtable version");
                 return 0;
             }
             return pairs.GetKerning(l, r);

@@ -42,11 +42,13 @@ namespace PdfClown.Documents.Contents.Fonts
       <summary>Adobe standard glyph mapping (unicode-encoding against glyph-naming)
       [PDF:1.6:D;AGL:2.0].</summary>
     */
-    internal class GlyphMapping
+    public class GlyphMapping
     {
         public static readonly GlyphMapping Default = new GlyphMapping("AGL20");
+        public static readonly GlyphMapping ZapfDingbats = new GlyphMapping("ZapfDingbats");
         public static readonly GlyphMapping DLFONT = new GlyphMapping("G500");
         public static bool IsExist(string fontName) => typeof(GlyphMapping).Assembly.GetManifestResourceNames().Contains($"fonts.{fontName}");
+
         private readonly Dictionary<string, int> codes = new Dictionary<string, int>(StringComparer.Ordinal);
         public GlyphMapping(string fontName)
         { Load($"fonts.{fontName}"); }

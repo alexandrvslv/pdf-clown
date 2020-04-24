@@ -222,7 +222,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
             foreach (CIDRange range in codeToCidRanges)
             {
-                int ch = range.Map((char)code);
+                int ch = range.Dictionary((char)code);
                 if (ch != -1)
                 {
                     return ch;
@@ -269,7 +269,7 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 seq += $"{bytes[i]} ({bytes[i]}) ";
             }
-            Debug.WriteLine("warning: Invalid character code sequence " + seq + "in CMap " + cmapName);
+            Debug.WriteLine("warn: Invalid character code sequence " + seq + "in CMap " + cmapName);
         }
 
         public int ReadCode(byte[] code)

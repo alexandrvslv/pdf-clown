@@ -38,6 +38,7 @@ using System.Linq;
 using System.Text;
 using SkiaSharp;
 using PdfClown.Documents.Contents.Fonts.CCF;
+using PdfClown.Documents.Contents.Fonts.AFM;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -54,40 +55,13 @@ namespace PdfClown.Documents.Contents.Fonts
         #region static
         #region fields
         public static Font LatestFont { get; private set; }
+        protected static readonly SKMatrix DefaultFontMatrix = new SKMatrix(0.001f, 0, 0, 0, 0.001f, 0, 0, 0, 1);
         private const int UndefinedDefaultCode = int.MinValue;
         private const int UndefinedWidth = int.MinValue;
         #endregion
 
         #region interface
         #region public
-        /**
-          <summary>Creates the representation of a font.</summary>
-        */
-        public static Font Get(Document context, string path)
-        {
-            return Get(
-              context,
-              new Bytes.Stream(
-                  new io::FileStream(path, io::FileMode.Open, io::FileAccess.Read))
-              );
-        }
-
-        /**
-          <summary>Creates the representation of a font.</summary>
-        */
-        public static Font Get(Document context, IInputStream fontData)
-        {
-            if (OpenFontParser.IsOpenFont(fontData))
-                return PdfType0Font.Get(context, fontData);
-            else
-                throw new NotImplementedException();
-        }
-
-        internal SKTextEncoding GetEnoding()
-        {
-            return CharCodeMaxLength == 2 ? SKTextEncoding.Utf16 : SKTextEncoding.Utf8;// Symbolic ? SKTextEncoding.GlyphId : SKTextEncoding.Utf8; 
-        }
-
         /**
           <summary>Gets the scaling factor to be applied to unscaled metrics to get actual
           measures.</summary>
@@ -176,36 +150,14 @@ namespace PdfClown.Documents.Contents.Fonts
             standard encoding;
           * glyph index: internal identifier of the graphical representation of a character.
         */
-        /**
-          <summary>Unicodes by character code.</summary>
-          <remarks>
-            <para>When this map is populated, <code>symbolic</code> variable shall accordingly be set.</para>
-          </remarks>
-        */
-        protected CMap cmap;
-        /**
-          <summary>Glyph indexes by unicode.</summary>
-        */
-        protected Dictionary<int, int> glyphIndexes;
-        /**
-          <summary>Glyph kernings by (left-right) glyph index pairs.</summary>
-        */
-        protected Dictionary<int, int> glyphKernings;
-        /**
-          <summary>Glyph widths by glyph index.</summary>
-        */
-        protected Dictionary<int, int> glyphWidths;
-        /**
-          <summary>Whether the font encoding is custom (that is non-Unicode).</summary>
-        */
-        protected bool symbolic = true;
-        /**
-          <summary>Used unicodes.</summary>
-        */
-        //protected HashSet<int> usedCodes;
-
+        protected CMap toUnicodeCMap;
+        protected FontMetrics afmStandard14;
+        protected FontDescriptor fontDescriptor;
+        protected readonly Dictionary<int, float> codeToWidthMap;
         protected SKTypeface typeface;
-
+        protected List<float> widths;
+        protected float avgFontWidth;
+        protected float fontWidthOfSpace = -1f;
         /**
           <summary>Average glyph width.</summary>
         */
@@ -213,7 +165,7 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
           <summary>Maximum character code byte size.</summary>
         */
-        private int CharCodeMaxLength => cmap?.MaxCodeLength ?? 1;
+        private int CharCodeMaxLength => toUnicodeCMap?.MaxCodeLength ?? 1;
         /**
           <summary>Default Unicode for missing characters.</summary>
         */
@@ -227,6 +179,21 @@ namespace PdfClown.Documents.Contents.Fonts
         #endregion
 
         #region constructors
+        /**
+         * Constructor for Standard 14.
+         */
+        public Font(string baseFont) : this((Document)null)
+        {
+            toUnicodeCMap = null;
+            afmStandard14 = Standard14Fonts.GetAFM(baseFont);
+            if (afmStandard14 == null)
+            {
+                throw new ArgumentException("No AFM for font " + baseFont);
+            }
+            FontDescriptor = PdfType1FontEmbedder.BuildFontDescriptor(afmStandard14);
+            // standard 14 fonts may be accessed concurrently, as they are singletons
+            codeToWidthMap = new Dictionary<int, float>();
+        }
         /**
           <summary>Creates a new font structure within the given document context.</summary>
         */
@@ -252,7 +219,7 @@ namespace PdfClown.Documents.Contents.Fonts
         #region interface
         #region public
 
-        public abstract SKMatrix FontMatrix { get; }
+        public virtual SKMatrix FontMatrix { get => DefaultFontMatrix; }
         public abstract SKRect BoundingBox { get; }
 
         /**
@@ -330,16 +297,16 @@ namespace PdfClown.Documents.Contents.Fonts
             set => BaseFont = value;
         }
 
-        public int FirstChar
+        public int? FirstChar
         {
-            get => ((PdfInteger)BaseDataObject[PdfName.FirstChar])?.IntValue ?? 0;
-            set => BaseDataObject[PdfName.FirstChar] = new PdfInteger(value);
+            get => ((PdfInteger)BaseDataObject[PdfName.FirstChar])?.IntValue;
+            set => BaseDataObject[PdfName.FirstChar] = PdfInteger.Get(value);
         }
 
-        public int LastChar
+        public int? LastChar
         {
-            get => ((PdfInteger)BaseDataObject[PdfName.LastChar])?.IntValue ?? 0;
-            set => BaseDataObject[PdfName.LastChar] = new PdfInteger(value);
+            get => ((PdfInteger)BaseDataObject[PdfName.LastChar])?.IntValue;
+            set => BaseDataObject[PdfName.LastChar] = PdfInteger.Get(value);
         }
 
         public virtual PdfArray Widths
@@ -350,8 +317,8 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public virtual FontDescriptor FontDescriptor
         {
-            get => Wrap<FontDescriptor>((PdfDictionary)BaseDataObject.Resolve(PdfName.FontDescriptor));
-            set => BaseDataObject[PdfName.FontDescriptor] = value.BaseObject;
+            get => fontDescriptor ?? (fontDescriptor = Wrap<FontDescriptor>((PdfDictionary)BaseDataObject.Resolve(PdfName.FontDescriptor)));
+            set => BaseDataObject[PdfName.FontDescriptor] = (fontDescriptor = value)?.BaseObject;
         }
 
         /**
@@ -369,10 +336,70 @@ namespace PdfClown.Documents.Contents.Fonts
         public virtual bool IsVertical { get => false; set { } }
         public virtual bool IsDamaged { get => false; }
         public virtual bool IsEmbedded { get => false; }
-        public virtual bool IsStandard14 { get => false; }
+
+        public virtual bool IsStandard14
+        {
+            get
+            {
+                if (IsEmbedded)
+                {
+                    return false;
+                }
+
+                // if the name matches, this is a Standard 14 font
+                return Standard14Fonts.ContainsName(Name);
+            }
+        }
+        /**
+         * Returns the AFM if this is a Standard 14 font.
+         */
+        protected FontMetrics Standard14AFM
+        {
+            get => afmStandard14;
+        }
+
         public abstract float GetHeight(int code);
         public abstract bool HasExplicitWidth(int code);
-        public abstract float AverageFontWidth { get; }
+        public virtual float AverageFontWidth
+        {
+            get
+            {
+                float average;
+                if (avgFontWidth.CompareTo(0.0f) != 0)
+                {
+                    average = avgFontWidth;
+                }
+                else
+                {
+                    float totalWidth = 0.0f;
+                    float characterCount = 0.0f;
+                    var widths = Widths;
+                    if (widths != null)
+                    {
+                        for (int i = 0; i < widths.Count; i++)
+                        {
+                            var fontWidth = (IPdfNumber)widths[i];
+                            if (fontWidth.FloatValue > 0)
+                            {
+                                totalWidth += fontWidth.FloatValue;
+                                characterCount += 1;
+                            }
+                        }
+                    }
+
+                    if (totalWidth > 0)
+                    {
+                        average = totalWidth / characterCount;
+                    }
+                    else
+                    {
+                        average = 0;
+                    }
+                    avgFontWidth = average;
+                }
+                return average;
+            }
+        }
         public abstract SKPoint GetPositionVector(int code);
         public abstract SKPoint GetDefaultPositionVector(int cid);
         public abstract float GetVerticalDisplacementVectorY(int code);
@@ -384,9 +411,9 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
           <summary>Gets whether the font encoding is custom (that is non-Unicode).</summary>
         */
-        public bool Symbolic => symbolic;
+        public abstract bool Symbolic { get; }
 
-        public CMap CMap => cmap;
+        public CMap CMap => toUnicodeCMap;
 
         /**
       * Returns the displacement vector (w0, w1) in text space, for the given character.
@@ -399,11 +426,6 @@ namespace PdfClown.Documents.Contents.Fonts
         public virtual SKPoint GetDisplacement(int code)
         {
             return new SKPoint(GetWidth(code) / 1000, 0);
-        }
-
-        public ushort GetGlyph(int key)
-        {
-            return glyphIndexes.TryGetValue(key, out var glyph) ? (ushort)glyph : (ushort)0;
         }
 
         public virtual void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes)
@@ -479,13 +501,11 @@ namespace PdfClown.Documents.Contents.Fonts
         */
         public virtual int ToUnicode(int code)
         {
-            //From PdfBox
             // if the font dictionary containsName a ToUnicode CMap, use that CMap
-            if (cmap != null)
+            if (toUnicodeCMap != null)
             {
-                if ((cmap.CMapName?.StartsWith("Identity-", StringComparison.Ordinal) ?? false)
-                    && (Dictionary.Resolve(PdfName.ToUnicode) is PdfName
-                    || !cmap.HasUnicodeMappings))
+                if ((toUnicodeCMap.CMapName?.StartsWith("Identity-", StringComparison.Ordinal) ?? false)
+                    && (Dictionary.Resolve(PdfName.ToUnicode) is PdfName || !toUnicodeCMap.HasUnicodeMappings))
                 {
                     // handle the undocumented case of using Identity-H/V as a ToUnicode CMap, this
                     // isn't actually valid as the Identity-x CMaps are code->CID maps, not
@@ -497,7 +517,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 else
                 {
                     // proceed as normal
-                    return cmap.ToUnicode(code);
+                    return toUnicodeCMap.ToUnicode(code);
                 }
             }
 
@@ -519,7 +539,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 {
                     while (buffer.Position < buffer.Length)
                     {
-                        var code = cmap.ReadCode(buffer, out var codeBytes);
+                        var code = toUnicodeCMap.ReadCode(buffer, out var codeBytes);
                         var textChar = ToUnicode(code);
                         if (textChar < 0)
                         {
@@ -551,7 +571,7 @@ namespace PdfClown.Documents.Contents.Fonts
                     if (textCode < 32) // NOTE: Control characters are ignored [FIX:7].
                         continue;
 
-                    var code = cmap.ToCode(textCode);
+                    var code = toUnicodeCMap.ToCode(textCode);
                     if (code == null) // Missing glyph.
                     {
                         switch (Document.Configuration.EncodingFallback)
@@ -559,7 +579,7 @@ namespace PdfClown.Documents.Contents.Fonts
                             case EncodingFallbackEnum.Exclusion:
                                 continue;
                             case EncodingFallbackEnum.Substitution:
-                                code = cmap.ToCode(defaultCode);
+                                code = toUnicodeCMap.ToCode(defaultCode);
                                 break;
                             case EncodingFallbackEnum.Exception:
                                 throw new EncodeException(text, index);
@@ -994,7 +1014,7 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             if (BaseDataObject.ContainsKey(PdfName.ToUnicode)) // To-Unicode explicit mapping.
             {
-                cmap = CMap.Get(BaseDataObject.Resolve(PdfName.ToUnicode));
+                toUnicodeCMap = CMap.Get(BaseDataObject.Resolve(PdfName.ToUnicode));
                 symbolic = false;
             }
 

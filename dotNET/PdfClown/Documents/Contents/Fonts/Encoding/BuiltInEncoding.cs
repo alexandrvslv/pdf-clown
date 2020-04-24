@@ -14,40 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using PdfClown.Documents.Contents.Fonts.TTF;
+
+using PdfClown.Objects;
+using PdfClown.Util;
+
+using System;
+using System.Collections.Generic;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
     /**
-     * A CIDFontMapping is a kind of FontMapping which allows for an additional TrueTypeFont substitute
-     * to be provided if a CID font is not available.
+     * A font's built-in encoding.
      *
      * @author John Hewson
      */
-    public sealed class CIDFontMapping : FontMapping<OpenTypeFont>
+    internal class BuiltInEncoding : Encoding
     {
-        private readonly BaseFont ttf;
-
-        public CIDFontMapping(OpenTypeFont font, BaseFont fontBoxFont, bool isFallback)
-            : base(font, isFallback)
+        /**
+         * Constructor.
+         *
+         * @param codeToName the given code to name mapping
+         */
+        public BuiltInEncoding(Dictionary<int, string> codeToName)
         {
-            this.ttf = fontBoxFont;
+            foreach (var item in codeToName)
+                Put(item.Key, item.Value);
         }
 
-        /**
-		 * Returns a TrueType font when isCIDFont() is true, otherwise null.
-		 */
-        public BaseFont TrueTypeFont
+        public override COSBase GetCOSObject()
         {
-            get => ttf;
-        }
-
-        /**
-		 * Returns true if this is a CID font.
-		 */
-        public bool IsCIDFont
-        {
-            get => Font != null;
+            throw new NotUnsupportedException("Built-in encodings cannot be serialized");
         }
     }
 }

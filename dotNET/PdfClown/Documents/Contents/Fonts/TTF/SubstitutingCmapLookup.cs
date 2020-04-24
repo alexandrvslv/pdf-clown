@@ -38,14 +38,14 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             this.enabledFeatures = enabledFeatures;
         }
 
-        public override int GetGlyphId(int characterCode)
+        public int GetGlyphId(int characterCode)
         {
             int gid = cmap.GetGlyphId(characterCode);
             string[] scriptTags = OpenTypeScript.getScriptTags(characterCode);
             return gsub.GetSubstitution(gid, scriptTags, enabledFeatures);
         }
 
-        public override List<int> GetCharCodes(int gid)
+        public List<int> GetCharCodes(int gid)
         {
             return cmap.GetCharCodes(gsub.GetUnsubstitution(gid));
         }

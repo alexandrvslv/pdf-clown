@@ -188,5 +188,10 @@ namespace PdfClown.Documents.Contents.Fonts
             Put(122, "z");
             Put(48, "zero");
         }
+
+        public override PdfDirectObject GetPdfObject()
+        {
+            return PdfName.StandardEncoding;
+        }
     }
 }

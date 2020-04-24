@@ -75,11 +75,11 @@ namespace PdfClown.Samples.CLI
                                     continue;
 
                                 Console.WriteLine("\nWhat to do with the contents associated to the removed layer?");
-                                var contentRemovalOptions = new Dictionary<string, string>
-                {
-                  {"0", "Remove layered content"},
-                  {"1", "Flatten layered content"}
-                };
+                                var contentRemovalOptions = new Dictionary<string, string>(StringComparer.Ordinal)
+                                {
+                                    {"0", "Remove layered content"},
+                                    {"1", "Flatten layered content"}
+                                };
                                 int contentRemovalChoice;
                                 try
                                 { contentRemovalChoice = Int32.Parse(PromptChoice(contentRemovalOptions)); }

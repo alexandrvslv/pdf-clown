@@ -139,7 +139,7 @@ namespace PdfClown.Samples.CLI
             int pageIndex = page.Index;
             if (pageIndex > 0 && !skip)
             {
-                IDictionary<string, string> options = new Dictionary<string, string>();
+                IDictionary<string, string> options = new Dictionary<string, string>(StringComparer.Ordinal);
                 options[""] = "Scan next page";
                 options["Q"] = "End scanning";
                 if (!PromptChoice(options).Equals(""))

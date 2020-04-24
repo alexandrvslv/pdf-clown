@@ -291,10 +291,10 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
                 else
                 {
-                    Debug.WriteLine("warning: Building on-disk font cache, this may take a while");
+                    Debug.WriteLine("warn: Building on-disk font cache, this may take a while");
                     ScanFonts(files);
                     SaveDiskCache();
-                    Debug.WriteLine("warning: Finished building on-disk font cache, found " + fontInfoList.Count + " fonts");
+                    Debug.WriteLine("warn: Finished building on-disk font cache, found " + fontInfoList.Count + " fonts");
                 }
             }
             catch (Exception e)

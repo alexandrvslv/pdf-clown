@@ -49,7 +49,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
 
             ScriptTable scriptTable = scriptTableDetails.ScriptTable;
 
-            Dictionary<string, Dictionary<List<int>, int>> gsubData = new Dictionary<string, Dictionary<List<int>, int>>();
+            Dictionary<string, Dictionary<List<int>, int>> gsubData = new Dictionary<string, Dictionary<List<int>, int>>(StringComparer.Ordinal);
             // the starting point is really the scriptTags
             if (scriptTable.DefaultLangSysTable != null)
             {

@@ -21,8 +21,6 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-
-
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -43,6 +41,14 @@
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\AGL20.scsv">
       <Link>res\fonts\AGL20.scsv</Link>
       <LogicalName>fonts.AGL20</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\Additional.scsv">
+      <Link>res\fonts\Additional.scsv</Link>
+      <LogicalName>fonts.Additional</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\ZapfDingbats.scsv">
+      <Link>res\fonts\ZapfDingbats.scsv</Link>
+      <LogicalName>fonts.ZapfDingbats</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\G500.scsv">
       <Link>res\fonts\G500.scsv</Link>
@@ -208,11 +214,20 @@
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFont.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType0.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType2.cs" />
-    <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType2Embedder.cs" />
+    <None Include="Documents\Contents\Fonts\CIDFont\UniUtil.cs" />
+    <None Include="Documents\Contents\Fonts\Embedder\PdfCIDFontType2Embedder.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDSystemInfo.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CIDRange.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CodespaceRange.cs" />
+    <None Include="Documents\Contents\Fonts\Embedder\PdfTrueTypeFontEmbedder.cs" />
+    <None Include="Documents\Contents\Fonts\Embedder\PdfType1FontEmbedder.cs" />
     <None Include="Documents\Contents\Fonts\Embedder\TrueTypeEmbedder.cs" />
+    <None Include="Documents\Contents\Fonts\IEncodedFont.cs" />
+    <None Include="Documents\Contents\Fonts\Encoding\BuiltInEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\Encoding\DictionaryEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\Encoding\MacExpertEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\Encoding\MacOSRomanEncoding.cs" />
+    <None Include="Documents\Contents\Fonts\Encoding\Type1Encoding.cs" />
     <None Include="Documents\Contents\Fonts\Mapper\CIDFontMapping.cs" />
     <None Include="Documents\Contents\Fonts\Mapper\FileSystemFontProvider.cs" />
     <None Include="Documents\Contents\Fonts\Mapper\FontCache.cs" />
