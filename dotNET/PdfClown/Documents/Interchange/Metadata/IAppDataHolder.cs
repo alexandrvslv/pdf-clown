@@ -47,18 +47,13 @@ namespace PdfClown.Documents.Interchange.Metadata
           the <see cref="AppData">private application data collection</see> matches the
           <code>appName</code>.</summary>
         */
-        AppData GetAppData(
-          PdfName appName
-          );
+        AppData GetAppData(PdfName appName);
 
         /**
           <summary>Gets the date and time when the holder's contents were most recently modified.
           </summary>
         */
-        DateTime? ModificationDate
-        {
-            get;
-        }
+        DateTime? ModificationDate { get; }
 
         /**
           <summary>Updates the <see cref="ModificationDate">modification date</see> with the current
@@ -68,9 +63,7 @@ namespace PdfClown.Documents.Interchange.Metadata
           <param name="appName">Application name corresponding to an entry in the <see cref="AppData">
           private application data collection</see>.</remarks>
         */
-        void Touch(
-          PdfName appName
-          );
+        void Touch(PdfName appName);
 
         /**
           <summary>Updates the <see cref="ModificationDate">modification date</see> synchronizing it
@@ -82,10 +75,7 @@ namespace PdfClown.Documents.Interchange.Metadata
           <param name="modificationDate">When the specified application last altered the content of this
           holder.</param>
         */
-        void Touch(
-          PdfName appName,
-          DateTime modificationDate
-          );
+        void Touch(PdfName appName, DateTime modificationDate);
     }
 }
 

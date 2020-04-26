@@ -558,7 +558,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                     if (p >= numGlyphs)
                     {
-                        Debug.WriteLine("warn: glyphId " + p + " for charcode " + charCode + " ignored, numGlyphs is " + numGlyphs);
+                        Debug.WriteLine($"warn: glyphId {p} for charcode {charCode} ignored, numGlyphs is {numGlyphs}");
                         continue;
                     }
 

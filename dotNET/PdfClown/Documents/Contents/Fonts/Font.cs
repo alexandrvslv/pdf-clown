@@ -39,6 +39,8 @@ using System.Text;
 using SkiaSharp;
 using PdfClown.Documents.Contents.Fonts.CCF;
 using PdfClown.Documents.Contents.Fonts.AFM;
+using System.IO;
+using System.Diagnostics;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -105,13 +107,26 @@ namespace PdfClown.Documents.Contents.Fonts
 
             if (fontType.Equals(PdfName.Type1)) // Type 1.
             {
-                if (!fontDictionary.ContainsKey(PdfName.FontDescriptor)) // Standard Type 1.
+                var fd = fontDictionary.Resolve(PdfName.FontDescriptor);
+                if (fd is PdfDictionary fdDictionary && fdDictionary.ContainsKey(PdfName.FontFile3))
                 {
-                    return new StandardType1Font(reference);
+                    return new PdfType1CFont(reference);
                 }
-                else // Custom Type 1.
+                else
                 {
                     return new PdfType1Font(reference);
+                }
+            }
+            else if (fontType.Equals(PdfName.MMType1)) // MMType1.
+            {
+                var fd = fontDictionary.Resolve(PdfName.FontDescriptor);
+                if (fd is PdfDictionary fdDictionary && fdDictionary.ContainsKey(PdfName.FontFile3))
+                {
+                    return new PdfType1CFont(reference);
+                }
+                else
+                {
+                    return new PdfMMType1Font(reference);
                 }
             }
             else if (fontType.Equals(PdfName.TrueType)) // TrueType.
@@ -126,13 +141,10 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 return new PdfType3Font(reference);
             }
-            else if (fontType.Equals(PdfName.MMType1)) // MMType1.
-            {
-                return new MMType1Font(reference);
-            }
             else // Unknown.
             {
-                throw new NotSupportedException("Unknown font type: " + fontType + " (reference: " + reference + ")");
+                Debug.WriteLine($"warn: Invalid font subtype '{fontType}'");
+                return new PdfType1Font(reference);
             }
         }
         #endregion
@@ -158,22 +170,14 @@ namespace PdfClown.Documents.Contents.Fonts
         protected List<float> widths;
         protected float avgFontWidth;
         protected float fontWidthOfSpace = -1f;
-        /**
-          <summary>Average glyph width.</summary>
-        */
-        private int averageWidth = UndefinedWidth;
+
         /**
           <summary>Maximum character code byte size.</summary>
         */
         private int CharCodeMaxLength => toUnicodeCMap?.MaxCodeLength ?? 1;
         /**
-          <summary>Default Unicode for missing characters.</summary>
-        */
-        private int defaultCode = UndefinedDefaultCode;
-        /**
           <summary>Default glyph width.</summary>
         */
-        private int defaultWidth = UndefinedWidth;
         private double textHeight = -1; // TODO: temporary until glyph bounding boxes are implemented.
         private static Dictionary<string, SKTypeface> cache;
         #endregion
@@ -182,7 +186,7 @@ namespace PdfClown.Documents.Contents.Fonts
         /**
          * Constructor for Standard 14.
          */
-        public Font(string baseFont) : this((Document)null)
+        public Font(Document context, string baseFont) : this(context)
         {
             toUnicodeCMap = null;
             afmStandard14 = Standard14Fonts.GetAFM(baseFont);
@@ -232,22 +236,6 @@ namespace PdfClown.Documents.Contents.Fonts
         }
 
         /**
-         <summary>Gets/Sets the Unicode codepoint used to substitute missing characters.</summary>
-         <exception cref="EncodeException">If the value is not mapped in the font's encoding.</exception>
-       */
-        public int DefaultCode
-        {
-            get => defaultCode;
-            set
-            {
-                if (!glyphIndexes.ContainsKey(value))
-                    throw new EncodeException((char)value);
-
-                defaultCode = value;
-            }
-        }
-
-        /**
           <summary>Gets the unscaled vertical offset from the baseline to the descender line (descent).
           The value is a negative number.</summary>
         */
@@ -259,11 +247,6 @@ namespace PdfClown.Documents.Contents.Fonts
                 */
             get => -Math.Abs(FontDescriptor?.Descent ?? 250);
         }
-
-        /**
-          <summary>Gets the Unicode code-points supported by this font.</summary>
-        */
-        public ICollection<int> CodePoints => glyphIndexes.Keys;
 
         /**
         <summary>Gets the unscaled line height.</summary>
@@ -289,6 +272,17 @@ namespace PdfClown.Documents.Contents.Fonts
         }
 
         /**
+         * This will get the fonts bounding box from its dictionary.
+         *
+         * @return The fonts bounding box.
+         */
+        public Rectangle FontBBox
+        {
+            get => Wrap<Rectangle>(Dictionary.Resolve<PdfArray>(PdfName.FontBBox));
+            set => Dictionary[PdfName.FontBBox] = value?.BaseObject;
+        }
+
+        /**
           <summary>Gets the PostScript name of the font.</summary>
         */
         public virtual string Name
@@ -309,10 +303,16 @@ namespace PdfClown.Documents.Contents.Fonts
             set => BaseDataObject[PdfName.LastChar] = PdfInteger.Get(value);
         }
 
+        public PdfDataObject EncodingData
+        {
+            get => BaseDataObject.Resolve(PdfName.Encoding);
+            set => BaseDataObject[PdfName.Encoding] = value.Reference;
+        }
+
         public virtual PdfArray Widths
         {
             get => (PdfArray)BaseDataObject.Resolve(PdfName.Widths);
-            set => BaseDataObject[PdfName.Widths] = value.Reference;
+            set => BaseDataObject[PdfName.Widths] = value;
         }
 
         public virtual FontDescriptor FontDescriptor
@@ -400,18 +400,96 @@ namespace PdfClown.Documents.Contents.Fonts
                 return average;
             }
         }
-        public abstract SKPoint GetPositionVector(int code);
-        public abstract SKPoint GetDefaultPositionVector(int cid);
-        public abstract float GetVerticalDisplacementVectorY(int code);
+
+        /**
+    * Determines the width of the space character.
+    * 
+    * @return the width of the space character
+    */
+        public float SpaceWidth
+        {
+            get
+            {
+                if (fontWidthOfSpace.CompareTo(-1f) == 0)
+                {
+                    var toUnicode = Dictionary.Resolve(PdfName.ToUnicode);
+                    try
+                    {
+                        if (toUnicode != null && toUnicodeCMap != null)
+                        {
+                            int spaceMapping = toUnicodeCMap.SpaceMapping;
+                            if (spaceMapping > -1)
+                            {
+                                fontWidthOfSpace = GetWidth(spaceMapping);
+                            }
+                        }
+                        else
+                        {
+                            fontWidthOfSpace = GetWidth(32);
+                        }
+
+                        // try to get it from the font itself
+                        if (fontWidthOfSpace <= 0)
+                        {
+                            fontWidthOfSpace = GetWidthFromFont(32);
+                        }
+                        // use the average font width as fall back
+                        if (fontWidthOfSpace <= 0)
+                        {
+                            fontWidthOfSpace = AverageFontWidth;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine($"error: Can't determine the width of the space character, assuming 250 {e}");
+                        fontWidthOfSpace = 250f;
+                    }
+                }
+                return fontWidthOfSpace;
+            }
+        }
+
+        /**
+         * Returns true if this font will be subset when embedded.
+         */
+        public abstract bool WillBeSubset { get; }
+
+        /**
+         * Adds the given Unicode point to the subset.
+         * 
+         * @param codePoint Unicode code point
+         */
+
+        public abstract void AddToSubset(int codePoint);
+
+        /**
+         * Replaces this font with a subset containing only the given Unicode characters.
+         *
+         * @throws IOException if the subset could not be written
+         */
+        public abstract void Subset();
+
+        public virtual SKPoint GetPositionVector(int code)
+        {
+            throw new NotSupportedException("Horizontal fonts have no position vector");
+        }
+
+        protected abstract float GetStandard14Width(int code);
+
         public abstract SKPath GetPath(int code);
+
         public abstract SKPath GetNormalizedPath(int code);
+
         public abstract bool HasGlyph(int code);
+
         public abstract float GetWidthFromFont(int code);
-        public abstract int ReadCode(Bytes.Buffer input, out byte[] bytes);
+
+        public abstract int ReadCode(Bytes.IInputStream input, out byte[] bytes);
+
         /**
           <summary>Gets whether the font encoding is custom (that is non-Unicode).</summary>
         */
-        public abstract bool Symbolic { get; }
+        public virtual bool Symbolic { get => false; }
 
         public CMap CMap => toUnicodeCMap;
 
@@ -472,24 +550,9 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        public int MissingCharacter(byte[] byteElement, int code)
+        public virtual int ToUnicode(int code, GlyphMapping customGlyphList)
         {
-            int textCode;
-            switch (Document.Configuration.EncodingFallback)
-            {
-                case EncodingFallbackEnum.Exclusion:
-                    textCode = -1;
-                    break;
-                case EncodingFallbackEnum.Substitution:
-                    textCode = DefaultCode;
-                    break;
-                case EncodingFallbackEnum.Exception:
-                    throw new DecodeException(byteElement, code);
-                default:
-                    throw new NotImplementedException();
-            }
-
-            return textCode;
+            return ToUnicode(code);
         }
 
         /**
@@ -526,34 +589,34 @@ namespace PdfClown.Documents.Contents.Fonts
             return -1;
         }
 
-        /**
-          <summary>Gets the text from the given internal representation.</summary>
-          <param name="bytes">Internal representation to decode.</param>
-          <exception cref="DecodeException"/>
-        */
-        public string Decode(byte[] bytes)
-        {
-            var textBuilder = new StringBuilder();
-            {
-                using (var buffer = new Bytes.Buffer(bytes))
-                {
-                    while (buffer.Position < buffer.Length)
-                    {
-                        var code = toUnicodeCMap.ReadCode(buffer, out var codeBytes);
-                        var textChar = ToUnicode(code);
-                        if (textChar < 0)
-                        {
-                            textChar = MissingCharacter(codeBytes, code);
-                        }
-                        if (textChar > -1)
-                        {
-                            textBuilder.Append((char)textChar);
-                        }
-                    }
-                }
-            }
-            return textBuilder.ToString();
-        }
+        ///**
+        //  <summary>Gets the text from the given internal representation.</summary>
+        //  <param name="bytes">Internal representation to decode.</param>
+        //  <exception cref="DecodeException"/>
+        //*/
+        //public string Decode(byte[] bytes)
+        //{
+        //    var textBuilder = new StringBuilder();
+        //    {
+        //        using (var buffer = new Bytes.Buffer(bytes))
+        //        {
+        //            while (buffer.Position < buffer.Length)
+        //            {
+        //                var code = toUnicodeCMap.ReadCode(buffer, out var codeBytes);
+        //                var textChar = ToUnicode(code);
+        //                if (textChar < 0)
+        //                {
+        //                    textChar = MissingCharacter(codeBytes, code);
+        //                }
+        //                if (textChar > -1)
+        //                {
+        //                    textBuilder.Append((char)textChar);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return textBuilder.ToString();
+        //}
 
 
         /**
@@ -563,35 +626,20 @@ namespace PdfClown.Documents.Contents.Fonts
         */
         public byte[] Encode(string text)
         {
-            using (var encodedStream = new io::MemoryStream())
+            using (var output = new MemoryStream())
             {
-                for (int index = 0, length = text.Length; index < length; index++)
+                int offset = 0;
+                while (offset < text.Length)
                 {
-                    int textCode = text[index];
-                    if (textCode < 32) // NOTE: Control characters are ignored [FIX:7].
-                        continue;
+                    int codePoint = text[offset];
 
-                    var code = toUnicodeCMap.ToCode(textCode);
-                    if (code == null) // Missing glyph.
-                    {
-                        switch (Document.Configuration.EncodingFallback)
-                        {
-                            case EncodingFallbackEnum.Exclusion:
-                                continue;
-                            case EncodingFallbackEnum.Substitution:
-                                code = toUnicodeCMap.ToCode(defaultCode);
-                                break;
-                            case EncodingFallbackEnum.Exception:
-                                throw new EncodeException(text, index);
-                            default:
-                                throw new NotImplementedException();
-                        }
-                    }
+                    // multi-byte encoding with 1 to 4 bytes
+                    byte[] bytes = Encode(codePoint);
+                    output.Write(bytes, 0, bytes.Length);
 
-                    encodedStream.Write(code, 0, code.Length);
-                    //usedCodes.Add(textCode);
+                    offset += 1;//Character.charCount(codePoint);
                 }
-                return encodedStream.ToArray();
+                return output.ToArray();
             }
         }
 
@@ -669,61 +717,61 @@ namespace PdfClown.Documents.Contents.Fonts
         public double GetHeight(string text, double size)
         { return GetHeight(text) * GetScalingFactor(size); }
 
-        /**
-          <summary>Gets the width (kerning inclusive) of the given text, scaled to the given font size.</summary>
-          <param name="text">Text whose width has to be calculated.</param>
-          <param name="size">Font size.</param>
-          <exception cref="EncodeException"/>
-        */
-        public double GetKernedWidth(string text, double size)
-        { return (GetWidth(text) + GetKerning(text)) * GetScalingFactor(size); }
+        ///**
+        //  <summary>Gets the width (kerning inclusive) of the given text, scaled to the given font size.</summary>
+        //  <param name="text">Text whose width has to be calculated.</param>
+        //  <param name="size">Font size.</param>
+        //  <exception cref="EncodeException"/>
+        //*/
+        //public double GetKernedWidth(string text, double size)
+        //{ return (GetWidth(text) + GetKerning(text)) * GetScalingFactor(size); }
 
-        /**
-          <summary>Gets the unscaled kerning width between two given characters.</summary>
-          <param name="textChar1">Left character.</param>
-          <param name="textChar2">Right character,</param>
-        */
-        public int GetKerning(char textChar1, char textChar2)
-        {
-            if (glyphKernings == null)
-                return 0;
+        ///**
+        //  <summary>Gets the unscaled kerning width between two given characters.</summary>
+        //  <param name="textChar1">Left character.</param>
+        //  <param name="textChar2">Right character,</param>
+        //*/
+        //public int GetKerning(char textChar1, char textChar2)
+        //{
+        //    if (glyphKernings == null)
+        //        return 0;
 
-            int textChar1Index;
-            if (!glyphIndexes.TryGetValue((int)textChar1, out textChar1Index))
-                return 0;
+        //    int textChar1Index;
+        //    if (!glyphIndexes.TryGetValue((int)textChar1, out textChar1Index))
+        //        return 0;
 
-            int textChar2Index;
-            if (!glyphIndexes.TryGetValue((int)textChar2, out textChar2Index))
-                return 0;
+        //    int textChar2Index;
+        //    if (!glyphIndexes.TryGetValue((int)textChar2, out textChar2Index))
+        //        return 0;
 
-            int kerning;
-            return glyphKernings.TryGetValue(
-              textChar1Index << 16 // Left-hand glyph index.
-                + textChar2Index, // Right-hand glyph index.
-              out kerning) ? kerning : 0;
-        }
+        //    int kerning;
+        //    return glyphKernings.TryGetValue(
+        //      textChar1Index << 16 // Left-hand glyph index.
+        //        + textChar2Index, // Right-hand glyph index.
+        //      out kerning) ? kerning : 0;
+        //}
 
-        /**
-          <summary>Gets the unscaled kerning width inside the given text.</summary>
-          <param name="text">Text whose kerning has to be calculated.</param>
-        */
-        public int GetKerning(string text)
-        {
-            int kerning = 0;
-            for (int index = 0, length = text.Length - 1; index < length; index++)
-            {
-                kerning += GetKerning(text[index], text[index + 1]);
-            }
-            return kerning;
-        }
+        ///**
+        //  <summary>Gets the unscaled kerning width inside the given text.</summary>
+        //  <param name="text">Text whose kerning has to be calculated.</param>
+        //*/
+        //public int GetKerning(string text)
+        //{
+        //    int kerning = 0;
+        //    for (int index = 0, length = text.Length - 1; index < length; index++)
+        //    {
+        //        kerning += GetKerning(text[index], text[index + 1]);
+        //    }
+        //    return kerning;
+        //}
 
-        /**
-          <summary>Gets the kerning width inside the given text, scaled to the given font size.</summary>
-          <param name="text">Text whose kerning has to be calculated.</param>
-          <param name="size">Font size.</param>
-        */
-        public double GetKerning(string text, double size)
-        { return GetKerning(text) * GetScalingFactor(size); }
+        ///**
+        //  <summary>Gets the kerning width inside the given text, scaled to the given font size.</summary>
+        //  <param name="text">Text whose kerning has to be calculated.</param>
+        //  <param name="size">Font size.</param>
+        //*/
+        //public double GetKerning(string text, double size)
+        //{ return GetKerning(text) * GetScalingFactor(size); }
 
         /**
           <summary>Gets the line height, scaled to the given font size.</summary>
@@ -732,10 +780,19 @@ namespace PdfClown.Documents.Contents.Fonts
         public double GetLineHeight(double size)
         { return LineHeight * GetScalingFactor(size); }
 
+        public float GetWidth(char code, double size)
+        {
+            return GetWidth(code, (float)size);
+        }
+
+        public float GetWidth(char code, float size)
+        {
+            return GetWidth(code) * (float)GetScalingFactor(size);
+        }
+
         public virtual float GetWidth(int code)
         {
-            float width = codeToWidthMap.TryGet(code);
-            if (width != null)
+            if (codeToWidthMap.TryGetValue(code, out float width))
             {
                 return width;
             }
@@ -747,20 +804,17 @@ namespace PdfClown.Documents.Contents.Fonts
             // embedded", however PDFBOX-427 shows that it also applies to embedded fonts.
 
             // Type1, Type1C, Type3
-            if (Widths != null || Dictionary.containsKey(PdfName.MISSING_WIDTH))
+            if (Widths != null || FontDescriptor?.MissingWidth != null)
             {
-                int firstChar = FirstChar;
-                int lastChar = LastChar;
-                int siz = getWidths().size();
+                var widths = Widths;
+                int firstChar = FirstChar ?? 0;
+                int lastChar = LastChar ?? 0;
+                int size = widths.Count;
                 int idx = code - firstChar;
-                if (siz > 0 && code >= firstChar && code <= lastChar && idx < siz)
+                if (size > 0 && code >= firstChar && code <= lastChar && idx < size)
                 {
-                    width = getWidths().get(idx);
-                    if (width == null)
-                    {
-                        width = 0f;
-                    }
-                    codeToWidthMap.put(code, width);
+                    width = ((IPdfNumber)widths[idx])?.FloatValue ?? 0f;
+                    codeToWidthMap[code] = width;
                     return width;
                 }
 
@@ -768,72 +822,52 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (fd != null)
                 {
                     // get entry from /MissingWidth entry
-                    width = fd.getMissingWidth();
-                    codeToWidthMap.put(code, width);
+                    width = fd.MissingWidth ?? 0;
+                    codeToWidthMap[code] = width;
                     return width;
                 }
             }
 
             // standard 14 font widths are specified by an AFM
-            if (isStandard14())
+            if (IsStandard14)
             {
-                width = getStandard14Width(code);
-                codeToWidthMap.put(code, width);
+                width = GetStandard14Width(code);
+                codeToWidthMap[code] = width;
                 return width;
             }
 
             // if there's nothing to override with, then obviously we fall back to the font
             width = GetWidthFromFont(code);
-            codeToWidthMap.put(code, width);
+            codeToWidthMap[code] = width;
             return width;
         }
 
-        /**
-          <summary>Gets the unscaled width of the given character.</summary>
-          <param name="textChar">Character whose width has to be calculated.</param>
-          <exception cref="EncodeException"/>
-        */
-        public int GetWidth(char textChar)
-        {
-            int glyphIndex;
-            if (!glyphIndexes.TryGetValue((int)textChar, out glyphIndex))
-            {
-                switch (Document.Configuration.EncodingFallback)
-                {
-                    case EncodingFallbackEnum.Exclusion:
-                        return 0;
-                    case EncodingFallbackEnum.Substitution:
-                        return DefaultWidth;
-                    case EncodingFallbackEnum.Exception:
-                        throw new EncodeException(textChar);
-                    default:
-                        throw new NotImplementedException();
-                }
-            }
-
-            int glyphWidth;
-            return glyphWidths.TryGetValue(glyphIndex, out glyphWidth) ? glyphWidth : DefaultWidth;
-        }
-
-        /**
-          <summary>Gets the width of the given character, scaled to the given font size.</summary>
-          <param name="textChar">Character whose height has to be calculated.</param>
-          <param name="size">Font size.</param>
-          <exception cref="EncodeException"/>
-        */
-        public double GetWidth(char textChar, double size)
-        { return GetWidth(textChar) * GetScalingFactor(size); }
+        ///**
+        //  <summary>Gets the width of the given character, scaled to the given font size.</summary>
+        //  <param name="textChar">Character whose height has to be calculated.</param>
+        //  <param name="size">Font size.</param>
+        //  <exception cref="EncodeException"/>
+        //*/
+        //public double GetWidth(char textChar, double size)
+        //{ return GetWidth(textChar) * GetScalingFactor(size); }
 
         /**
           <summary>Gets the unscaled width (kerning exclusive) of the given text.</summary>
           <param name="text">Text whose width has to be calculated.</param>
           <exception cref="EncodeException"/>
         */
-        public int GetWidth(string text)
+        public virtual float GetWidth(string text)
         {
-            int width = 0;
-            for (int index = 0, length = text.Length; index < length; index++)
-            { width += GetWidth(text[index]); }
+            byte[] bytes = Encode(text);
+            var input = new Bytes.Buffer(bytes);
+
+            float width = 0;
+            while (input.Available > 0)
+            {
+                int code = ReadCode(input, out _);
+                width += GetWidth(code);
+            }
+
             return width;
         }
 
@@ -846,6 +880,16 @@ namespace PdfClown.Documents.Contents.Fonts
         */
         public double GetWidth(string text, double size)
         { return GetWidth(text) * GetScalingFactor(size); }
+
+        protected bool IsNonZeroBoundingBox(Rectangle bbox)
+        {
+            return bbox != null && (
+                bbox.Left.CompareTo(0) != 0 ||
+                bbox.Bottom.CompareTo(0) != 0 ||
+                bbox.Right.CompareTo(0) != 0 ||
+                bbox.Top.CompareTo(0) != 0
+            );
+        }
 
         public virtual SKTypeface GetTypeface()
         {
@@ -969,45 +1013,6 @@ namespace PdfClown.Documents.Contents.Fonts
         #region protected
 
         /**
-          <summary>Gets/Sets the average glyph width.</summary>
-        */
-        public virtual int AverageWidth
-        {
-            get
-            {
-                if (averageWidth == UndefinedWidth)
-                {
-                    if (glyphWidths.Count == 0)
-                    { averageWidth = 1000; }
-                    else
-                    {
-                        averageWidth = 0;
-                        foreach (int glyphWidth in glyphWidths.Values)
-                        { averageWidth += glyphWidth; }
-                        averageWidth /= glyphWidths.Count;
-                    }
-                }
-                return averageWidth;
-            }
-            set => averageWidth = value;
-        }
-
-        /**
-          <summary>Gets/Sets the default glyph width.</summary>
-        */
-        public virtual int DefaultWidth
-        {
-            get
-            {
-                if (defaultWidth == UndefinedWidth)
-                { defaultWidth = AverageWidth; }
-                return defaultWidth;
-            }
-            set => defaultWidth = value;
-        }
-
-
-        /**
           <summary>Loads font information from existing PDF font structure.</summary>
         */
         protected void Load()
@@ -1015,7 +1020,6 @@ namespace PdfClown.Documents.Contents.Fonts
             if (BaseDataObject.ContainsKey(PdfName.ToUnicode)) // To-Unicode explicit mapping.
             {
                 toUnicodeCMap = CMap.Get(BaseDataObject.Resolve(PdfName.ToUnicode));
-                symbolic = false;
             }
 
             if (BaseDataObject.ContainsKey(PdfName.Encoding)) // Encoding explicit mapping.
@@ -1027,18 +1031,6 @@ namespace PdfClown.Documents.Contents.Fonts
             }
 
             OnLoad();
-
-            // Missing character substitute.
-            if (defaultCode == UndefinedDefaultCode)
-            {
-                ICollection<int> codePoints = CodePoints;
-                if (codePoints.Contains((int)'?'))
-                { DefaultCode = '?'; }
-                else if (codePoints.Contains((int)' '))
-                { DefaultCode = ' '; }
-                else
-                { DefaultCode = codePoints.First(); }
-            }
         }
 
         /**

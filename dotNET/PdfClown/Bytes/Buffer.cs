@@ -518,6 +518,8 @@ namespace PdfClown.Bytes
         #region IStream
         public long Length => length;
 
+        public long Available { get => length - position; }
+
         #region IDisposable
         public void Dispose()
         { }

@@ -145,15 +145,14 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     }
                     else
                     {
-                        Debug.WriteLine("debug: incorrect glyph name index " + index +
-                                  ", valid numbers 0.." + WGL4Names.NUMBER_OF_MAC_GLYPHS);
+                        Debug.WriteLine($"debug: incorrect glyph name index {index}, valid numbers 0..{WGL4Names.NUMBER_OF_MAC_GLYPHS}");
                     }
                 }
             }
             else if (formatType.CompareTo(3.0f) == 0)
             {
                 // no postscript information is provided.
-                Debug.WriteLine("debug: No PostScript name information is provided for the font " + font.Name);
+                Debug.WriteLine($"debug: No PostScript name information is provided for the font {font.Name}");
             }
             initialized = true;
         }

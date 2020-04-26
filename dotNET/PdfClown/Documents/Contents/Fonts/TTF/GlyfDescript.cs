@@ -26,7 +26,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
      * see http://xmlgraphics.apache.org/batik/ for further details.
      * 
      */
-    public abstract class GlyfDescript : GlyphDescription
+    public abstract class GlyfDescript : IGlyphDescription
     {
 
         // Flags describing a coordinate of a glyph.
@@ -66,7 +66,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public static readonly byte Y_DUAL = 0x20;
 
-        private int[] instructions;
+        private byte[] instructions;
         private readonly int contourCount;
 
         /**
@@ -93,7 +93,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * Returns the hinting instructions.
          * @return an array containing the hinting instructions.
          */
-        public virtual int[] Instructions
+        public virtual byte[] Instructions
         {
             get => instructions;
         }

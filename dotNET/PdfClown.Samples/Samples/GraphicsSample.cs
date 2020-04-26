@@ -56,15 +56,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
 
             // 3. Drawing the page contents...
-            composer.SetFont(
-              new fonts::StandardType1Font(
-                document,
-                fonts::StandardType1Font.FamilyEnum.Courier,
-                true,
-                false
-                ),
-              32
-              );
+            composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false), 32);
 
             {
                 BlockComposer blockComposer = new BlockComposer(composer);
@@ -275,10 +267,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
 
             // 3. Drawing the page contents...
-            composer.SetFont(
-              new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Courier, true, false),
-              32);
-
+            composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false), 32);
             {
                 BlockComposer blockComposer = new BlockComposer(composer);
                 blockComposer.Begin(SKRect.Create(30, 0, pageSize.Width - 60, 50), XAlignmentEnum.Center, YAlignmentEnum.Middle);
@@ -465,15 +454,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
             // 3. Inserting contents...
             // Set the font to use!
-            composer.SetFont(
-              new fonts::StandardType1Font(
-                document,
-                fonts::StandardType1Font.FamilyEnum.Courier,
-                true,
-                false
-                ),
-              32
-              );
+            composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false), 32);
 
             XAlignmentEnum[] xAlignments = (XAlignmentEnum[])Enum.GetValues(typeof(XAlignmentEnum));
             YAlignmentEnum[] yAlignments = (YAlignmentEnum[])Enum.GetValues(typeof(YAlignmentEnum));
@@ -604,7 +585,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
 
             // 3. Drawing the page contents...
-            fonts::Font mainFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Courier, true, false);
+            fonts::Font mainFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false);
             int step;
             {
                 XAlignmentEnum[] xAlignments = (XAlignmentEnum[])Enum.GetValues(typeof(XAlignmentEnum));
@@ -629,7 +610,7 @@ namespace PdfClown.Samples.CLI
             }
 
             // Drawing the text blocks...
-            fonts::Font sampleFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Times, false, false);
+            fonts::Font sampleFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Times, false, false);
             int x = 30;
             int y = (int)(step * 1.2);
             foreach (XAlignmentEnum xAlignment in (XAlignmentEnum[])Enum.GetValues(typeof(XAlignmentEnum)))
@@ -703,7 +684,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
 
             // 3. Drawing the page contents...
-            fonts::Font mainFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Courier, true, false);
+            fonts::Font mainFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false);
             int stepCount = 5;
             int step = (int)(pageSize.Height) / (stepCount + 1);
             BlockComposer blockComposer = new BlockComposer(composer);
@@ -720,7 +701,7 @@ namespace PdfClown.Samples.CLI
 
             // Drawing the text block...
             {
-                fonts::Font sampleFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Times, false, false);
+                fonts::Font sampleFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Times, false, false);
                 entities::Image sampleImage = entities::Image.Get(GetResourcePath("images" + System.IO.Path.DirectorySeparatorChar + "gnu.jpg"));
                 xObjects::XObject sampleImageXObject = sampleImage.ToXObject(document);
 
@@ -808,7 +789,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
 
             // 3. Drawing the page contents...
-            fonts::Font mainFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Courier, true, false);
+            fonts::Font mainFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false);
             int stepCount = 5;
             int step = (int)(pageSize.Height) / (stepCount + 1);
 
@@ -831,7 +812,7 @@ namespace PdfClown.Samples.CLI
             }
 
             // 3.2. Drawing the text blocks...
-            fonts::Font sampleFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Times, false, false);
+            fonts::Font sampleFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Times, false, false);
             int x = 30;
             int y = (int)(step * 1.1);
             blockComposer.LineSpace.UnitMode = Length.UnitModeEnum.Relative;
@@ -883,7 +864,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
 
             // 3. Drawing the page contents...
-            fonts::Font mainFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Courier, true, false);
+            fonts::Font mainFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false);
             int stepCount = 5;
             int step = (int)pageSize.Height / (stepCount + 1);
             BlockComposer blockComposer = new BlockComposer(composer);
@@ -905,7 +886,7 @@ namespace PdfClown.Samples.CLI
 
             // Drawing the text block...
             {
-                fonts::Font sampleFont = new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Times, false, false);
+                fonts::Font sampleFont = fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Times, false, false);
                 composer.SetFont(sampleFont, 15);
 
                 float topMargin = 100;

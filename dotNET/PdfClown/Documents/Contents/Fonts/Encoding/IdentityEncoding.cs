@@ -30,10 +30,11 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal sealed class IdentityEncoding : Encoding
     {
+        public static readonly IdentityEncoding Instance = new IdentityEncoding();
         public IdentityEncoding()
         {
             for (int index = 1; index < 256; index++)
-            { Put(index, index); }
+            { Put(index, GlyphMapping.Default.UnicodeToName(index)); }
         }
     }
 }

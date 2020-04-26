@@ -80,7 +80,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(watermark);
             // 2.2. Inserting the contents...
             // Set the font to use!
-            composer.SetFont(new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Times, true, false), 120);
+            composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Times, true, false), 120);
             // Set the color to fill the text characters!
             composer.SetFillColor(new DeviceRGBColor(115 / 255d, 164 / 255d, 232 / 255d));
             // Apply transparency!

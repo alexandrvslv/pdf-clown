@@ -66,7 +66,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             else
             {
-                Debug.WriteLine("debug: Skipped kerning table due to an unsupported kerning table version: " + version);
+                Debug.WriteLine($"debug: Skipped kerning table due to an unsupported kerning table version: {version}");
             }
             if (numSubtables > 0)
             {

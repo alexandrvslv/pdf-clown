@@ -21,38 +21,39 @@ using System.Collections.Generic;
 namespace PdfClown.Documents.Contents.Fonts
 {
 
-	/**
+    /**
      * This is the Mac OS Roman encoding, which is similar to the
      * MacRomanEncoding with the addition of 15 entries
      */
-	internal class MacOSRomanEncoding : MacRomanEncoding
-	{
-		/**
+    internal class MacOSRomanEncoding : MacRomanEncoding
+    {
+        public new static readonly MacOSRomanEncoding Instance = new MacOSRomanEncoding();
+        /**
 		 * Constructor.
 		 */
-		public MacOSRomanEncoding() : base()
-		{
-			Put(255, "notequal");
-			Put(260, "infinity");
-			Put(262, "lessequal");
-			Put(263, "greaterequal");
-			Put(266, "partialdiff");
-			Put(267, "summation");
-			Put(270, "product");
-			Put(271, "pi");
-			Put(272, "integral");
-			Put(275, "Omega");
-			Put(303, "radical");
-			Put(305, "approxequal");
-			Put(306, "Delta");
-			Put(327, "lozenge");
-			Put(333, "Euro");
-			Put(360, "apple");
-		}
+        public MacOSRomanEncoding() : base()
+        {
+            Put(255, "notequal");
+            Put(260, "infinity");
+            Put(262, "lessequal");
+            Put(263, "greaterequal");
+            Put(266, "partialdiff");
+            Put(267, "summation");
+            Put(270, "product");
+            Put(271, "pi");
+            Put(272, "integral");
+            Put(275, "Omega");
+            Put(303, "radical");
+            Put(305, "approxequal");
+            Put(306, "Delta");
+            Put(327, "lozenge");
+            Put(333, "Euro");
+            Put(360, "apple");
+        }
 
-		public override PdfDirectObject GetPdfObject()
-		{
-			return null;
-		}
-	}
+        public override PdfDirectObject GetPdfObject()
+        {
+            return null;
+        }
+    }
 }

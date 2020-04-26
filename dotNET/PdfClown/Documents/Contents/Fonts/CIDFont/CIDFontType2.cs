@@ -156,7 +156,26 @@ namespace PdfClown.Documents.Contents.Fonts
             return ttfFont;
         }
 
-        override public SKMatrix FontMatrix
+        public override bool IsEmbedded
+        {
+            get => isEmbedded;
+        }
+
+        public override bool IsDamaged
+        {
+            get => isDamaged;
+        }
+
+        /**
+         * Returns the embedded or substituted TrueType font. May be an OpenType font if the font is
+         * not embedded.
+         */
+        public TrueTypeFont TrueTypeFont
+        {
+            get => ttf;
+        }
+
+        public override SKMatrix FontMatrix
         {
             get
             {
@@ -169,7 +188,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        override public SKRect BoundingBox
+        public override SKRect BoundingBox
         {
             get
             {
@@ -192,7 +211,7 @@ namespace PdfClown.Documents.Contents.Fonts
                          bbox.Right.CompareTo(0) != 0 ||
                          bbox.Top.CompareTo(0) != 0))
                 {
-                    return bbox.ToRectangleF();
+                    return bbox.ToRect();
                 }
             }
             return ttf.FontBBox;
@@ -248,7 +267,7 @@ namespace PdfClown.Documents.Contents.Fonts
                         {
                             // we keep track of which warnings have been issued, so we don't log multiple times
                             noMapping.Add(code);
-                            Debug.WriteLine("warn: Failed to find a character mapping for " + code + " in " + Name);
+                            Debug.WriteLine($"warn: Failed to find a character mapping for {code} in {Name}");
                         }
                         // Acrobat is willing to use the CID as a GID, even when the font isn't embedded
                         // see PDFBOX-2599
@@ -317,7 +336,7 @@ namespace PdfClown.Documents.Contents.Fonts
             return width;
         }
 
-        public override int ReadCode(Bytes.Buffer input, out byte[] bytes)
+        public override int ReadCode(Bytes.IInputStream input, out byte[] bytes)
         {
             throw new NotImplementedException();
         }
@@ -372,25 +391,6 @@ namespace PdfClown.Documents.Contents.Fonts
             return new byte[] { (byte)(glyphId >> 8 & 0xff), (byte)(glyphId & 0xff) };
         }
 
-        public override bool IsEmbedded
-        {
-            get => isEmbedded;
-        }
-
-        public override bool IsDamaged
-        {
-            get => isDamaged;
-        }
-
-        /**
-         * Returns the embedded or substituted TrueType font. May be an OpenType font if the font is
-         * not embedded.
-         */
-        public TrueTypeFont TrueTypeFont
-        {
-            get => ttf;
-        }
-
         public override SKPath GetPath(int code)
         {
             if (ttf is OpenTypeFont && ((OpenTypeFont)ttf).IsPostScript)
@@ -407,7 +407,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 GlyphData glyph = ttf.Glyph.GetGlyph(gid);
                 if (glyph != null)
                 {
-                    return glyph.getPath();
+                    return glyph.GetPath();
                 }
                 return new SKPath();
             }

@@ -46,8 +46,8 @@ namespace PdfClown.Documents.Contents.Fonts
         protected SimpleFont(Document context) : base(context)
         { }
 
-        public SimpleFont(string baseFont)
-            : base(baseFont)
+        public SimpleFont(Document context, string baseFont)
+            : base(context, baseFont)
         {
 
             // assign the glyph list based on the font
@@ -128,7 +128,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * Internal implementation of isSymbolic, allowing for the fact that the result may be
          * indeterminate.
          */
-        protected bool? FontSymbolic
+        protected virtual bool? FontSymbolic
         {
             get
             {
@@ -211,7 +211,7 @@ namespace PdfClown.Documents.Contents.Fonts
             return ToUnicode(code, GlyphMapping.Default);
         }
 
-        public virtual int ToUnicode(int code, GlyphMapping customGlyphList)
+        public override int ToUnicode(int code, GlyphMapping customGlyphList)
         {
             // allow the glyph list to be overridden for the purpose of extracting Unicode
             // we only do this when the font's glyph list is the AGL, to avoid breaking Zapf Dingbats
@@ -242,7 +242,7 @@ namespace PdfClown.Documents.Contents.Fonts
             if (encoding != null)
             {
                 name = encoding.GetName(code);
-                var temp = unicodeGlyphList.NameToCode(name);
+                var temp = unicodeGlyphList.ToUnicode(name);
                 if (temp != null)
                 {
                     return temp.Value;
@@ -258,7 +258,7 @@ namespace PdfClown.Documents.Contents.Fonts
             get => false;
         }
 
-        protected virtual float GetStandard14Width(int code)
+        protected override float GetStandard14Width(int code)
         {
             if (Standard14AFM != null)
             {
@@ -298,18 +298,18 @@ namespace PdfClown.Documents.Contents.Fonts
         public abstract BaseFont Font { get; }
 
 
-        public virtual void AddToSubset(int codePoint)
+        public override void AddToSubset(int codePoint)
         {
             throw new NotSupportedException();
         }
 
-        public virtual void Subset()
+        public override void Subset()
         {
             // only TTF subsetting via PDType0Font is currently supported
             throw new NotSupportedException();
         }
 
-        public virtual bool WillBeSubset
+        public override bool WillBeSubset
         {
             get => false;
         }
@@ -335,9 +335,9 @@ namespace PdfClown.Documents.Contents.Fonts
         *
         * @throws IOException if the font file could not be read
 */
-        protected void ReadEncoding()
+        protected virtual void ReadEncoding()
         {
-            var encoding = Dictionary.Resolve(PdfName.Encoding);
+            var encoding = EncodingData;
             if (encoding != null)
             {
                 if (encoding is PdfName encodingName)

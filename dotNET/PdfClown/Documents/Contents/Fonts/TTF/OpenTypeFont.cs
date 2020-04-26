@@ -80,7 +80,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         public override SKPath GetPath(string name)
         {
             int gid = NameToGID(name);
-            return CFF.Font().GetType2CharString(gid).Path;
+            return CFF.Font.GetType2CharString(gid).Path;
         }
 
         /**

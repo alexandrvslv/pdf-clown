@@ -34,7 +34,7 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal sealed class WinAnsiEncoding : Encoding
     {
-        public static WinAnsiEncoding Instance;
+        public static readonly WinAnsiEncoding Instance = new WinAnsiEncoding();
         public WinAnsiEncoding()
         {
             Put(65, "A");
@@ -258,7 +258,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // In WinAnsiEncoding, all unused codes greater than 40 map to the bullet character.
             for (int i = 041; i <= 255; i++)
             {
-                if (!codes.ContainsKey(i))
+                if (!codeToName.ContainsKey(i))
                 {
                     Put(i, "bullet");
                 }

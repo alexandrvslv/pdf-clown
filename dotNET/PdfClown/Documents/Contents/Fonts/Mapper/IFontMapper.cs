@@ -39,7 +39,7 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @param fontDescriptor the FontDescriptor of the font to find
          */
-        FontMapping<BaseFont> GetFontBoxFont(string baseFont, FontDescriptor fontDescriptor);
+        FontMapping<BaseFont> GetBaseFont(string baseFont, FontDescriptor fontDescriptor);
 
         /**
          * Finds a CFF CID-Keyed font with the given PostScript name, or a suitable substitute, or null.

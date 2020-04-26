@@ -41,9 +41,9 @@ namespace PdfClown.Documents.Contents.Fonts
                 Put(item.Key, item.Value);
         }
 
-        public override COSBase GetCOSObject()
+        public override PdfDirectObject GetPdfObject()
         {
-            throw new NotUnsupportedException("Built-in encodings cannot be serialized");
+            throw new NotSupportedException("Built-in encodings cannot be serialized");
         }
     }
 }

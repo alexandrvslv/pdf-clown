@@ -159,6 +159,7 @@ namespace PdfClown.Objects
         public static readonly PdfName Coords = new PdfName("Coords");
         public static readonly PdfName Count = new PdfName("Count");
         public static readonly PdfName Cover = new PdfName("Cover");
+        public static readonly PdfName CharProcs = new PdfName("CharProcs");
         public static readonly PdfName CreationDate = new PdfName("CreationDate");
         public static readonly PdfName Creator = new PdfName("Creator");
         public static readonly PdfName CreatorInfo = new PdfName("CreatorInfo");
@@ -257,6 +258,7 @@ namespace PdfClown.Objects
         public static readonly PdfName FontFile = new PdfName("FontFile");
         public static readonly PdfName FontFile2 = new PdfName("FontFile2");
         public static readonly PdfName FontFile3 = new PdfName("FontFile3");
+        public static readonly PdfName FontMatrix = new PdfName("FontMatrix");
         public static readonly PdfName FontName = new PdfName("FontName");
         public static readonly PdfName FontFamily = new PdfName("FontFamily");
         public static readonly PdfName FontStretch = new PdfName("FontStretch");

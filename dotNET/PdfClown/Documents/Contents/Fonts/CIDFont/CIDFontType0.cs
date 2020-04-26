@@ -208,7 +208,7 @@ namespace PdfClown.Documents.Contents.Fonts
                     bbox.Right.CompareTo(0) != 0 ||
                     bbox.Top.CompareTo(0) != 0))
                 {
-                    return bbox.ToRectangleF();
+                    return bbox.ToRect();
                 }
             }
             if (cidFont != null)
@@ -368,7 +368,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 return cid;
             }
         }
-        public override int ReadCode(Bytes.Buffer input, out byte[] bytes)
+        public override int ReadCode(Bytes.IInputStream input, out byte[] bytes)
         {
             throw new NotSupportedException();
         }

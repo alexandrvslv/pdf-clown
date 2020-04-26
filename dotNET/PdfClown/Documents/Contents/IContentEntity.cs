@@ -51,9 +51,7 @@ namespace PdfClown.Documents.Contents
           <param name="composer">Target content composer.</param>
           <returns>The inline object representing the entity.</returns>
         */
-        ContentObject ToInlineObject(
-          PrimitiveComposer composer
-          );
+        ContentObject ToInlineObject(PrimitiveComposer composer);
 
         /**
           <summary>Converts this entity to its equivalent external (independent) object representation
@@ -66,8 +64,6 @@ namespace PdfClown.Documents.Contents
           <param name="context">Target document.</param>
           <returns>The external object representing the entity.</returns>
         */
-        XObjects.XObject ToXObject(
-          Document context
-          );
+        XObjects.XObject ToXObject(Document context);
     }
 }

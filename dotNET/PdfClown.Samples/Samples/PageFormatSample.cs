@@ -29,16 +29,9 @@ namespace PdfClown.Samples.CLI
             Serialize(file, "Page Format", "page formats", "page formats");
         }
 
-        private void Populate(
-          Document document
-          )
+        private void Populate(Document document)
         {
-            StandardType1Font bodyFont = new StandardType1Font(
-              document,
-              StandardType1Font.FamilyEnum.Courier,
-              true,
-              false
-              );
+            PdfType1Font bodyFont = PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false);
 
             Pages pages = document.Pages;
             PageFormat.SizeEnum[] pageFormats = (PageFormat.SizeEnum[])Enum.GetValues(typeof(PageFormat.SizeEnum));

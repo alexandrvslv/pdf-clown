@@ -94,19 +94,6 @@ namespace PdfClown.Documents.Contents.Objects
 
         #region interface
         #region private
-        private static SKPaint GetStroke(GraphicsState state)
-        {
-            var stroke = state.StrokeColorSpace.GetPaint(state.StrokeColor, state.StrokeAlpha);
-            stroke.Style = SKPaintStyle.Stroke;
-            stroke.StrokeWidth = (float)state.LineWidth;
-            stroke.StrokeCap = state.LineCap.ToSkia();
-            stroke.StrokeJoin = state.LineJoin.ToSkia();
-            stroke.StrokeMiter = (float)state.MiterLimit;
-
-            LineDash lineDash = state.LineDash;
-            lineDash.Apply(stroke);
-            return stroke;
-        }
 
         #endregion
         #endregion
@@ -157,94 +144,31 @@ namespace PdfClown.Documents.Contents.Objects
         {
             var scanner = state.Scanner;
             var pathObject = scanner.RenderObject;
+            var context = scanner.RenderContext;
             if (pathObject != null)
             {
-                var context = scanner.RenderContext;
-
                 if (closed)
                 {
                     pathObject.Close();
                 }
-                if (filled)
+                if (context != null)
                 {
-                    pathObject.FillType = fillMode.ToSkia();
-                    using (var paint = state.FillColorSpace.GetPaint(state.FillColor, state.FillAlpha))
+                    if (filled)
                     {
-                        if ((state.BlendMode?.Count ?? 0) > 0)
+                        pathObject.FillType = fillMode.ToSkia();
+                        using (var paint = state.CreateFillPaint())
                         {
-                            foreach (var mode in state.BlendMode)
-                            {
-                                ApplyBlend(paint, mode);
-                            }
+                            context.DrawPath(pathObject, paint);
                         }
-                        context.DrawPath(pathObject, paint);
                     }
-                }
-                if (stroked)
-                {
-                    using (var paint = GetStroke(state))
+                    if (stroked)
                     {
-                        context.DrawPath(pathObject, paint);
+                        using (var paint = state.CreateStrokePaint())
+                        {
+                            context.DrawPath(pathObject, paint);
+                        }
                     }
                 }
-            }
-        }
-
-        private static void ApplyBlend(SKPaint paint, BlendModeEnum mode)
-        {
-            switch (mode)
-            {
-                case BlendModeEnum.Multiply:
-                    paint.BlendMode = SKBlendMode.Multiply;
-                    break;
-                case BlendModeEnum.Lighten:
-                    paint.BlendMode = SKBlendMode.Lighten;
-                    break;
-                case BlendModeEnum.Luminosity:
-                    paint.BlendMode = SKBlendMode.Luminosity;
-                    break;
-                case BlendModeEnum.Overlay:
-                    paint.BlendMode = SKBlendMode.Overlay;
-                    break;
-                case BlendModeEnum.Normal:
-                    paint.BlendMode = SKBlendMode.SrcOver;
-                    break;
-                case BlendModeEnum.ColorBurn:
-                    paint.BlendMode = SKBlendMode.ColorBurn;
-                    break;
-                case BlendModeEnum.Screen:
-                    paint.BlendMode = SKBlendMode.Screen;
-                    break;
-                case BlendModeEnum.Darken:
-                    paint.BlendMode = SKBlendMode.Darken;
-                    break;
-                case BlendModeEnum.ColorDodge:
-                    paint.BlendMode = SKBlendMode.ColorDodge;
-                    break;
-                case BlendModeEnum.Compatible:
-                    paint.BlendMode = SKBlendMode.SrcOver;
-                    break;
-                case BlendModeEnum.HardLight:
-                    paint.BlendMode = SKBlendMode.HardLight;
-                    break;
-                case BlendModeEnum.SoftLight:
-                    paint.BlendMode = SKBlendMode.SoftLight;
-                    break;
-                case BlendModeEnum.Difference:
-                    paint.BlendMode = SKBlendMode.Difference;
-                    break;
-                case BlendModeEnum.Exclusion:
-                    paint.BlendMode = SKBlendMode.Exclusion;
-                    break;
-                case BlendModeEnum.Hue:
-                    paint.BlendMode = SKBlendMode.Hue;
-                    break;
-                case BlendModeEnum.Saturation:
-                    paint.BlendMode = SKBlendMode.Saturation;
-                    break;
-                case BlendModeEnum.Color:
-                    paint.BlendMode = SKBlendMode.Color;
-                    break;
             }
         }
 

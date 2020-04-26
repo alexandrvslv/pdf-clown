@@ -173,7 +173,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 }
             }
 
-            bool isPostScript = allowCFF() && font.TableMap.ContainsKey(CFFTable.TAG);
+            bool isPostScript = AllowCFF && font.TableMap.ContainsKey(CFFTable.TAG);
 
             HeaderTable head = font.Header;
             if (head == null)
@@ -230,9 +230,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
         }
 
-        protected bool allowCFF()
+        protected virtual bool AllowCFF
         {
-            return false;
+            get => false;
         }
 
         private TTFTable ReadTableDirectory(TrueTypeFont font, TTFDataStream raf)

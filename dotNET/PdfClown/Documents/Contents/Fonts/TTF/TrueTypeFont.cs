@@ -660,7 +660,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine("error: ParseUniName " + e);
+                    Debug.WriteLine($"error: ParseUniName {e}");
                     return -1;
                 }
             }
@@ -680,7 +680,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             else
             {
                 // must scaled by caller using FontMatrix
-                return glyph.getPath();
+                return glyph.GetPath();
             }
         }
 

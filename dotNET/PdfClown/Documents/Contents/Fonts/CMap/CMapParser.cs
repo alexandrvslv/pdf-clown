@@ -242,7 +242,7 @@ namespace PdfClown.Documents.Contents.Fonts
                                     codes.AddCharMapping(inputCode, ParseUnicode());
                                 }
                                 catch (OverflowException)
-                                { Debug.WriteLine(String.Format("WARN: Unable to process Unicode sequence from {0} CMap: {1}", codes.CMapName, Token)); }
+                                { Debug.WriteLine($"WARN: Unable to process Unicode sequence from {codes.CMapName} CMap: {Token}"); }
                                 OperationUtils.Increment(inputCode);
                             }
                             break;
@@ -321,7 +321,7 @@ namespace PdfClown.Documents.Contents.Fonts
                     codes.AddCharMapping(inputCode, ParseUnicode());
                 }
                 catch (OverflowException)
-                { Debug.WriteLine(String.Format("WARN: Unable to process Unicode sequence from {0} CMap: {1}", codes.CMapName, Token)); }
+                { Debug.WriteLine($"WARN: Unable to process Unicode sequence from {codes.CMapName} CMap: {Token}"); }
             }
         }
         #endregion
@@ -347,7 +347,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 case TokenTypeEnum.Integer: // Character code in plain format.
                     return (int)Token;
                 case TokenTypeEnum.Name: // Character name.
-                    return GlyphMapping.Default.NameToCode((string)Token).Value;
+                    return GlyphMapping.Default.ToUnicode((string)Token).Value;
                 default:
                     throw new Exception("Hex string, integer or name expected instead of " + TokenType);
             }

@@ -60,7 +60,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             return (OpenTypeFont)base.Parse(file);
         }
 
-        public new OpenTypeFont Parse(Bytes.Buffer data)
+        public new OpenTypeFont Parse(Bytes.IInputStream data)
         {
             return (OpenTypeFont)base.Parse(data);
         }

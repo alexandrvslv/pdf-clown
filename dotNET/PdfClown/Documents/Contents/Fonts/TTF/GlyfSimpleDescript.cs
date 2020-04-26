@@ -35,7 +35,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         //private static readonly Log LOG = LogFactory.getLog(GlyfSimpleDescript.class);
 
-        private int[] endPtsOfContours;
+        private ushort[] endPtsOfContours;
         private byte[] flags;
         private short[] xCoordinates;
         private short[] yCoordinates;
@@ -83,7 +83,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
             int instructionCount = bais.ReadUnsignedShort();
             ReadInstructions(bais, instructionCount);
-            readFlags(pointCount, bais);
+            ReadFlags(pointCount, bais);
             ReadCoords(pointCount, bais, x0);
         }
 
@@ -192,7 +192,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         /**
          * The flags are run-length encoded.
          */
-        private void readFlags(int flagCount, TTFDataStream bais)
+        private void ReadFlags(int flagCount, TTFDataStream bais)
         {
             for (int index = 0; index < flagCount; index++)
             {

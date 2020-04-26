@@ -93,12 +93,7 @@ namespace PdfClown.Samples.CLI
                   pageSize.Height * .5f
                   );
                 blockComposer.Begin(frame, XAlignmentEnum.Justify, YAlignmentEnum.Top);
-                StandardType1Font bodyFont = new StandardType1Font(
-                  document,
-                  StandardType1Font.FamilyEnum.Courier,
-                  true,
-                  false
-                  );
+                PdfType1Font bodyFont = PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false);
                 composer.SetFont(bodyFont, 24);
                 blockComposer.ShowText("Page-to-form sample");
                 SKSize breakSize = new SKSize(0, 8);

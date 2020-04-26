@@ -88,7 +88,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
                 if (code >= firstChar && code <= lastChar)
                 {
-                    var charCode = glyphList.NameToCode(name) ?? 0;
+                    var charCode = glyphList.ToUnicode(name) ?? 0;
                     int gid = cmapLookup.GetGlyphId(charCode);
                     widths[entry.Key - firstChar] = (int)Math.Round(hmtx.GetAdvanceWidth(gid) * scaling);
                 }

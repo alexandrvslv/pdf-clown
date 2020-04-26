@@ -59,6 +59,7 @@ namespace PdfClown.Documents.Contents.Fonts
     public sealed class CMap
     {
         #region static
+        private static readonly int SPACE = ' ';
         #region interface
         /**
           <summary>Gets the character map extracted from the given data.</summary>
@@ -126,6 +127,7 @@ namespace PdfClown.Documents.Contents.Fonts
         private string registry;
         private string ordering;
         private int wMode;
+        private int spaceMapping;
 
         // code lengths
         private readonly List<CodespaceRange> codespaceRanges = new List<CodespaceRange>();
@@ -171,6 +173,12 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             get => wMode;
             set => wMode = value;
+        }
+
+        public int SpaceMapping
+        {
+            get => spaceMapping;
+            set => spaceMapping = value;
         }
         /**
          * This will tell if this cmap has any CID mappings.
@@ -222,7 +230,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
             foreach (CIDRange range in codeToCidRanges)
             {
-                int ch = range.Dictionary((char)code);
+                int ch = range.Map((char)code);
                 if (ch != -1)
                 {
                     return ch;
@@ -239,7 +247,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @return character code
          * @throws IOException if there was an error reading the stream or CMap
          */
-        public int ReadCode(Bytes.Buffer input, out byte[] bytes)
+        public int ReadCode(Bytes.IInputStream input, out byte[] bytes)
         {
             bytes = new byte[maxCodeLength];
             input.Read(bytes, 0, minCodeLength);
@@ -332,10 +340,10 @@ namespace PdfClown.Documents.Contents.Fonts
             unicodeToChar[unicode] = codes;
 
             // fixme: ugly little hack
-            //if (SPACE.equals(unicode))
-            //{
-            //    spaceMapping = code;
-            //}
+            if (SPACE.Equals(unicode))
+            {
+                spaceMapping = code;
+            }
         }
 
         /**

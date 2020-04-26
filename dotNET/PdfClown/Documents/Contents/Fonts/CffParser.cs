@@ -339,7 +339,7 @@ namespace PdfClown.Documents.Contents.Fonts
                     while ((line = stream.ReadLine()) != null)
                     {
                         string[] lineItems = line.Split(',');
-                        charsetMap[Int32.Parse(lineItems[0])] = GlyphMapping.Default.NameToCode(lineItems[1]).Value;
+                        charsetMap[Int32.Parse(lineItems[0])] = GlyphMapping.Default.ToUnicode(lineItems[1]).Value;
                     }
                 }
             }
@@ -481,7 +481,7 @@ namespace PdfClown.Documents.Contents.Fonts
              * FIXME: avoid Unicode resolution at this stage -- names should be kept to allow subsequent
              * character substitution (see font differences) in case of custom (non-unicode) encodings.
              */
-            int? code = GlyphMapping.Default.NameToCode(GetString(sid));
+            int? code = GlyphMapping.Default.ToUnicode(GetString(sid));
             if (!code.HasValue)
             {
                 //custom code

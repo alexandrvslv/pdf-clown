@@ -128,7 +128,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public override long ReadLong()
         {
-            return raf.ReadLong();
+            return raf.ReadInt64();
         }
 
         /**

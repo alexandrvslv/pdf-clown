@@ -44,7 +44,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         //private static readonly Log LOG = LogFactory.getLog(GlyfCompositeDescript.class);
 
         private readonly List<GlyfCompositeComp> components = new List<GlyfCompositeComp>();
-        private readonly Dictionary<int, GlyphDescription> descriptions = new Dictionary<int, GlyphDescription>();
+        private readonly Dictionary<int, IGlyphDescription> descriptions = new Dictionary<int, IGlyphDescription>();
         private GlyphTable glyphTable = null;
         private bool beingResolved = false;
         private bool resolved = false;
@@ -104,7 +104,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 comp.FirstIndex = firstIndex;
                 comp.FirstContour = firstContour;
 
-                if (descriptions.TryGetValue(comp.GlyphIndex, out GlyphDescription desc))
+                if (descriptions.TryGetValue(comp.GlyphIndex, out IGlyphDescription desc))
                 {
                     desc.Resolve();
                     firstIndex += desc.PointCount;
@@ -123,7 +123,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             GlyfCompositeComp c = GetCompositeCompEndPt(i);
             if (c != null)
             {
-                descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd);
+                descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd);
                 return gd.GetEndPtOfContours(i - c.FirstContour) + c.FirstIndex;
             }
             return 0;
@@ -137,7 +137,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             GlyfCompositeComp c = GetCompositeComp(i);
             if (c != null)
             {
-                descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd);
+                descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd);
                 return gd.GetFlags(i - c.FirstIndex);
             }
             return 0;
@@ -151,7 +151,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             GlyfCompositeComp c = GetCompositeComp(i);
             if (c != null)
             {
-                descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd);
+                descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd);
                 int n = i - c.FirstIndex;
                 int x = gd.GetXCoordinate(n);
                 int y = gd.GetYCoordinate(n);
@@ -170,7 +170,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             GlyfCompositeComp c = GetCompositeComp(i);
             if (c != null)
             {
-                descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd);
+                descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd);
                 int n = i - c.FirstIndex;
                 int x = gd.GetXCoordinate(n);
                 int y = gd.GetYCoordinate(n);
@@ -203,7 +203,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 if (pointCount < 0)
                 {
                     GlyfCompositeComp c = components[components.Count - 1];
-                    if (descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd))
+                    if (descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd))
                     {
                         Debug.WriteLine("error: GlyphDescription for index " + c.GlyphIndex + " is null, returning 0");
                         pointCount = 0;
@@ -232,7 +232,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 {
                     GlyfCompositeComp c = components[components.Count - 1];
                     contourCount = c.FirstContour +
-                        (descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd) ? gd.ContourCount : 0);
+                        (descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd) ? gd.ContourCount : 0);
                 }
                 return contourCount;
             }
@@ -252,7 +252,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         {
             foreach (GlyfCompositeComp c in components)
             {
-                descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd);
+                descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd);
                 if (c.FirstIndex <= i && gd != null && i < (c.FirstIndex + gd.PointCount))
                 {
                     return c;
@@ -265,7 +265,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         {
             foreach (GlyfCompositeComp c in components)
             {
-                descriptions.TryGetValue(c.GlyphIndex, out GlyphDescription gd);
+                descriptions.TryGetValue(c.GlyphIndex, out IGlyphDescription gd);
                 if (c.FirstContour <= i && gd != null && i < (c.FirstContour + gd.ContourCount))
                 {
                     return c;
@@ -289,7 +289,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("error: " + e);
+                    Debug.WriteLine($"error: {e}");
                 }
             }
         }

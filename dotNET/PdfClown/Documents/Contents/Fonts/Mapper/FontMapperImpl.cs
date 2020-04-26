@@ -302,7 +302,7 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @param fontDescriptor the FontDescriptor of the font to find
          */
-        public FontMapping<BaseFont> GetFontBoxFont(string baseFont, FontDescriptor fontDescriptor)
+        public FontMapping<BaseFont> GetBaseFont(string baseFont, FontDescriptor fontDescriptor)
         {
             BaseFont font = FindBaseFont(baseFont);
             if (font != null)

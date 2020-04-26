@@ -61,12 +61,7 @@ namespace PdfClown.Samples.CLI
                   XAlignmentEnum.Justify,
                   YAlignmentEnum.Top
                   );
-                StandardType1Font bodyFont = new StandardType1Font(
-                  document,
-                  StandardType1Font.FamilyEnum.Courier,
-                  true,
-                  false
-                  );
+                PdfType1Font bodyFont = PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false);
                 composer.SetFont(bodyFont, 32);
                 blockComposer.ShowText("Inline image sample"); blockComposer.ShowBreak();
                 composer.SetFont(bodyFont, 16);

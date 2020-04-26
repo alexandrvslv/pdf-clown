@@ -33,6 +33,7 @@ using SkiaSharp;
 using PdfClown.Documents.Contents.XObjects;
 using PdfClown.Objects;
 using PdfClown.Util.Math.Geom;
+using PdfClown.Documents.Contents.Fonts;
 
 namespace PdfClown.Documents.Contents
 {
@@ -169,11 +170,9 @@ namespace PdfClown.Documents.Contents
         {
             SKMatrix initialCtm;
             var rotation = contentContext.Rotation;
-            if (contentContext is colors.TilingPattern tiling)
-            {
-                return SKMatrix.MakeIdentity();
-            }
-            else if (contentContext is FormXObject xObject)
+            if (contentContext is colors.TilingPattern tiling
+                || contentContext is FormXObject xObject
+                || contentContext is PdfType3CharProc charProc)
             {
                 return SKMatrix.MakeIdentity();
             }
@@ -209,6 +208,16 @@ namespace PdfClown.Documents.Contents
                 paint.StrokeCap = LineCap.ToSkia();
                 paint.StrokeJoin = LineJoin.ToSkia();
                 paint.StrokeMiter = (float)MiterLimit;
+
+                LineDash?.Apply(paint);
+
+                if ((BlendMode?.Count ?? 0) > 0)
+                {
+                    foreach (var mode in BlendMode)
+                    {
+                        ApplyBlend(paint, mode);
+                    }
+                }
             }
             return paint;
         }
@@ -222,8 +231,74 @@ namespace PdfClown.Documents.Contents
             {
                 paint.TextSize = (float)FontSize;
                 paint.TextScaleX = (float)Scale;
+
+                if ((BlendMode?.Count ?? 0) > 0)
+                {
+                    foreach (var mode in BlendMode)
+                    {
+                        ApplyBlend(paint, mode);
+                    }
+                }
             }
             return paint;
+        }
+
+        private static void ApplyBlend(SKPaint paint, BlendModeEnum mode)
+        {
+            switch (mode)
+            {
+                case BlendModeEnum.Multiply:
+                    paint.BlendMode = SKBlendMode.Multiply;
+                    break;
+                case BlendModeEnum.Lighten:
+                    paint.BlendMode = SKBlendMode.Lighten;
+                    break;
+                case BlendModeEnum.Luminosity:
+                    paint.BlendMode = SKBlendMode.Luminosity;
+                    break;
+                case BlendModeEnum.Overlay:
+                    paint.BlendMode = SKBlendMode.Overlay;
+                    break;
+                case BlendModeEnum.Normal:
+                    paint.BlendMode = SKBlendMode.SrcOver;
+                    break;
+                case BlendModeEnum.ColorBurn:
+                    paint.BlendMode = SKBlendMode.ColorBurn;
+                    break;
+                case BlendModeEnum.Screen:
+                    paint.BlendMode = SKBlendMode.Screen;
+                    break;
+                case BlendModeEnum.Darken:
+                    paint.BlendMode = SKBlendMode.Darken;
+                    break;
+                case BlendModeEnum.ColorDodge:
+                    paint.BlendMode = SKBlendMode.ColorDodge;
+                    break;
+                case BlendModeEnum.Compatible:
+                    paint.BlendMode = SKBlendMode.SrcOver;
+                    break;
+                case BlendModeEnum.HardLight:
+                    paint.BlendMode = SKBlendMode.HardLight;
+                    break;
+                case BlendModeEnum.SoftLight:
+                    paint.BlendMode = SKBlendMode.SoftLight;
+                    break;
+                case BlendModeEnum.Difference:
+                    paint.BlendMode = SKBlendMode.Difference;
+                    break;
+                case BlendModeEnum.Exclusion:
+                    paint.BlendMode = SKBlendMode.Exclusion;
+                    break;
+                case BlendModeEnum.Hue:
+                    paint.BlendMode = SKBlendMode.Hue;
+                    break;
+                case BlendModeEnum.Saturation:
+                    paint.BlendMode = SKBlendMode.Saturation;
+                    break;
+                case BlendModeEnum.Color:
+                    paint.BlendMode = SKBlendMode.Color;
+                    break;
+            }
         }
 
         public static SKMatrix GetRotationMatrix(SKSize canvasSize, RotationEnum rotation)

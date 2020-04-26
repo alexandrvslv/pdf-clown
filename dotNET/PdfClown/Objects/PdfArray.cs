@@ -313,6 +313,8 @@ namespace PdfClown.Objects
             get => virtual_;
             set => virtual_ = value;
         }
+
+        public override PdfReference Reference => base.Reference;
         #endregion
         #endregion
         #endregion

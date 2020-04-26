@@ -68,8 +68,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                     object obj = sequence.RemoveAtValue(sequence.Count - 1);
                     if (!(obj is int))
                     {
-                        Debug.WriteLine("warn: Parameter " + obj + " for CALLSUBR is ignored, integer expected in glyph '"
-                                + glyphName + "' of font " + fontName);
+                        Debug.WriteLine($"warn: Parameter {obj} for CALLSUBR is ignored, integer expected in glyph '{glyphName}' of font {fontName}");
                         continue;
                     }
                     int operand = (int)obj;

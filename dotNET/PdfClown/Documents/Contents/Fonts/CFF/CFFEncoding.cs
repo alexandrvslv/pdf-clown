@@ -27,7 +27,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
      */
     public abstract class CFFEncoding : Encoding
     {
-        private readonly Dictionary<int, string> codeToName = new Dictionary<int, string>(250);
+        private new readonly Dictionary<int, string> codeToName = new Dictionary<int, string>(250);
 
         /**
 		 * Package-private constructor for subclasses.

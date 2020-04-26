@@ -46,7 +46,7 @@ namespace PdfClown.Samples.CLI
 
                 // Add some (arbitrary) graphics content on the page!
                 BlockComposer composer = new BlockComposer(new PrimitiveComposer(page));
-                composer.BaseComposer.SetFont(new StandardType1Font(document, StandardType1Font.FamilyEnum.Times, true, false), 14);
+                composer.BaseComposer.SetFont(PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Times, true, false), 14);
                 SKSize pageSize = page.Size;
                 composer.Begin(SKRect.Create(50, 50, pageSize.Width - 100, pageSize.Height - 100), XAlignmentEnum.Left, YAlignmentEnum.Top);
                 composer.ShowText("This page holds private application data (see PieceInfo entry in its dictionary).");

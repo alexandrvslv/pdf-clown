@@ -49,7 +49,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF.Table.Common
 
             foreach (RangeRecord rangeRecord in rangeRecords)
             {
-                for (int glyphId = rangeRecord.getStartGlyphID(); glyphId <= rangeRecord.getEndGlyphID(); glyphId++)
+                for (int glyphId = rangeRecord.StartGlyphID; glyphId <= rangeRecord.EndGlyphID; glyphId++)
                 {
                     glyphIds.Add(glyphId);
                 }

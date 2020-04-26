@@ -21,6 +21,8 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
+
+ 
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -215,6 +217,7 @@
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType0.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType2.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\UniUtil.cs" />
+    <None Include="Documents\Contents\Fonts\CMap\ToUnicodeWriter.cs" />
     <None Include="Documents\Contents\Fonts\Embedder\PdfCIDFontType2Embedder.cs" />
     <None Include="Documents\Contents\Fonts\CIDFont\CIDSystemInfo.cs" />
     <None Include="Documents\Contents\Fonts\CMap\CIDRange.cs" />
@@ -241,6 +244,8 @@
     <None Include="Documents\Contents\Fonts\Mapper\Standard14Fonts.cs" />
     <None Include="Documents\Contents\Fonts\Panose\Panose.cs" />
     <None Include="Documents\Contents\Fonts\Panose\PanoseClassification.cs" />
+    <None Include="Documents\Contents\Fonts\PdfType1CFont.cs" />
+    <None Include="Documents\Contents\Fonts\PdfType3CharProc.cs" />
     <None Include="Documents\Contents\Fonts\TTF\GSUB\CompoundCharacterTokenizer.cs" />
     <None Include="Documents\Contents\Fonts\Type1\DamagedFontException.cs" />
     <None Include="Documents\Contents\Fonts\Type1\PfbParser.cs" />

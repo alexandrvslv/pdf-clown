@@ -48,13 +48,13 @@ namespace PdfClown.Samples.CLI
 
             BlockComposer blockComposer = new BlockComposer(composer);
             blockComposer.Begin(SKRect.Create(300, 400, 200, 100), XAlignmentEnum.Left, YAlignmentEnum.Middle);
-            composer.SetFont(new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Times, false, true), 12);
+            composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Times, false, true), 12);
             blockComposer.ShowText("PrimitiveComposer.ShowText(...) methods return the actual bounding box of the text shown, allowing to precisely determine its location on the page.");
             blockComposer.End();
 
             // 3. Inserting contents...
             // Set the font to use!
-            composer.SetFont(new fonts::StandardType1Font(document, fonts::StandardType1Font.FamilyEnum.Courier, true, false), 72);
+            composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Courier, true, false), 72);
             composer.DrawPolygon(
               composer.ShowText(
                 "Text frame",
@@ -66,7 +66,7 @@ namespace PdfClown.Samples.CLI
               );
             composer.Stroke();
 
-            composer.SetFont(fonts::Font.Get(document, GetResourcePath("fonts" + System.IO.Path.DirectorySeparatorChar + "Ruritania-Outline.ttf")), 102);
+            composer.SetFont(fonts::PdfType0Font.Load(document, GetResourcePath("fonts" + System.IO.Path.DirectorySeparatorChar + "Ruritania-Outline.ttf")), 102);
             composer.DrawPolygon(
               composer.ShowText(
                 "Text frame",

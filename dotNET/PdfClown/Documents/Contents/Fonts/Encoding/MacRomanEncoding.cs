@@ -34,7 +34,7 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal class MacRomanEncoding : Encoding
     {
-        public static MacRomanEncoding Instance;
+        public static readonly MacRomanEncoding Instance = new MacRomanEncoding();
         public MacRomanEncoding()
         {
             Put(65, "A");

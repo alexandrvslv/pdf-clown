@@ -60,6 +60,13 @@ namespace PdfClown.Documents.Contents.Fonts
         #region static
         #region interface
         #region public
+        public static PdfType0Font Load(Document doc, string resurceFile)
+        {
+            using (var stream = typeof(PdfType0Font).Assembly.GetManifestResourceStream(resurceFile))
+            {
+                return new PdfType0Font(doc, new TTFParser().Parse(stream), true, true, false);
+            }
+        }
         /**
          * Loads a TTF to be embedded and subset into a document as a Type 0 font. If you are loading a
          * font for AcroForm, then use the 3-parameter constructor instead.
@@ -201,13 +208,13 @@ namespace PdfClown.Documents.Contents.Fonts
 
             embedder = new PdfCIDFontType2Embedder(document, Dictionary, ttf, embedSubset, this, vertical);
             CIDFont = embedder.GetCIDFont();
-            LoadEncoding();
+            ReadEncoding();
             if (closeTTF)
             {
                 if (embedSubset)
                 {
                     this.ttf = ttf;
-                    document.registerTrueTypeFontForClosing(ttf);
+                    //TODO document.registerTrueTypeFontForClosing(ttf); 
                 }
                 else
                 {
@@ -219,7 +226,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         internal PdfType0Font(PdfDirectObject baseObject) : base(baseObject)
         {
-            LoadEncoding();
+            ReadEncoding();
         }
         #endregion
 
@@ -229,7 +236,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public PdfArray DescendantFonts
         {
             get => (PdfArray)BaseDataObject.Resolve(PdfName.DescendantFonts);
-            set => BaseDataObject[PdfName.DescendantFonts] = value?.Reference;
+            set => BaseDataObject[PdfName.DescendantFonts] = value;
         }
         /**
           <summary>Gets the CIDFont dictionary that is the descendant of this composite font.</summary>
@@ -252,14 +259,8 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override FontDescriptor FontDescriptor
         {
-            get => CIDFont.FontDescriptor;
+            get => fontDescriptor ?? (fontDescriptor = CIDFont.FontDescriptor);
             set => CIDFont.FontDescriptor = value;
-        }
-
-        public override int DefaultWidth
-        {
-            get => base.DefaultWidth;
-            set => base.DefaultWidth = value;
         }
 
         public override SKMatrix FontMatrix
@@ -282,13 +283,17 @@ namespace PdfClown.Documents.Contents.Fonts
             // Will be cached by underlying font
             get => CIDFont.BoundingBox;
         }
+        public override float AverageFontWidth
+        {
+            get => CIDFont.AverageFontWidth;
+        }
 
         public override float GetHeight(int code)
         {
             return CIDFont.GetHeight(code);
         }
 
-        protected override byte[] Encode(int unicode)
+        public override byte[] Encode(int unicode)
         {
             return CIDFont.Encode(unicode);
         }
@@ -298,15 +303,69 @@ namespace PdfClown.Documents.Contents.Fonts
             return CIDFont.HasExplicitWidth(code);
         }
 
-        public override float AverageFontWidth
+        public override bool IsStandard14
         {
-            get => CIDFont.AverageFontWidth;
+            get => false;
+        }
+
+        public override bool IsDamaged
+        {
+            get => CIDFont.IsDamaged;
+        }
+
+        public CMap CMapUCS2
+        {
+            get => cMapUCS2;
+        }
+
+        public GsubData GsubData
+        {
+            get => gsubData;
+        }
+
+        public override void AddToSubset(int codePoint)
+        {
+            if (!WillBeSubset)
+            {
+                throw new InvalidOperationException("This font was created with subsetting disabled");
+            }
+            embedder.AddToSubset(codePoint);
+        }
+
+        public void AddGlyphsToSubset(ISet<int> glyphIds)
+        {
+            if (!WillBeSubset)
+            {
+                throw new InvalidOperationException("This font was created with subsetting disabled");
+            }
+            embedder.AddGlyphIds(glyphIds);
+        }
+
+
+        public override void Subset()
+        {
+            if (!WillBeSubset)
+            {
+                throw new InvalidOperationException("This font was created with subsetting disabled");
+            }
+            embedder.Subset();
+            if (ttf != null)
+            {
+                ttf.Dispose();
+                ttf = null;
+            }
+        }
+
+        public override bool WillBeSubset
+        {
+            get => embedder?.NeedsSubset ?? false;
         }
 
         public override SKPoint GetPositionVector(int code)
         {
             // units are always 1/1000 text space, font matrix is not used, see FOP-2252
-            return CIDFont.GetPositionVector(code).Scale(-1 / 1000f);
+            var vector = CIDFont.GetPositionVector(code);
+            return vector.Scale(-1 / 1000f);
         }
 
 
@@ -359,22 +418,11 @@ namespace PdfClown.Documents.Contents.Fonts
             }
             else
             {
-                //LOG.isWarnEnabled()
-                if (!noUnicode.contains(code))
-                {
-                    // if no value has been produced, there is no way to obtain Unicode for the character.
-                    String cid = "CID+" + CodeToCID(code);
-                    Debug.WriteLine("warn: No Unicode mapping for " + cid + " (" + code + ") in font " + Name);
-                    // we keep track of which warnings have been issued, so we don't log multiple times
-                    noUnicode.add(code);
-                }
                 return -1;
             }
         }
 
-
-
-        public override int ReadCode(Bytes.Buffer input, out byte[] bytes)
+        public override int ReadCode(Bytes.IInputStream input, out byte[] bytes)
         {
             return CMap.ReadCode(input, out bytes);
         }
@@ -401,16 +449,6 @@ namespace PdfClown.Documents.Contents.Fonts
             return CIDFont.CodeToGID(code);
         }
 
-        public override bool IsStandard14
-        {
-            get => false;
-        }
-
-        public override bool IsDamaged
-        {
-            get => CIDFont.IsDamaged;
-        }
-
         public override SKPath GetPath(int code)
         {
             return CIDFont.GetPath(code);
@@ -426,22 +464,12 @@ namespace PdfClown.Documents.Contents.Fonts
             return CIDFont.HasGlyph(code);
         }
 
-        public CMap CMapUCS2
-        {
-            get => cMapUCS2;
-        }
-
-        public GsubData GsubData
-        {
-            get => gsubData;
-        }
-
         public byte[] EncodeGlyphId(int glyphId)
         {
             return CIDFont.EncodeGlyphId(glyphId);
         }
 
-        private void LoadEncoding()
+        private void ReadEncoding()
         {
             var encoding = Dictionary.Resolve(PdfName.Encoding);
             if (encoding is PdfName encodingName)
@@ -516,51 +544,9 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-
         protected override void OnLoad()
         {
-            LoadEncoding();
-
-            // Glyph widths.
-            {
-                glyphWidths = new Dictionary<int, int>();
-                PdfArray glyphWidthObjects = CIDFont.Widths;
-                if (glyphWidthObjects != null)
-                {
-                    for (IEnumerator<PdfDirectObject> iterator = glyphWidthObjects.GetEnumerator(); iterator.MoveNext();)
-                    {
-                        //TODO: this algorithm is valid only in case cid-to-gid mapping is identity (see cidtogid map)!!
-                        /*
-                          NOTE: Font widths are grouped in one of the following formats [PDF:1.6:5.6.3]:
-                            1. startCID [glyphWidth1 glyphWidth2 ... glyphWidthn]
-                            2. startCID endCID glyphWidth
-                        */
-                        int startCID = ((PdfInteger)iterator.Current).RawValue;
-                        iterator.MoveNext();
-                        PdfDirectObject glyphWidthObject2 = iterator.Current;
-                        if (glyphWidthObject2 is PdfArray) // Format 1: startCID [glyphWidth1 glyphWidth2 ... glyphWidthn].
-                        {
-                            int cID = startCID;
-                            foreach (PdfDirectObject glyphWidthObject in (PdfArray)glyphWidthObject2)
-                            { glyphWidths[cID++] = ((IPdfNumber)glyphWidthObject).IntValue; }
-                        }
-                        else // Format 2: startCID endCID glyphWidth.
-                        {
-                            int endCID = ((PdfInteger)glyphWidthObject2).RawValue;
-                            iterator.MoveNext();
-                            int glyphWidth = ((IPdfNumber)iterator.Current).IntValue;
-                            for (int cID = startCID; cID <= endCID; cID++)
-                            { glyphWidths[cID] = glyphWidth; }
-                        }
-                    }
-                }
-            }
-            // Default glyph width.
-            {
-                PdfInteger defaultWidthObject = (PdfInteger)BaseDataObject[PdfName.DW];
-                if (defaultWidthObject != null)
-                { DefaultWidth = defaultWidthObject.IntValue; }
-            }
+            ReadEncoding();
         }
         #endregion
 
@@ -571,5 +557,18 @@ namespace PdfClown.Documents.Contents.Fonts
         #endregion
         #endregion
         #endregion
+    }
+
+    public static class SKPointExtendion
+    {
+        public static SKPoint Scale(this SKPoint point, float scale)
+        {
+            return point.Scale(scale, scale);
+        }
+
+        public static SKPoint Scale(this SKPoint point, float scaleX, float scaleY)
+        {
+            return new SKPoint(point.X * scaleX, point.Y * scaleY);
+        }
     }
 }

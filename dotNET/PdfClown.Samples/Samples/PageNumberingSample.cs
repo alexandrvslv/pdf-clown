@@ -46,12 +46,7 @@ namespace PdfClown.Samples.CLI
             PageStamper stamper = new PageStamper();
 
             // 2. Numbering each page...
-            StandardType1Font font = new StandardType1Font(
-              document,
-              StandardType1Font.FamilyEnum.Courier,
-              true,
-              false
-              );
+            PdfType1Font font = PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false);
             DeviceRGBColor redColor = DeviceRGBColor.Get(SKColors.Red);
             int margin = 32;
             foreach (Page page in document.Pages)

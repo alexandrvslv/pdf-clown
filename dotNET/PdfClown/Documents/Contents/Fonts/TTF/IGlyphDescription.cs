@@ -26,7 +26,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
      * see http://xmlgraphics.apache.org/batik/ for further details.
      * 
      */
-    public interface GlyphDescription
+    public interface IGlyphDescription
     {
         /** 
          * Returns the index of the ending point of the given contour.

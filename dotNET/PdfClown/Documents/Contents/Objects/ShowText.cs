@@ -180,7 +180,7 @@ namespace PdfClown.Documents.Contents.Objects
                             if (textCode < 0)
                             {
                                 // Missing character.
-                                textCode = font.MissingCharacter(byteElement, code);
+                                textCode = '?';// font.MissingCharacter(byteElement, code);
                             }
                             var textChar = (char)textCode;
                             //NOTE: The text rendering matrix is recomputed before each glyph is painted

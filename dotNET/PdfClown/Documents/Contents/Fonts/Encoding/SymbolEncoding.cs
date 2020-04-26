@@ -32,7 +32,7 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal sealed class SymbolEncoding : Encoding
     {
-        public static SymbolEncoding Instance;
+        public static readonly SymbolEncoding Instance = new SymbolEncoding();
         public SymbolEncoding()
         {
             Put(32, "space");

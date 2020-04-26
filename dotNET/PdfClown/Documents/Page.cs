@@ -229,7 +229,7 @@ namespace PdfClown.Documents
                   NOTE: The default value is the page's crop box.
                 */
                 PdfDirectObject artBoxObject = GetInheritableAttribute(PdfName.ArtBox);
-                return artBoxObject != null ? Wrap<Rectangle>(artBoxObject).ToRectangleF() : CropBox;
+                return artBoxObject != null ? Wrap<Rectangle>(artBoxObject).ToRect() : CropBox;
             }
             set => BaseDataObject[PdfName.ArtBox] = (value.HasValue ? new Rectangle(value.Value).BaseDataObject : null);
         }
@@ -258,7 +258,7 @@ namespace PdfClown.Documents
                   NOTE: The default value is the page's crop box.
                 */
                 PdfDirectObject bleedBoxObject = GetInheritableAttribute(PdfName.BleedBox);
-                return bleedBoxObject != null ? Wrap<Rectangle>(bleedBoxObject).ToRectangleF() : CropBox;
+                return bleedBoxObject != null ? Wrap<Rectangle>(bleedBoxObject).ToRect() : CropBox;
             }
             set => BaseDataObject[PdfName.BleedBox] = (value.HasValue ? new Rectangle(value.Value).BaseDataObject : null);
         }
@@ -282,7 +282,7 @@ namespace PdfClown.Documents
                   NOTE: The default value is the page's media box.
                 */
                 PdfDirectObject cropBoxObject = GetInheritableAttribute(PdfName.CropBox);
-                return cropBoxObject != null ? Wrap<Rectangle>(cropBoxObject).ToRectangleF() : Box;
+                return cropBoxObject != null ? Wrap<Rectangle>(cropBoxObject).ToRect() : Box;
             }
             set => BaseDataObject[PdfName.CropBox] = (value.HasValue ? new Rectangle(value.Value).BaseDataObject : null);
         }
@@ -422,7 +422,7 @@ namespace PdfClown.Documents
                   NOTE: The default value is the page's crop box.
                 */
                 PdfDirectObject trimBoxObject = GetInheritableAttribute(PdfName.TrimBox);
-                return trimBoxObject != null ? Wrap<Rectangle>(trimBoxObject).ToRectangleF() : CropBox;
+                return trimBoxObject != null ? Wrap<Rectangle>(trimBoxObject).ToRect() : CropBox;
             }
             set => BaseDataObject[PdfName.TrimBox] = (value.HasValue ? new Rectangle(value.Value).BaseDataObject : null);
         }
@@ -430,7 +430,7 @@ namespace PdfClown.Documents
         #region IContentContext
         public SKRect Box
         {
-            get => Wrap<Rectangle>(GetInheritableAttribute(PdfName.MediaBox)).ToRectangleF();
+            get => Wrap<Rectangle>(GetInheritableAttribute(PdfName.MediaBox)).ToRect();
             /* NOTE: Mandatory. */
             set => BaseDataObject[PdfName.MediaBox] = new Rectangle(value).BaseDataObject;
         }

@@ -34,6 +34,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private SKRect? boundingBox = null;
         private short numberOfContours;
         private GlyfDescript glyphDescription = null;
+        private GlyphRenderer renderer;
 
         /**
          * This will read the required data from the stream.
@@ -87,7 +88,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * Returns the description of the glyph.
          * @return the glyph description
          */
-        public GlyphDescription Description
+        public IGlyphDescription Description
         {
             get => glyphDescription;
         }
@@ -96,9 +97,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * Returns the path of the glyph.
          * @return the path
          */
-        public SKPath getPath()
+        public SKPath GetPath()
         {
-            return new GlyphRenderer(glyphDescription).getPath();
+            return (renderer ?? (renderer = new GlyphRenderer(glyphDescription))).GetPath();
         }
 
         /**

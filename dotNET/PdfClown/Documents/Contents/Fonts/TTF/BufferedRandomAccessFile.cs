@@ -92,7 +92,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("error: FillBuffer " + ex);
+                Debug.WriteLine($"error: FillBuffer {ex}");
                 return -1;
             }
 
@@ -108,7 +108,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("error: FillBuffer " + ex);
+                Debug.WriteLine($"error: FillBuffer {ex}");
                 return -1;
             }
             return base.ReadInt16();
@@ -122,7 +122,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("error: FillBuffer " + ex);
+                Debug.WriteLine($"error: FillBuffer {ex}");
                 return 0;
             }
             return base.ReadUInt16();
@@ -139,7 +139,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("error: FillBuffer " + ex);
+                Debug.WriteLine($"error: FillBuffer {ex}");
             }
             return base.Read(b, off, len);
         }

@@ -46,12 +46,12 @@ namespace PdfClown.Documents.Contents.Fonts
         static Encoding()
         {
             //TODO:this collection MUST be automatically populated looking for Encoding subclasses!
-            Encodings[PdfName.StandardEncoding] = new StandardEncoding();
-            Encodings[PdfName.MacRomanEncoding] = new MacRomanEncoding();
-            Encodings[PdfName.WinAnsiEncoding] = new WinAnsiEncoding();
-            Encodings[PdfName.Identity] = new IdentityEncoding();
-            Encodings[PdfName.Symbol] = new SymbolEncoding();
-            Encodings[PdfName.ZapfDingbats] = new ZapfDingbatsEncoding();
+            Encodings[PdfName.StandardEncoding] = StandardEncoding.Instance;
+            Encodings[PdfName.MacRomanEncoding] = MacRomanEncoding.Instance;
+            Encodings[PdfName.WinAnsiEncoding] = WinAnsiEncoding.Instance;
+            Encodings[PdfName.Identity] = IdentityEncoding.Instance;
+            Encodings[PdfName.Symbol] = SymbolEncoding.Instance;
+            Encodings[PdfName.ZapfDingbats] = ZapfDingbatsEncoding.Instance;
         }
         #endregion
 
@@ -72,7 +72,6 @@ namespace PdfClown.Documents.Contents.Fonts
         #region fields
         protected internal readonly Dictionary<int, string> codeToName = new Dictionary<int, string>();
         protected internal readonly Dictionary<string, int> inverted = new Dictionary<string, int>(StringComparer.Ordinal);
-        protected internal readonly Dictionary<int, int> codes = new Dictionary<int, int>();
         private HashSet<string> names;
         #endregion
 
@@ -89,12 +88,6 @@ namespace PdfClown.Documents.Contents.Fonts
             get => inverted;
         }
 
-        public Dictionary<int, int> GetCodes()
-        { return new Dictionary<int, int>(codes); }
-
-        public int GetUnicode(int key)
-        { return codes.TryGetValue(key, out var unicode) ? unicode : 0; }
-
         public virtual string GetName(int key)
         { return codeToName.TryGetValue(key, out var name) ? name : null; }
         #endregion
@@ -107,12 +100,6 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 inverted[charName] = charCode;
             }
-            Put(charCode, GlyphMapping.Default.NameToCode(charName).Value);
-        }
-
-        protected void Put(int charCode, int unicode)
-        {
-            codes[charCode] = unicode;
         }
 
         /**

@@ -158,7 +158,7 @@ namespace PdfClown.Samples.CLI
 
             SKSize breakSize = new SKSize(0, 10);
             // Add the font to the document!
-            fonts::Font font = fonts::Font.Get(document, GetResourcePath("fonts" + Path.DirectorySeparatorChar + "TravelingTypewriter.otf"));
+            fonts::Font font = fonts::PdfType0Font.Load(document, GetResourcePath("fonts" + Path.DirectorySeparatorChar + "TravelingTypewriter.otf"));
 
             SKRect frame = SKRect.Create(
               20,
@@ -351,10 +351,7 @@ namespace PdfClown.Samples.CLI
 
             SKSize breakSize = new SKSize(0, 20); // Size of a paragraph break.
                                                   // Instantiate the page body's font!
-            fonts::Font font = fonts::Font.Get(
-              document,
-              GetResourcePath("fonts" + Path.DirectorySeparatorChar + "lazyDog.ttf")
-              );
+            fonts::Font font = fonts::PdfType0Font.Load(document, GetResourcePath("fonts" + Path.DirectorySeparatorChar + "lazyDog.ttf"));
 
             // Showing the page title...
             // Define the box frame to force the page title within!
@@ -506,15 +503,7 @@ namespace PdfClown.Samples.CLI
             composer.BeginLocalState();
             composer.SetFillColor(new colorSpaces::DeviceRGBColor(115f / 255, 164f / 255, 232f / 255));
             // Set the font to use!
-            composer.SetFont(
-              new fonts::StandardType1Font(
-                document,
-                fonts::StandardType1Font.FamilyEnum.Times,
-                true,
-                false
-                ),
-              120
-              );
+            composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Times, true, false), 120);
             // Show the text!
             composer.ShowText(
               "PdfClown",
@@ -539,15 +528,7 @@ namespace PdfClown.Samples.CLI
             // Showing the side text inside the common content stream...
             composer.BeginLocalState();
             {
-                composer.SetFont(
-                  new fonts::StandardType1Font(
-                    document,
-                    fonts::StandardType1Font.FamilyEnum.Helvetica,
-                    false,
-                    false
-                    ),
-                  8
-                  );
+                composer.SetFont(fonts::PdfType1Font.Load(document, fonts::PdfType1Font.FamilyEnum.Helvetica, false, false), 8);
                 composer.SetFillColor(colorSpaces::DeviceRGBColor.White);
                 composer.BeginLocalState();
                 {

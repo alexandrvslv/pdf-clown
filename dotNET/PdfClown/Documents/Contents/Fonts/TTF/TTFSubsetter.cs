@@ -474,7 +474,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                     if (isResult.CompareTo(g.Offset) != 0)
                     {
-                        Debug.WriteLine("debug: Tried skipping " + g.Offset + " bytes but skipped only " + isResult + " bytes");
+                        Debug.WriteLine($"debug: Tried skipping {g.Offset} bytes but skipped only {isResult} bytes");
                     }
 
                     long lastOff = 0L;
@@ -486,7 +486,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                         if (isResult.CompareTo(offset - lastOff) != 0)
                         {
-                            Debug.WriteLine("debug: Tried skipping " + (offset - lastOff) + " bytes but skipped only " + isResult + " bytes");
+                            Debug.WriteLine($"debug: Tried skipping {(offset - lastOff)} bytes but skipped only {isResult} bytes");
                         }
 
                         sbyte[] buf = new sbyte[(int)len];
@@ -494,7 +494,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                         if (isResult.CompareTo(len) != 0)
                         {
-                            Debug.WriteLine("debug: Tried reading " + len + " bytes but only " + isResult + " bytes read");
+                            Debug.WriteLine($"debug: Tried reading {len} bytes but only {isResult} bytes read");
                         }
 
                         // rewrite glyphIds for compound glyphs
@@ -574,7 +574,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                 if (isResult.CompareTo(g.Offset) != 0)
                 {
-                    Debug.WriteLine("debug: Tried skipping " + g.Offset + " bytes but skipped only " + isResult + " bytes");
+                    Debug.WriteLine($"debug: Tried skipping {g.Offset} bytes but skipped only {isResult} bytes");
                 }
 
                 long prevEnd = 0;    // previously read glyph offset
@@ -592,7 +592,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                     if (isResult.CompareTo(offset - prevEnd) != 0)
                     {
-                        Debug.WriteLine("debug: Tried skipping " + (offset - prevEnd) + " bytes but skipped only " + isResult + " bytes");
+                        Debug.WriteLine($"debug: Tried skipping {(offset - prevEnd)} bytes but skipped only {isResult} bytes");
                     }
 
                     sbyte[] buf = new sbyte[(int)length];
@@ -600,7 +600,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                     if (isResult.CompareTo(length) != 0)
                     {
-                        Debug.WriteLine("debug: Tried reading " + length + " bytes but only " + isResult + " bytes read");
+                        Debug.WriteLine($"debug: Tried reading {length} bytes but only {isResult} bytes read");
                     }
 
                     // detect glyph type
@@ -902,7 +902,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                 if (isResult.CompareTo(hm.Offset) != 0)
                 {
-                    Debug.WriteLine("debug: Tried skipping " + hm.Offset + " bytes but only " + isResult + " bytes skipped");
+                    Debug.WriteLine($"debug: Tried skipping {hm.Offset} bytes but only {isResult} bytes skipped");
                 }
 
                 long lastOffset = 0;

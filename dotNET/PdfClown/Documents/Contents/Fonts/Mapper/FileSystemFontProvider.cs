@@ -170,13 +170,13 @@ namespace PdfClown.Documents.Contents.Fonts
 
                     TrueTypeFont ttf = ReadTrueTypeFont(postScriptName, file);
 #if DEBUG
-                    Debug.WriteLine("debug: Loaded " + postScriptName + " from " + file);
+                    Debug.WriteLine($"debug: Loaded {postScriptName} from {file}");
 #endif
                     return ttf;
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("error: Could not load font file: " + file, e);
+                    Debug.WriteLine($"error: Could not load font file: {file} {e}");
                 }
                 return null;
             }
@@ -215,14 +215,14 @@ namespace PdfClown.Documents.Contents.Fonts
                     {
                         OpenTypeFont otf = parser.Parse(stream);
 #if DEBUG
-                        Debug.WriteLine("debug: Loaded " + postScriptName + " from " + file);
+                        Debug.WriteLine($"debug: Loaded {postScriptName} from {file}");
 #endif
                         return otf;
                     }
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("eror: Could not load font file: " + file, e);
+                    Debug.WriteLine($"eror: Could not load font file: {file} {e}");
                 }
                 return null;
             }
@@ -235,14 +235,14 @@ namespace PdfClown.Documents.Contents.Fonts
                     {
                         Type1Font type1 = Type1Font.CreateWithPFB(new Bytes.Buffer(input));
 #if DEBUG
-                        Debug.WriteLine("debug: Loaded " + postScriptName + " from " + file);
+                        Debug.WriteLine($"debug: Loaded {postScriptName} from {file}");
 #endif
                         return type1;
                     }
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("eror: Could not load font file: " + file, e);
+                    Debug.WriteLine($"eror: Could not load font file: {file} {e}");
                 }
                 return null;
             }
@@ -280,7 +280,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
 
 #if TRACE
-                Debug.WriteLine("trace: Found " + files.Count + " fonts on the local system");
+                Debug.WriteLine($"trace: Found {files.Count} fonts on the local system");
 #endif
 
                 // load cached FontInfo objects
@@ -294,12 +294,12 @@ namespace PdfClown.Documents.Contents.Fonts
                     Debug.WriteLine("warn: Building on-disk font cache, this may take a while");
                     ScanFonts(files);
                     SaveDiskCache();
-                    Debug.WriteLine("warn: Finished building on-disk font cache, found " + fontInfoList.Count + " fonts");
+                    Debug.WriteLine($"warn: Finished building on-disk font cache, found {fontInfoList.Count} fonts");
                 }
             }
             catch (Exception e)
             {
-                Debug.WriteLine("error: Error accessing the file system", e);
+                Debug.WriteLine($"error: Error accessing the file system {e}");
             }
         }
 
@@ -326,7 +326,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("eror: Error parsing font " + file.Name + " " + e);
+                    Debug.WriteLine($"eror: Error parsing font {file.Name} {e}");
                 }
             }
         }
@@ -368,14 +368,14 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("warn: Could not write to font cache" + e);
+                    Debug.WriteLine($"warn: Could not write to font cache {e}");
                     Debug.WriteLine("warn: Installed fonts information will have to be reloaded for each start");
                     Debug.WriteLine("warn: You can assign a directory to the 'pdfbox.fontcache' property");
                 }
             }
             catch (SecurityException e)
             {
-                Debug.WriteLine("debug: Couldn't create writer for font cache file", e);
+                Debug.WriteLine($"debug: Couldn't create writer for font cache file {e}");
             }
         }
 
@@ -482,7 +482,7 @@ namespace PdfClown.Documents.Contents.Fonts
                             }
                             else
                             {
-                                Debug.WriteLine("debug: Font file " + fontFile.FullName + " not found, skipped");
+                                Debug.WriteLine($"debug: Font file {fontFile.FullName} not found, skipped");
                             }
                             pending.Remove(fontFile.FullName);
                         }
@@ -490,7 +490,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("eror: Error loading font cache, will be re-built", e);
+                    Debug.WriteLine($"eror: Error loading font cache, will be re-built {e}");
                     return null;
                 }
             }
@@ -565,7 +565,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (ttf.Name != null && ttf.Name.Contains("|"))
                 {
                     fontInfoList.Add(new FSIgnored(file, FontFormat.TTF, "*skippipeinname*"));
-                    Debug.WriteLine("warn: Skipping font with '|' in name " + ttf.Name + " in file " + file);
+                    Debug.WriteLine($"warn: Skipping font with '|' in name {ttf.Name} in file {file}");
                 }
                 else if (ttf.Name != null)
                 {
@@ -634,20 +634,20 @@ namespace PdfClown.Documents.Contents.Fonts
                     NamingTable name = ttf.Naming;
                     if (name != null)
                     {
-                        Debug.WriteLine("trace: " + format + ": '" + name.PostScriptName + "' / '" + name.FontFamily + "' / '" + name.FontSubFamily + "'");
+                        Debug.WriteLine($"trace: {format}: '{name.PostScriptName}' / '{name.FontFamily}' / '{name.FontSubFamily}'");
                     }
 #endif
                 }
                 else
                 {
                     fontInfoList.Add(new FSIgnored(file, FontFormat.TTF, "*skipnoname*"));
-                    Debug.WriteLine("warn: Missing 'name' entry for PostScript name in font " + file);
+                    Debug.WriteLine($"warn: Missing 'name' entry for PostScript name in font {file}");
                 }
             }
             catch (IOException e)
             {
                 fontInfoList.Add(new FSIgnored(file, FontFormat.TTF, "*skipexception*"));
-                Debug.WriteLine("eror: Could not load font file: " + file, e);
+                Debug.WriteLine($"eror: Could not load font file: {file} {e}");
             }
             finally
             {
@@ -669,20 +669,20 @@ namespace PdfClown.Documents.Contents.Fonts
                     if (type1.Name != null && type1.Name.Contains("|"))
                     {
                         fontInfoList.Add(new FSIgnored(pfbFile, FontFormat.PFB, "*skippipeinname*"));
-                        Debug.WriteLine("warn: Skipping font with '|' in name " + type1.Name + " in file " + pfbFile);
+                        Debug.WriteLine($"warn: Skipping font with '|' in name {type1.Name} in file {pfbFile}");
                         return;
                     }
                     fontInfoList.Add(new FSFontInfo(pfbFile, FontFormat.PFB, type1.Name,
                                                     null, -1, -1, 0, 0, -1, null, this));
 
 #if TRACE
-                    Debug.WriteLine("trace: PFB: '" + type1.Name + "' / '" + type1.FamilyName + "' / '" + type1.Weight + "'");
+                    Debug.WriteLine($"trace: PFB: '{type1.Name}' / '{type1.FamilyName}' / '{type1.Weight}'");
 #endif
                 }
             }
             catch (IOException e)
             {
-                Debug.WriteLine("eror: Could not load font file: " + pfbFile, e);
+                Debug.WriteLine($"eror: Could not load font file: {pfbFile} {e}");
             }
         }
 

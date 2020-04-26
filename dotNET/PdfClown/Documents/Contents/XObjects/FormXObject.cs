@@ -170,7 +170,7 @@ namespace PdfClown.Documents.Contents.XObjects
         #region IContentContext
         public SKRect Box
         {
-            get => Wrap<Rectangle>(BaseDataObject.Header[PdfName.BBox]).ToRectangleF();
+            get => Wrap<Rectangle>(BaseDataObject.Header[PdfName.BBox]).ToRect();
             set => BaseDataObject.Header[PdfName.BBox] = new Rectangle(value).BaseDataObject;
         }
 

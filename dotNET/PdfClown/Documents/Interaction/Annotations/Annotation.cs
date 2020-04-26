@@ -324,7 +324,7 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public virtual SKRect Rect
         {
-            get => Wrap<Objects.Rectangle>(BaseDataObject[PdfName.Rect]).ToRectangleF();
+            get => Wrap<Objects.Rectangle>(BaseDataObject[PdfName.Rect]).ToRect();
             set => BaseDataObject[PdfName.Rect] = new Objects.Rectangle(value).BaseDataObject;
         }
 

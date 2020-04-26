@@ -29,6 +29,7 @@ using PdfClown.Objects;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -49,12 +50,95 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly GlyphMapping DLFONT = new GlyphMapping("G500");
         public static bool IsExist(string fontName) => typeof(GlyphMapping).Assembly.GetManifestResourceNames().Contains($"fonts.{fontName}");
 
-        private readonly Dictionary<string, int> codes = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> nameToCode = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<int, string> codeToName = new Dictionary<int, string>();
+        private readonly Dictionary<string, int> uniNameToUnicodeCache = new Dictionary<string, int>();
         public GlyphMapping(string fontName)
         { Load($"fonts.{fontName}"); }
 
-        public int? NameToCode(string name)
-        { return codes.TryGetValue(name, out var code) ? code : (int?)null; }
+        public int? ToUnicode(string name)
+        {
+            if (name == null)
+            {
+                return null;
+            }
+            if (nameToCode.TryGetValue(name, out var unicode))
+            {
+                return unicode;
+            }
+            // separate read/write cache for thread safety
+            if (!uniNameToUnicodeCache.TryGetValue(name, out unicode))
+            {
+                // test if we have a suffix and if so remove it
+                var dotIndex = name.IndexOf('.');
+                int nameLength = name.Length;
+                if (dotIndex > 0)
+                {
+                    unicode = ToUnicode(name.Substring(0, dotIndex)) ?? -1;
+                }
+                else if (name.StartsWith("uni", StringComparison.Ordinal) && name.Length == 7)
+                {
+                    // test for Unicode name in the format uniXXXX where X is hex
+                    var uniStr = new StringBuilder();
+                    try
+                    {
+                        for (int chPos = 3; chPos + 4 <= nameLength; chPos += 4)
+                        {
+                            int codePoint = Convert.ToInt32(name.Substring(chPos, 4), 16);
+                            if (codePoint > 0xD7FF && codePoint < 0xE000)
+                            {
+                                Debug.WriteLine($"warn: Unicode character name with disallowed code area: {name}");
+                            }
+                            else
+                            {
+                                unicode = codePoint;// uniStr.Append((char)codePoint);
+                                break;
+                            }
+                        }
+                        //unicode = uniStr.ToString();
+                    }
+                    catch (Exception nfe)
+                    {
+                        Debug.WriteLine($"warn: Not a number in Unicode character name: {name} {nfe}");
+                    }
+                }
+                else if (name.StartsWith("u", StringComparison.Ordinal) && name.Length == 5)
+                {
+                    // test for an alternate Unicode name representation uXXXX
+                    try
+                    {
+                        int codePoint = Convert.ToInt32(name.Substring(1), 16);
+                        if (codePoint > 0xD7FF && codePoint < 0xE000)
+                        {
+                            Debug.WriteLine($"Unicode character name with disallowed code area: {name}");
+                        }
+                        else
+                        {
+                            unicode = codePoint;
+                        }
+                    }
+                    catch (Exception nfe)
+                    {
+                        Debug.WriteLine($"warn: Not a number in Unicode character name: {name}");
+                    }
+                }
+                if (unicode > 0)
+                {
+                    // null value not allowed in ConcurrentHashMap
+                    uniNameToUnicodeCache[name] = unicode;
+                }
+            }
+            return unicode;
+        }
+
+        public string UnicodeToName(int unicode)
+        {
+            if (codeToName.TryGetValue(unicode, out var name))
+            {
+                return name;
+            }
+            return ".notdef";
+        }
 
         /**
           <summary>Loads the glyph list mapping character names to character codes (unicode
@@ -84,13 +168,23 @@ namespace PdfClown.Documents.Contents.Fonts
                     Match lineMatch = lineMatches[0];
 
                     string name = lineMatch.Groups[1].Value;
-                    int code = Int32.Parse(
-                      lineMatch.Groups[2].Value,
-                      NumberStyles.HexNumber
-                      );
+                    int code = Int32.Parse(lineMatch.Groups[2].Value, NumberStyles.HexNumber);
 
                     // Associate the character name with its corresponding character code!
-                    codes[name] = code;
+                    nameToCode[name] = code;
+                    // reverse mapping
+                    // PDFBOX-3884: take the various standard encodings as canonical, 
+                    // e.g. tilde over ilde
+                    bool forceOverride =
+                          WinAnsiEncoding.Instance.Contains(name) ||
+                          MacRomanEncoding.Instance.Contains(name) ||
+                          MacExpertEncoding.Instance.Contains(name) ||
+                          SymbolEncoding.Instance.Contains(name) ||
+                          ZapfDingbatsEncoding.Instance.Contains(name);
+                    if (!codeToName.ContainsKey(code) || forceOverride)
+                    {
+                        codeToName[code] = name;
+                    }
                 }
             }
             finally
@@ -99,5 +193,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 { glyphListStream.Close(); }
             }
         }
+
+
     }
 }

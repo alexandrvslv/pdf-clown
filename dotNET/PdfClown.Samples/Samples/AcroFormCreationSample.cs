@@ -60,14 +60,7 @@ namespace PdfClown.Samples.CLI
             fieldStyle.GraphicsVisibile = true;
 
             PrimitiveComposer composer = new PrimitiveComposer(page);
-            composer.SetFont(
-              new StandardType1Font(
-                document,
-                StandardType1Font.FamilyEnum.Courier,
-                true,
-                false
-                ),
-              14);
+            composer.SetFont(PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false), 14);
 
             // 4. Field creation.
             // 4.a. Push button.

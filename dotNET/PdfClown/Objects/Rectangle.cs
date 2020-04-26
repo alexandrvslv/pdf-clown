@@ -118,7 +118,7 @@ namespace PdfClown.Objects
             set => BaseDataObject[3] = PdfReal.Get(value);
         }
 
-        public SKRect ToRectangleF()
+        public SKRect ToRect()
         { return SKRect.Create((float)X, (float)Y, (float)Width, (float)Height); }
 
         public double Width

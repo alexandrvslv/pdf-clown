@@ -215,14 +215,7 @@ namespace PdfClown.Documents.Interaction.Forms
                             if (defaultFontName == null)
                             {
                                 //TODO:manage name collision!
-                                formFonts[
-                                  defaultFontName = new PdfName("default")
-                                  ] = defaultFont = new fonts::StandardType1Font(
-                                    Document,
-                                    fonts::StandardType1Font.FamilyEnum.Helvetica,
-                                    false,
-                                    false
-                                    );
+                                formFonts[defaultFontName = new PdfName("default")] = defaultFont = fonts::PdfType1Font.Load(Document, fonts::PdfType1Font.FamilyEnum.Helvetica, false, false);
                             }
                             normalAppearanceFonts[defaultFontName] = defaultFont;
                         }

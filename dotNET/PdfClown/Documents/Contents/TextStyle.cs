@@ -85,9 +85,7 @@ namespace PdfClown.Documents.Contents
         /**
           <exception cref="EncodeException"/>
         */
-        public double GetWidth(
-          char textChar
-          )
+        public double GetWidth(char textChar)
         { return font.GetWidth(textChar, fontSize) * scaleX / scaleY; }
 
         public TextRenderModeEnum RenderMode => renderMode;

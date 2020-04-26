@@ -67,12 +67,7 @@ namespace PdfClown.Samples.CLI
                       XAlignmentEnum.Left,
                       YAlignmentEnum.Top
                       );
-                    StandardType1Font bodyFont = new StandardType1Font(
-                      document,
-                      StandardType1Font.FamilyEnum.Courier,
-                      true,
-                      false
-                      );
+                    PdfType1Font bodyFont = PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false);
                     composer.SetFont(bodyFont, 32);
                     blockComposer.ShowText("Barcode sample"); blockComposer.ShowBreak();
                     composer.SetFont(bodyFont, 16);

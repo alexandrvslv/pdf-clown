@@ -34,6 +34,9 @@ namespace PdfClown.Documents.Contents.Fonts
         public FontDescriptor(PdfDirectObject baseObject) : base(baseObject)
         { }
 
+        public FontDescriptor() : this(null, new PdfDictionary())
+        { }
+
         public FontDescriptor(Document document, PdfDictionary baseObject) : base(document, baseObject)
         { }
 
@@ -65,6 +68,29 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             get => (FlagsEnum)(((PdfInteger)Dictionary[PdfName.Flags])?.IntValue ?? 0);
             set => Dictionary[PdfName.Flags] = new PdfInteger((int)value);
+        }
+
+        public bool NonSymbolic
+        {
+            get => (Flags & FlagsEnum.Nonsymbolic) == FlagsEnum.Nonsymbolic;
+            set
+            {
+                if (value)
+                    Flags |= FlagsEnum.Nonsymbolic;
+                else
+                    Flags &= ~FlagsEnum.Nonsymbolic;
+            }
+        }
+        public bool Symbolic
+        {
+            get => (Flags & FlagsEnum.Symbolic) == FlagsEnum.Symbolic;
+            set
+            {
+                if (value)
+                    Flags |= FlagsEnum.Symbolic;
+                else
+                    Flags &= ~FlagsEnum.Symbolic;
+            }
         }
 
         public Rectangle FontBBox
@@ -157,17 +183,17 @@ namespace PdfClown.Documents.Contents.Fonts
             set => Dictionary[PdfName.FontFile3] = value?.BaseObject;
         }
 
-        public PdfString CharSet
+        public string CharSet
         {
-            get => (PdfString)Dictionary.Resolve(PdfName.CharSet);
-            set => Dictionary[PdfName.CharSet] = value;
+            get => Dictionary.Resolve(PdfName.CharSet)?.ToString();
+            set => Dictionary[PdfName.CharSet] = PdfString.Get(value);
         }
 
         //CID Font Specific
         public string Lang
         {
             get => ((PdfName)Dictionary[PdfName.Lang])?.StringValue;
-            set => Dictionary[PdfName.Lang] = new PdfName(value);
+            set => Dictionary[PdfName.Lang] = PdfName.Get(value);
         }
 
         public Style Style
@@ -202,7 +228,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public Panose Panose
         {
             get => panose ?? (panose = new Panose(((PdfString)Dictionary.Resolve(PdfName.Panose)).GetBuffer()));
-            set => Dictionary[PdfName.Panose] = new PdfString( value?.Bytes);
+            set => Dictionary[PdfName.Panose] = new PdfString(value?.Bytes);
         }
     }
 }

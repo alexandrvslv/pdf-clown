@@ -17,8 +17,7 @@ namespace PdfClown.Samples.CLI
       <remarks>In particular, this sample displays the complete glyphset of each standard font,
       iterating through character codes and glyph styles (regular, italic, bold).</remarks>
     */
-    public class StandardFontSample
-      : Sample
+    public class StandardFontSample : Sample
     {
         private static readonly int FontBaseSize = 20;
         private static readonly int Margin = 50;
@@ -37,9 +36,7 @@ namespace PdfClown.Samples.CLI
             Serialize(file, "Standard Type 1 fonts", "applying standard Type 1 fonts", "Standard Type1 fonts");
         }
 
-        private void Populate(
-          Document document
-          )
+        private void Populate(Document document)
         {
             Page page = new Page(document);
             document.Pages.Add(page);
@@ -55,16 +52,11 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
 
             int x = Margin, y = Margin;
-            StandardType1Font titleFont = new StandardType1Font(
-              document,
-              StandardType1Font.FamilyEnum.Times,
-              true,
-              true
-              );
-            StandardType1Font font = null;
+            PdfType1Font titleFont = PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Times, true, true);
+            PdfType1Font font = null;
             // Iterating through the standard Type 1 fonts...
-            foreach (StandardType1Font.FamilyEnum fontFamily
-              in (StandardType1Font.FamilyEnum[])Enum.GetValues(typeof(StandardType1Font.FamilyEnum)))
+            foreach (PdfType1Font.FamilyEnum fontFamily
+              in (PdfType1Font.FamilyEnum[])Enum.GetValues(typeof(PdfType1Font.FamilyEnum)))
             {
                 // Iterating through the font styles...
                 for (int styleIndex = 0; styleIndex < 4; styleIndex++)
@@ -73,15 +65,15 @@ namespace PdfClown.Samples.CLI
                       NOTE: Symbol and Zapf Dingbats are available just as regular fonts (no italic or bold variant).
                     */
                     if (styleIndex > 0
-                      && (fontFamily == StandardType1Font.FamilyEnum.Symbol
-                        || fontFamily == StandardType1Font.FamilyEnum.ZapfDingbats))
+                      && (fontFamily == PdfType1Font.FamilyEnum.Symbol
+                        || fontFamily == PdfType1Font.FamilyEnum.ZapfDingbats))
                         break;
 
                     bool bold = (styleIndex & 1) > 0;
                     bool italic = (styleIndex & 2) > 0;
 
                     // Define the font used to show its character set!
-                    font = new StandardType1Font(document, fontFamily, bold, italic);
+                    font = PdfType1Font.Load(document, fontFamily, bold, italic);
 
                     if (y > pageSize.Height - Margin)
                     {

@@ -1,5 +1,5 @@
-/*
-  Copyright 2008-2010 Stefano Chizzolini. http://www.pdfclown.org
+﻿/*
+  Copyright 2007-2012 Stefano Chizzolini. http://www.pdfclown.org
 
   Contributors:
     * Stefano Chizzolini (original code developer, http://www.stefanochizzolini.it)
@@ -23,56 +23,53 @@
   this list of conditions.
 */
 
-using PdfClown.Bytes;
 using PdfClown.Objects;
 
 using System.Collections.Generic;
-using SkiaSharp;
 
 namespace PdfClown.Documents.Contents.Objects
 {
     /**
-      <summary>Path object [PDF:1.6:4.4].</summary>
-    */
+     <summary>'Font Type3 Char Proc Information' operation
+     [PDF:1.6:4.4.1].</summary>
+   */
     [PDF(VersionEnum.PDF10)]
-    public sealed class Path : GraphicsObject
+    public sealed class CharProcWidth : Operation
     {
         #region static
         #region fields
-        public static readonly string[] BeginOperatorKeywords = new string[]
-          {
-              BeginSubpath.OperatorKeyword,
-              DrawRectangle.OperatorKeyword
-          };
-        public static readonly string[] EndOperatorKeywords = new string[]
-          {
-              PaintPath.CloseFillStrokeEvenOddOperatorKeyword,
-              PaintPath.CloseFillStrokeOperatorKeyword,
-              PaintPath.CloseStrokeOperatorKeyword,
-              PaintPath.EndPathNoOpOperatorKeyword,
-              PaintPath.FillEvenOddOperatorKeyword,
-              PaintPath.FillObsoleteOperatorKeyword,
-              PaintPath.FillOperatorKeyword,
-              PaintPath.FillStrokeEvenOddOperatorKeyword,
-              PaintPath.FillStrokeOperatorKeyword,
-              PaintPath.StrokeOperatorKeyword
-          };
+        public static readonly string OperatorKeyword = "d0";
         #endregion
         #endregion
 
         #region dynamic
         #region constructors
-        public Path()
+        public CharProcWidth(double wx, double wy)
+            : base(OperatorKeyword,
+                  new List<PdfDirectObject>(new PdfDirectObject[] { PdfReal.Get(wx), PdfReal.Get(wy) }))
         { }
 
-        public Path(IList<ContentObject> operations) : base(operations)
+        public CharProcWidth(IList<PdfDirectObject> operands) : base(OperatorKeyword, operands)
         { }
         #endregion
 
         #region interface
-        #region protected
-        protected override SKPath CreateRenderObject()
-        { return new SKPath(); }
+        #region public        
+
+        public override void Scan(GraphicsState state)
+        {
+        }
+        public double WX
+        {
+            get => ((IPdfNumber)operands[0]).RawValue;
+            set => operands[0] = PdfReal.Get(value);
+        }
+
+        public double WY
+        {
+            get => ((IPdfNumber)operands[1]).RawValue;
+            set => operands[1] = PdfReal.Get(value);
+        }
         #endregion
         #endregion
         #endregion

@@ -41,7 +41,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         public int GetGlyphId(int characterCode)
         {
             int gid = cmap.GetGlyphId(characterCode);
-            string[] scriptTags = OpenTypeScript.getScriptTags(characterCode);
+            string[] scriptTags = OpenTypeScript.GetScriptTags(characterCode);
             return gsub.GetSubstitution(gid, scriptTags, enabledFeatures);
         }
 

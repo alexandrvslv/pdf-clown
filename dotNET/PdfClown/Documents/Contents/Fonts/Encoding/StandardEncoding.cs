@@ -34,10 +34,9 @@ namespace PdfClown.Documents.Contents.Fonts
     */
     internal sealed class StandardEncoding : Encoding
     {
-        public static StandardEncoding Instance;
+        public static readonly StandardEncoding Instance = new StandardEncoding();
         public StandardEncoding()
         {
-            Instance = this;
             Put(65, "A");
             Put(225, "AE");
             Put(66, "B");

@@ -33,11 +33,11 @@ namespace PdfClown.Documents.Contents.Fonts
       <summary>Multiple Master Type 1 font [PDF:1.6:5.5.1].</summary>
     */
     [PDF(VersionEnum.PDF10)]
-    public sealed class MMType1Font : PdfType1Font
+    public sealed class PdfMMType1Font : PdfType1Font
     {
         //TODO
         #region constructors
-        internal MMType1Font(PdfDirectObject baseObject) : base(baseObject)
+        internal PdfMMType1Font(PdfDirectObject baseObject) : base(baseObject)
         { }
         #endregion
     }

@@ -66,7 +66,7 @@ namespace PdfClown.Documents.Contents.Fonts
             cidFont = CreateCIDFont();
             PdfArray descendantFonts = new PdfArray();
             descendantFonts.Add(cidFont);
-            dict[PdfName.DescendantFonts] = descendantFonts.Reference;
+            dict[PdfName.DescendantFonts] = descendantFonts;
 
             if (!embedSubset)
             {
@@ -133,12 +133,12 @@ namespace PdfClown.Documents.Contents.Fonts
                     {
                         hasSurrogates = true;
                     }
-                    toUniWriter.Add(cid, new string(new int[] { codePoint }, 0, 1));
+                    toUniWriter.Add(cid, new string(new char[] { (char)codePoint }, 0, 1));
                 }
             }
 
             var output = new MemoryStream();
-            toUniWriter.writeTo(output);
+            toUniWriter.WriteTo(output);
             var cMapStream = new Bytes.Buffer(output.ToArray());
 
             PdfStream stream = new PdfStream(cMapStream);
@@ -276,7 +276,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 ws.Add(PdfInteger.Get(width)); // wi
                 prev = cid;
             }
-            cidFont[PdfName.W] = widths.Reference;
+            cidFont[PdfName.W] = widths;
         }
 
         private bool BuildVerticalHeader(PdfDictionary cidFont)
@@ -297,7 +297,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 PdfArray cosDw2 = new PdfArray();
                 cosDw2.Add(PdfInteger.Get(v));
                 cosDw2.Add(PdfInteger.Get(w1));
-                cidFont[PdfName.DW2] = cosDw2.Reference;
+                cidFont[PdfName.DW2] = cosDw2;
             }
             return true;
         }
@@ -360,7 +360,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 w2.Add(PdfInteger.Get(height)); // v_iy
                 prev = cid;
             }
-            cidFont[PdfName.W2] = heights.Reference;
+            cidFont[PdfName.W2] = heights;
         }
 
         /**
@@ -376,7 +376,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 gidwidths[cid * 2 + 1] = ttf.HorizontalMetrics.GetAdvanceWidth(cid);
             }
 
-            cidFont[PdfName.W] = GetWidths(gidwidths).Reference;
+            cidFont[PdfName.W] = GetWidths(gidwidths);
         }
 
         enum State
@@ -509,7 +509,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
             }
 
-            cidFont[PdfName.W2] = GetVerticalMetrics(gidMetrics).Reference;
+            cidFont[PdfName.W2] = GetVerticalMetrics(gidMetrics);
         }
 
         private PdfArray GetVerticalMetrics(int[] values)

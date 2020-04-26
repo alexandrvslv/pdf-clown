@@ -307,7 +307,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param codePoint
          * @return A Unicode script string, or {@code #UNKNOWN} if unknown
          */
-        private string GetUnicodeScript(int codePoint)
+        private static string GetUnicodeScript(int codePoint)
         {
             EnsureValidCodePoint(codePoint);
             var type = char.GetUnicodeCategory((char)codePoint);
@@ -334,14 +334,14 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @param codePoint
          * @return An array of four-char script tags
          */
-        public string[] GetScriptTags(int codePoint)
+        public static string[] GetScriptTags(int codePoint)
         {
             EnsureValidCodePoint(codePoint);
             string unicode = GetUnicodeScript(codePoint);
             return UNICODE_SCRIPT_TO_OPENTYPE_TAG_MAP.TryGetValue(unicode, out var result) ? result : null;
         }
 
-        private void EnsureValidCodePoint(int codePoint)
+        private static void EnsureValidCodePoint(int codePoint)
         {
             if (codePoint < char.MinValue || codePoint > char.MaxValue)
             {

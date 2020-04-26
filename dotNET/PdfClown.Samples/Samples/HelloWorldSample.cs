@@ -47,7 +47,7 @@ namespace PdfClown.Samples.CLI
 
             // 3. Inserting contents...
             // Set the font to use!
-            composer.SetFont(new StandardType1Font(document, StandardType1Font.FamilyEnum.Courier, true, false), 30);
+            composer.SetFont(PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false), 30);
             // Show the text onto the page (along with its box)!
             /*
               NOTE: PrimitiveComposer's ShowText() method is the most basic way to add text to a page

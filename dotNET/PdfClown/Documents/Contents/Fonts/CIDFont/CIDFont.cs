@@ -53,7 +53,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         protected readonly PdfType0Font parent;
 
-        private Dictionary<int, float> widths;
+        private new Dictionary<int, float> widths;
         private int? defaultWidth;
         private float averageWidth;
 
@@ -61,7 +61,6 @@ namespace PdfClown.Documents.Contents.Fonts
         private readonly Dictionary<int, SKPoint> positionVectors = new Dictionary<int, SKPoint>();     // v
         private float[] dw2 = new float[] { 880, -1000 };
 
-        private FontDescriptor fontDescriptor;
         public CIDFont(Document document)
             : this(document, new PdfDictionary(new PdfName[] { PdfName.Type }, new PdfDirectObject[] { PdfName.Font }))
         { }
@@ -109,7 +108,7 @@ namespace PdfClown.Documents.Contents.Fonts
             set => Dictionary[PdfName.FontDescriptor] = value?.BaseObject;
         }
 
-        public override int DefaultWidth
+        public int DefaultWidth
         {
             get => defaultWidth ?? (defaultWidth = ((PdfInteger)Dictionary[PdfName.DW])?.IntValue ?? 1000).Value;
             set => Dictionary[PdfName.DW] = new PdfInteger(value);
@@ -118,19 +117,19 @@ namespace PdfClown.Documents.Contents.Fonts
         public override PdfArray Widths
         {
             get => (PdfArray)Dictionary.Resolve(PdfName.W);
-            set => Dictionary[PdfName.W] = value.Reference;
+            set => Dictionary[PdfName.W] = value;
         }
 
         public PdfArray VerticalDefaultWidth
         {
             get => (PdfArray)Dictionary.Resolve(PdfName.DW2);
-            set => Dictionary[PdfName.DW2] = value.Reference;
+            set => Dictionary[PdfName.DW2] = value;
         }
 
         public PdfArray VerticaltWidths
         {
             get => (PdfArray)Dictionary.Resolve(PdfName.W2);
-            set => Dictionary[PdfName.W2] = value.Reference;
+            set => Dictionary[PdfName.W2] = value;
         }
 
         public PdfStream CIDToGIDMap
@@ -148,6 +147,8 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             get => parent;
         }
+
+        public override bool WillBeSubset => false;
 
         private void ReadWidths()
         {
@@ -245,7 +246,7 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @param cid CID
          */
-        public override SKPoint GetDefaultPositionVector(int cid)
+        public virtual SKPoint GetDefaultPositionVector(int cid)
         {
             return new SKPoint(GetWidthForCID(cid) / 2, dw2[0]);
         }
@@ -277,7 +278,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param code character code
          * @return w1y
          */
-        public override float GetVerticalDisplacementVectorY(int code)
+        public virtual float GetVerticalDisplacementVectorY(int code)
         {
             int cid = CodeToCID(code);
             if (verticalDisplacementY.TryGetValue(cid, out var w1y))
@@ -376,6 +377,21 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
             }
             return cid2gid;
+        }
+
+        public override void AddToSubset(int codePoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Subset()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override float GetStandard14Width(int code)
+        {
+            throw new NotImplementedException();
         }
     }
 }

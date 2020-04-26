@@ -44,7 +44,7 @@ namespace PdfClown.Samples.CLI
             PrimitiveComposer composer = new PrimitiveComposer(page);
             BlockComposer blockComposer = new BlockComposer(composer);
 
-            StandardType1Font font = new StandardType1Font(document, StandardType1Font.FamilyEnum.Courier, true, false);
+            PdfType1Font font = PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false);
 
             /*
               2.1. Goto-URI link.

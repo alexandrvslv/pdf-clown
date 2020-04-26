@@ -38,9 +38,10 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
     {
         //private static readonly Log LOG = LogFactory.getLog(GlyphRenderer.class);
 
-        private GlyphDescription glyphDescription;
+        private readonly IGlyphDescription glyphDescription;
+        private SKPath path;
 
-        public GlyphRenderer(GlyphDescription glyphDescription)
+        public GlyphRenderer(IGlyphDescription glyphDescription)
         {
             this.glyphDescription = glyphDescription;
         }
@@ -49,16 +50,21 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * Returns the path of the glyph.
          * @return the path
          */
-        public SKPath getPath()
+        public SKPath GetPath()
         {
-            Point[] points = Describe(glyphDescription);
-            return CalculatePath(points);
+            if (path == null)
+            {
+
+                Point[] points = Describe(glyphDescription);
+                path = CalculatePath(points);
+            }
+            return path;
         }
 
         /**
          * Set the points of a glyph from the GlyphDescription.
          */
-        private Point[] Describe(GlyphDescription gd)
+        private Point[] Describe(IGlyphDescription gd)
         {
             int endPtIndex = 0;
             int endPtOfContourIndex = -1;

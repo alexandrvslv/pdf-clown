@@ -53,21 +53,64 @@ namespace PdfClown.Documents.Contents.Fonts
     [PDF(VersionEnum.PDF10)]
     public class PdfType1Font : SimpleFont
     {
-        public static readonly PdfType1Font TIMES_ROMAN = new PdfType1Font("Times-Roman");
-        public static readonly PdfType1Font TIMES_BOLD = new PdfType1Font("Times-Bold");
-        public static readonly PdfType1Font TIMES_ITALIC = new PdfType1Font("Times-Italic");
-        public static readonly PdfType1Font TIMES_BOLD_ITALIC = new PdfType1Font("Times-BoldItalic");
-        public static readonly PdfType1Font HELVETICA = new PdfType1Font("Helvetica");
-        public static readonly PdfType1Font HELVETICA_BOLD = new PdfType1Font("Helvetica-Bold");
-        public static readonly PdfType1Font HELVETICA_OBLIQUE = new PdfType1Font("Helvetica-Oblique");
-        public static readonly PdfType1Font HELVETICA_BOLD_OBLIQUE = new PdfType1Font("Helvetica-BoldOblique");
-        public static readonly PdfType1Font COURIER = new PdfType1Font("Courier");
-        public static readonly PdfType1Font COURIER_BOLD = new PdfType1Font("Courier-Bold");
-        public static readonly PdfType1Font COURIER_OBLIQUE = new PdfType1Font("Courier-Oblique");
-        public static readonly PdfType1Font COURIER_BOLD_OBLIQUE = new PdfType1Font("Courier-BoldOblique");
-        public static readonly PdfType1Font SYMBOL = new PdfType1Font("Symbol");
-        public static readonly PdfType1Font ZAPF_DINGBATS = new PdfType1Font("ZapfDingbats");
+        public static readonly PdfType1Font TIMES_ROMAN = new PdfType1Font(null, "Times-Roman");
+        public static readonly PdfType1Font TIMES_BOLD = new PdfType1Font(null, "Times-Bold");
+        public static readonly PdfType1Font TIMES_ITALIC = new PdfType1Font(null, "Times-Italic");
+        public static readonly PdfType1Font TIMES_BOLD_ITALIC = new PdfType1Font(null, "Times-BoldItalic");
+        public static readonly PdfType1Font HELVETICA = new PdfType1Font(null, "Helvetica");
+        public static readonly PdfType1Font HELVETICA_BOLD = new PdfType1Font(null, "Helvetica-Bold");
+        public static readonly PdfType1Font HELVETICA_OBLIQUE = new PdfType1Font(null, "Helvetica-Oblique");
+        public static readonly PdfType1Font HELVETICA_BOLD_OBLIQUE = new PdfType1Font(null, "Helvetica-BoldOblique");
+        public static readonly PdfType1Font COURIER = new PdfType1Font(null, "Courier");
+        public static readonly PdfType1Font COURIER_BOLD = new PdfType1Font(null, "Courier-Bold");
+        public static readonly PdfType1Font COURIER_OBLIQUE = new PdfType1Font(null, "Courier-Oblique");
+        public static readonly PdfType1Font COURIER_BOLD_OBLIQUE = new PdfType1Font(null, "Courier-BoldOblique");
+        public static readonly PdfType1Font SYMBOL = new PdfType1Font(null, "Symbol");
+        public static readonly PdfType1Font ZAPF_DINGBATS = new PdfType1Font(null, "ZapfDingbats");
+        public enum FamilyEnum
+        {
+            Courier,
+            Helvetica,
+            Times,
+            Symbol,
+            ZapfDingbats
+        };
 
+        public static PdfType1Font Load(Document context, FamilyEnum family, bool bold, bool italic)
+        {
+            string fontName = family.ToString();
+            switch (family)
+            {
+                case (FamilyEnum.Symbol):
+                case (FamilyEnum.ZapfDingbats):
+                    break;
+                case (FamilyEnum.Times):
+                    if (bold)
+                    {
+                        fontName += "-Bold";
+                        if (italic)
+                        { fontName += "Italic"; }
+                    }
+                    else if (italic)
+                    { fontName += "-Italic"; }
+                    else
+                    { fontName += "-Roman"; }
+                    break;
+                default:
+                    if (bold)
+                    {
+                        fontName += "-Bold";
+                        if (italic)
+                        { fontName += "Oblique"; }
+                    }
+                    else if (italic)
+                    { fontName += "-Oblique"; }
+                    break;
+            }
+
+
+            return new PdfType1Font(context, fontName);
+        }
         // alternative names for glyphs which are commonly encountered
         private static readonly Dictionary<string, string> ALT_NAMES = new Dictionary<string, string>(StringComparer.Ordinal);
         private static readonly int PFB_START_MARKER = 0x80;
@@ -93,7 +136,6 @@ namespace PdfClown.Documents.Contents.Fonts
         private readonly Dictionary<int, byte[]> codeToBytesMap;
         private SKMatrix? fontMatrix;
         private SKRect? fontBBox;
-        private SKPath emptyPath;
         #endregion
 
         #region constructors
@@ -103,7 +145,7 @@ namespace PdfClown.Documents.Contents.Fonts
         internal PdfType1Font(PdfDirectObject baseObject) : base(baseObject)
         { }
 
-        public PdfType1Font(string baseFont) : base(baseFont)
+        public PdfType1Font(Document context, string baseFont) : base(context, baseFont)
         {
             Dictionary[PdfName.Subtype] = PdfName.Type1;
             Dictionary[PdfName.BaseFont] = PdfName.Get(baseFont);
@@ -126,7 +168,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
             // todo: could load the PFB font here if we wanted to support Standard 14 embedding
             type1font = null;
-            FontMapping<BaseFont> mapping = FontMappers.Instance.GetFontBoxFont(BaseFont, FontDescriptor);
+            FontMapping<BaseFont> mapping = FontMappers.Instance.GetBaseFont(BaseFont, FontDescriptor);
             genericFont = mapping.Font;
 
             if (mapping.IsFallback)
@@ -160,6 +202,7 @@ namespace PdfClown.Documents.Contents.Fonts
             fontMatrixTransform = SKMatrix.MakeIdentity();
             codeToBytesMap = new Dictionary<int, byte[]>();
         }
+
         public PdfType1Font(Document doc, Bytes.IInputStream pfbIn, Encoding encoding) : base(doc)
         {
             PdfType1FontEmbedder embedder = new PdfType1FontEmbedder(doc, Dictionary, pfbIn, encoding);
@@ -172,6 +215,7 @@ namespace PdfClown.Documents.Contents.Fonts
             fontMatrixTransform = SKMatrix.MakeIdentity();
             codeToBytesMap = new Dictionary<int, byte[]>();
         }
+
         public PdfType1Font(PdfDictionary fontDictionary)
             : base(fontDictionary)
         {
@@ -212,8 +256,11 @@ namespace PdfClown.Documents.Contents.Fonts
                         else
                         {
                             // the PFB embedded as two segments back-to-back
-                            byte[] segment1 = Arrays.copyOfRange(bytes, 0, length1);
-                            byte[] segment2 = Arrays.copyOfRange(bytes, length1, length1 + length2);
+                            byte[] segment1 = new byte[length1];
+                            Array.Copy(bytes, 0, segment1, 0, length1);
+
+                            byte[] segment2 = new byte[length2];
+                            Array.Copy(bytes, length1, segment2, 0, length2);
 
                             // empty streams are simply ignored
                             if (length1 > 0 && length2 > 0)
@@ -245,7 +292,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
             else
             {
-                FontMapping<BaseFont> mapping = FontMappers.Instance.GetFontBoxFont(BaseFont, fd);
+                FontMapping<BaseFont> mapping = FontMappers.Instance.GetBaseFont(BaseFont, fd);
                 genericFont = mapping.Font;
 
                 if (mapping.IsFallback)
@@ -366,7 +413,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 return bytes;
             }
 
-            string name = GlyphList.codePointToName(unicode);
+            string name = GlyphList.UnicodeToName(unicode);
             if (IsStandard14)
             {
                 // genericFont not needed, thus simplified code
@@ -423,14 +470,12 @@ namespace PdfClown.Documents.Contents.Fonts
             return p.X;
         }
 
-        override
-        public bool IsEmbedded
+        public override bool IsEmbedded
         {
             get => isEmbedded;
         }
 
-        override
-            public float AverageFontWidth
+        public override float AverageFontWidth
         {
             get
             {
@@ -511,9 +556,9 @@ namespace PdfClown.Documents.Contents.Fonts
             if (FontDescriptor != null)
             {
                 Rectangle bbox = FontDescriptor.FontBBox;
-                if (isNonZeroBoundingBox(bbox))
+                if (IsNonZeroBoundingBox(bbox))
                 {
-                    return bbox.ToRectangleF();
+                    return bbox.ToRect();
                 }
             }
             return genericFont.FontBBox;
@@ -543,7 +588,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
 
             // try unicode name
-            var unicodes = GlyphList.NameToCode(name);
+            var unicodes = GlyphList.ToUnicode(name);
             if (unicodes != null && unicodes.Value < char.MaxValue)
             {
                 string uniName = UniUtil.GetUniNameOfCodePoint((int)unicodes);
@@ -572,14 +617,13 @@ namespace PdfClown.Documents.Contents.Fonts
             return ".notdef";
         }
 
-        override
-        public SKPath GetPath(string name)
+        public override SKPath GetPath(string name)
         {
             // Acrobat does not draw .notdef for Type 1 fonts, see PDFBOX-2421
             // I suspect that it does do this for embedded fonts though, but this is untested
             if (name.Equals(".notdef") && !isEmbedded)
             {
-                return emptyPath;
+                return SKPathExtension.Empty;
             }
             else
             {

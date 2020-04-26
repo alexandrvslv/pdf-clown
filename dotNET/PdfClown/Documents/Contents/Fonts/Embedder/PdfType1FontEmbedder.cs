@@ -99,8 +99,8 @@ namespace PdfClown.Documents.Contents.Fonts
             FontDescriptor fd = new FontDescriptor();
             fd.FontName = type1.Name;
             fd.FontFamily = type1.FamilyName;
-            fd.NonSymbolic(!isSymbolic);
-            fd.Symbolic(isSymbolic);
+            fd.NonSymbolic = !isSymbolic;
+            fd.Symbolic = isSymbolic;
             fd.FontBBox = new Rectangle(type1.FontBBox);
             fd.ItalicAngle = type1.ItalicAngle;
             fd.Ascent = type1.FontBBox.Top;
@@ -118,21 +118,21 @@ namespace PdfClown.Documents.Contents.Fonts
 		 */
         public static FontDescriptor BuildFontDescriptor(FontMetrics metrics)
         {
-            bool isSymbolic = metrics.getEncodingScheme().equals("FontSpecific");
+            bool isSymbolic = metrics.EncodingScheme.Equals("FontSpecific", StringComparison.Ordinal);
 
             FontDescriptor fd = new FontDescriptor();
             fd.FontName = metrics.FontName;
             fd.FontFamily = metrics.FamilyName;
-            fd.NonSymbolic(!isSymbolic);
-            fd.Symbolic(isSymbolic);
+            fd.NonSymbolic = !isSymbolic;
+            fd.Symbolic = isSymbolic;
             fd.FontBBox = new Rectangle(metrics.FontBBox);
             fd.ItalicAngle = metrics.ItalicAngle;
             fd.Ascent = metrics.Ascender;
             fd.Descent = metrics.Descender;
             fd.CapHeight = metrics.CapHeight;
             fd.XHeight = metrics.XHeight;
-            fd.AverageWidth = metrics.AverageCharacterWidth;
-            fd.CharacterSet = metrics.CharacterSet;
+            fd.AvgWidth = metrics.GetAverageCharacterWidth();
+            fd.CharSet = metrics.CharacterSet;
             fd.StemV = 0; // for PDF/A
             return fd;
         }

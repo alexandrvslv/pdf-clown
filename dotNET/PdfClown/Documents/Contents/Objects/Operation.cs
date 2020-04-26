@@ -178,6 +178,10 @@ namespace PdfClown.Documents.Contents.Objects
                 return EndInlineImage.Value;
             else if (@operator.Equals(ApplyExtGState.OperatorKeyword, StringComparison.Ordinal))
                 return new ApplyExtGState(operands);
+            else if (@operator.Equals(CharProcWidth.OperatorKeyword, StringComparison.Ordinal))
+                return new CharProcWidth(operands);
+            else if (@operator.Equals(CharProcBBox.OperatorKeyword, StringComparison.Ordinal))
+                return new CharProcBBox(operands);
             else // No explicit operation implementation available.
                 return new GenericOperation(@operator, operands);
         }
