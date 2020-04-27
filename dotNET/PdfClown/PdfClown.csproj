@@ -22,7 +22,7 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
 
- 
+
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -116,17 +116,205 @@
       <Link>res\fonts\afm\ZapfDingbats.afm</Link>
       <LogicalName>fonts.afm.ZapfDingbats</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\83pv-RKSJ-H">
+      <Link>res\fonts\cmap\83pv-RKSJ-H</Link>
+      <LogicalName>fonts.cmap.83pv-RKSJ-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\90msp-RKSJ-H">
+      <Link>res\fonts\cmap\90msp-RKSJ-H</Link>
+      <LogicalName>fonts.cmap.90msp-RKSJ-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\90msp-RKSJ-V">
+      <Link>res\fonts\cmap\90msp-RKSJ-V</Link>
+      <LogicalName>fonts.cmap.90msp-RKSJ-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\90ms-RKSJ-H">
+      <Link>res\fonts\cmap\90ms-RKSJ-H</Link>
+      <LogicalName>fonts.cmap.90ms-RKSJ-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\90ms-RKSJ-V">
+      <Link>res\fonts\cmap\90ms-RKSJ-V</Link>
+      <LogicalName>fonts.cmap.90ms-RKSJ-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\90pv-RKSJ-H">
+      <Link>res\fonts\cmap\90pv-RKSJ-H</Link>
+      <LogicalName>fonts.cmap.90pv-RKSJ-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\90pv-RKSJ-V">
+      <Link>res\fonts\cmap\90pv-RKSJ-V</Link>
+      <LogicalName>fonts.cmap.90pv-RKSJ-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Add-RKSJ-H">
+      <Link>res\fonts\cmap\Add-RKSJ-H</Link>
+      <LogicalName>fonts.cmap.Add-RKSJ-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Add-RKSJ-V">
+      <Link>res\fonts\cmap\Add-RKSJ-V</Link>
+      <LogicalName>fonts.cmap.Add-RKSJ-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-0">
+      <Link>res\fonts\cmap\Adobe-CNS1-0</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-0</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-1">
+      <Link>res\fonts\cmap\Adobe-CNS1-1</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-1</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-2">
+      <Link>res\fonts\cmap\Adobe-CNS1-2</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-3">
+      <Link>res\fonts\cmap\Adobe-CNS1-3</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-3</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-4">
+      <Link>res\fonts\cmap\Adobe-CNS1-4</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-4</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-5">
+      <Link>res\fonts\cmap\Adobe-CNS1-5</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-5</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-6">
+      <Link>res\fonts\cmap\Adobe-CNS1-6</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-6</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-CNS1-UCS2">
+      <Link>res\fonts\cmap\Adobe-CNS1-UCS2</Link>
+      <LogicalName>fonts.cmap.Adobe-CNS1-UCS2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-GB1-0">
+      <Link>res\fonts\cmap\Adobe-GB1-0</Link>
+      <LogicalName>fonts.cmap.Adobe-GB1-0</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-GB1-1">
+      <Link>res\fonts\cmap\Adobe-GB1-1</Link>
+      <LogicalName>fonts.cmap.Adobe-GB1-1</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-GB1-2">
+      <Link>res\fonts\cmap\Adobe-GB1-2</Link>
+      <LogicalName>fonts.cmap.Adobe-GB1-2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-GB1-3">
+      <Link>res\fonts\cmap\Adobe-GB1-3</Link>
+      <LogicalName>fonts.cmap.Adobe-GB1-3</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-GB1-4">
+      <Link>res\fonts\cmap\Adobe-GB1-4</Link>
+      <LogicalName>fonts.cmap.Adobe-GB1-4</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-GB1-5">
+      <Link>res\fonts\cmap\Adobe-GB1-5</Link>
+      <LogicalName>fonts.cmap.Adobe-GB1-5</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-GB1-UCS2">
       <Link>res\fonts\cmap\Adobe-GB1-UCS2</Link>
       <LogicalName>fonts.cmap.Adobe-GB1-UCS2</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Identity-H">
-      <Link>res\fonts\cmap\Identity-H</Link>
-      <LogicalName>fonts.cmap.Identity-H</LogicalName>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-0">
+      <Link>res\fonts\cmap\Adobe-Japan1-0</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-0</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Identity-V">
-      <Link>res\fonts\cmap\Identity-V</Link>
-      <LogicalName>fonts.cmap.Identity-V</LogicalName>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-1">
+      <Link>res\fonts\cmap\Adobe-Japan1-1</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-1</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-2">
+      <Link>res\fonts\cmap\Adobe-Japan1-2</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-3">
+      <Link>res\fonts\cmap\Adobe-Japan1-3</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-3</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-4">
+      <Link>res\fonts\cmap\Adobe-Japan1-4</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-4</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-5">
+      <Link>res\fonts\cmap\Adobe-Japan1-5</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-5</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-6">
+      <Link>res\fonts\cmap\Adobe-Japan1-6</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-6</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-7">
+      <Link>res\fonts\cmap\Adobe-Japan1-7</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-7</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan1-UCS2">
+      <Link>res\fonts\cmap\Adobe-Japan1-UCS2</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan1-UCS2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Japan2-0">
+      <Link>res\fonts\cmap\Adobe-Japan2-0</Link>
+      <LogicalName>fonts.cmap.Adobe-Japan2-0</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Korea1-0">
+      <Link>res\fonts\cmap\Adobe-Korea1-0</Link>
+      <LogicalName>fonts.cmap.Adobe-Korea1-0</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Korea1-1">
+      <Link>res\fonts\cmap\Adobe-Korea1-1</Link>
+      <LogicalName>fonts.cmap.Adobe-Korea1-1</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Korea1-2">
+      <Link>res\fonts\cmap\Adobe-Korea1-2</Link>
+      <LogicalName>fonts.cmap.Adobe-Korea1-2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Adobe-Korea1-UCS2">
+      <Link>res\fonts\cmap\Adobe-Korea1-UCS2</Link>
+      <LogicalName>fonts.cmap.Adobe-Korea1-UCS2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\B5pc-H">
+      <Link>res\fonts\cmap\B5pc-H</Link>
+      <LogicalName>fonts.cmap.B5pc-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\B5pc-V">
+      <Link>res\fonts\cmap\B5pc-V</Link>
+      <LogicalName>fonts.cmap.B5pc-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\CNS-EUC-H">
+      <Link>res\fonts\cmap\CNS-EUC-H</Link>
+      <LogicalName>fonts.cmap.CNS-EUC-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\CNS-EUC-V">
+      <Link>res\fonts\cmap\CNS-EUC-V</Link>
+      <LogicalName>fonts.cmap.CNS-EUC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\ETen-B5-H">
+      <Link>res\fonts\cmap\ETen-B5-H</Link>
+      <LogicalName>fonts.cmap.ETen-B5-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\ETen-B5-V">
+      <Link>res\fonts\cmap\ETen-B5-V</Link>
+      <LogicalName>fonts.cmap.ETen-B5-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\ETenms-B5-H">
+      <Link>res\fonts\cmapETenms-B5-H</Link>
+      <LogicalName>fonts.cmap.ETenms-B5-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\ETenms-B5-V">
+      <Link>res\fonts\cmap\ETenms-B5-V</Link>
+      <LogicalName>fonts.cmap.ETenms-B5-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\EUC-H">
+      <Link>res\fonts\cmap\EUC-H</Link>
+      <LogicalName>fonts.cmap.EUC-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\EUC-V">
+      <Link>res\fonts\cmap\EUC-V</Link>
+      <LogicalName>fonts.cmap.EUC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Ext-RKSJ-H">
+      <Link>res\fonts\cmap\Ext-RKSJ-H</Link>
+      <LogicalName>fonts.cmap.Ext-RKSJ-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Ext-RKSJ-V">
+      <Link>res\fonts\cmap\Ext-RKSJ-V</Link>
+      <LogicalName>fonts.cmap.Ext-RKSJ-V</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GB-EUC-H">
       <Link>res\fonts\cmap\GB-EUC-H</Link>
@@ -136,6 +324,14 @@
       <Link>res\fonts\cmap\GB-EUC-V</Link>
       <LogicalName>fonts.cmap.GB-EUC-V</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBK2K-H">
+      <Link>res\fonts\cmap\GBK2K-H</Link>
+      <LogicalName>fonts.cmap.GBK2K-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBK2K-V">
+      <Link>res\fonts\cmap\GBK2K-V</Link>
+      <LogicalName>fonts.cmap.GBK2K-V</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBK-EUC-H">
       <Link>res\fonts\cmap\GBK-EUC-H</Link>
       <LogicalName>fonts.cmap.GBK-EUC-H</LogicalName>
@@ -143,6 +339,150 @@
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBK-EUC-V">
       <Link>res\fonts\cmap\GBK-EUC-V</Link>
       <LogicalName>fonts.cmap.GBK-EUC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBKp-EUC-H">
+      <Link>res\fonts\cmap\GBKp-EUC-H</Link>
+      <LogicalName>fonts.cmap.GBKp-EUC-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBKp-EUC-V">
+      <Link>res\fonts\cmap\GBKp-EUC-V</Link>
+      <LogicalName>fonts.cmap.GBKp-EUC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBpc-EUC-H">
+      <Link>res\fonts\cmap\GBpc-EUC-H</Link>
+      <LogicalName>fonts.cmap.GBpc-EUC-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\GBpc-EUC-V">
+      <Link>res\fonts\cmap\GBpc-EUC-V</Link>
+      <LogicalName>fonts.cmap.GBpc-EUC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\H">
+      <Link>res\fonts\cmap\H</Link>
+      <LogicalName>fonts.cmap.H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\HKscs-B5-H">
+      <Link>res\fonts\cmap\HKscs-B5-H</Link>
+      <LogicalName>fonts.cmap.HKscs-B5-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\HKscs-B5-V">
+      <Link>res\fonts\cmap\HKscs-B5-V</Link>
+      <LogicalName>fonts.cmap.HKscs-B5-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Identity-H">
+      <Link>res\fonts\cmap\Identity-H</Link>
+      <LogicalName>fonts.cmap.Identity-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\Identity-V">
+      <Link>res\fonts\cmap\Identity-V</Link>
+      <LogicalName>fonts.cmap.Identity-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSC-EUC-H">
+      <Link>res\fonts\cmap\KSC-EUC-H</Link>
+      <LogicalName>fonts.cmap.KSC-EUC-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSC-EUC-V">
+      <Link>res\fonts\cmap\KSC-EUC-V</Link>
+      <LogicalName>fonts.cmap.KSC-EUC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSCms-UHC-H">
+      <Link>res\fonts\cmap\KSCms-UHC-H</Link>
+      <LogicalName>fonts.cmap.KSCms-UHC-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSCms-UHC-HW-H">
+      <Link>res\fonts\cmap\KSCms-UHC-HW-H</Link>
+      <LogicalName>fonts.cmap.KSCms-UHC-HW-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSCms-UHC-HW-V">
+      <Link>res\fonts\cmap\KSCms-UHC-HW-V</Link>
+      <LogicalName>fonts.cmap.KSCms-UHC-HW-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSCms-UHC-V">
+      <Link>res\fonts\cmap\KSCms-UHC-V</Link>
+      <LogicalName>fonts.cmap.KSCms-UHC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSCpc-EUC-H">
+      <Link>res\fonts\cmap\KSCpc-EUC-H</Link>
+      <LogicalName>fonts.cmap.KSCpc-EUC-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\KSCpc-EUC-V">
+      <Link>res\fonts\cmap\KSCpc-EUC-V</Link>
+      <LogicalName>fonts.cmap.KSCpc-EUC-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniCNS-UCS2-H">
+      <Link>res\fonts\cmap\UniCNS-UCS2-H</Link>
+      <LogicalName>fonts.cmap.UniCNS-UCS2-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniCNS-UCS2-V">
+      <Link>res\fonts\cmap\UniCNS-UCS2-V</Link>
+      <LogicalName>fonts.cmap.UniCNS-UCS2-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniCNS-UTF16-H">
+      <Link>res\fonts\cmap\UniCNS-UTF16-H</Link>
+      <LogicalName>fonts.cmap.UniCNS-UTF16-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniCNS-UTF16-V">
+      <Link>res\fonts\cmap\UniCNS-UTF16-V</Link>
+      <LogicalName>fonts.cmap.UniCNS-UTF16-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniGB-UCS2-H">
+      <Link>res\fonts\cmap\UniGB-UCS2-H</Link>
+      <LogicalName>fonts.cmap.UniGB-UCS2-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniGB-UCS2-V">
+      <Link>res\fonts\cmap\UniGB-UCS2-V</Link>
+      <LogicalName>fonts.cmap.UniGB-UCS2-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniGB-UTF16-H">
+      <Link>res\fonts\cmap\UniGB-UTF16-H</Link>
+      <LogicalName>fonts.cmap.UniGB-UTF16-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniGB-UTF16-V">
+      <Link>res\fonts\cmap\UniGB-UTF16-V</Link>
+      <LogicalName>fonts.cmap.UniGB-UTF16-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniJIS-UCS2-H">
+      <Link>res\fonts\cmap\UniJIS-UCS2-H</Link>
+      <LogicalName>fonts.cmap.UniJIS-UCS2-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniJIS-UCS2-HW-H">
+      <Link>res\fonts\cmap\UniJIS-UCS2-HW-H</Link>
+      <LogicalName>fonts.cmap.UniJIS-UCS2-HW-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniJIS-UCS2-HW-V">
+      <Link>res\fonts\cmap\UniJIS-UCS2-HW-V</Link>
+      <LogicalName>fonts.cmap.UniJIS-UCS2-HW-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniJIS-UCS2-V">
+      <Link>res\fonts\cmap\UniJIS-UCS2-V</Link>
+      <LogicalName>fonts.cmap.UniJIS-UCS2-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniJIS-UTF16-H">
+      <Link>res\fonts\cmap\UniJIS-UTF16-H</Link>
+      <LogicalName>fonts.cmap.UniJIS-UTF16-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniJIS-UTF16-V">
+      <Link>res\fonts\cmap\UniJIS-UTF16-V</Link>
+      <LogicalName>fonts.cmap.UniJIS-UTF16-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniKS-UCS2-H">
+      <Link>res\fonts\cmap\UniKS-UCS2-H</Link>
+      <LogicalName>fonts.cmap.UniKS-UCS2-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniKS-UCS2-V">
+      <Link>res\fonts\cmap\UniKS-UCS2-V</Link>
+      <LogicalName>fonts.cmap.UniKS-UCS2-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniKS-UTF16-H">
+      <Link>res\fonts\cmapUniKS-UTF16-H</Link>
+      <LogicalName>fonts.cmap.UniKS-UTF16-H</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniKS-UTF16-V">
+      <Link>res\fonts\cmap\UniKS-UTF16-V</Link>
+      <LogicalName>fonts.cmap.UniKS-UTF16-V</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\V">
+      <Link>res\fonts\cmap\V</Link>
+      <LogicalName>fonts.cmap.V</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cff\ExpertCharset">
       <Link>res\fonts\cff\ExpertCharset</Link>
@@ -175,86 +515,6 @@
   <PropertyGroup>
     <RestoreSources>../FreeImage.NETCore/Package;$(RestoreSources);</RestoreSources>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="Documents\Contents\Fonts\AFM\AFMParser.cs" />
-    <None Include="Documents\Contents\Fonts\AFM\CharMetric.cs" />
-    <None Include="Documents\Contents\Fonts\AFM\Composite.cs" />
-    <None Include="Documents\Contents\Fonts\AFM\CompositePart.cs" />
-    <None Include="Documents\Contents\Fonts\AFM\FontMetrics.cs" />
-    <None Include="Documents\Contents\Fonts\AFM\KernPair.cs" />
-    <None Include="Documents\Contents\Fonts\AFM\Ligature.cs" />
-    <None Include="Documents\Contents\Fonts\AFM\TrackKern.cs" />
-    <None Include="Documents\Contents\Fonts\Autodetect\IFontDirFinder.cs" />
-    <None Include="Documents\Contents\Fonts\Autodetect\FontFileFinder.cs" />
-    <None Include="Documents\Contents\Fonts\Autodetect\MacFontDirFinder.cs" />
-    <None Include="Documents\Contents\Fonts\Autodetect\NativeFontDirFinder.cs" />
-    <None Include="Documents\Contents\Fonts\Autodetect\UnixFontDirFinder.cs" />
-    <None Include="Documents\Contents\Fonts\Autodetect\WindowsFontDirFinder.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFCharset.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFCIDFont.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFDataInput.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFEncoding.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFExpertCharset.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFExpertEncoding.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFExpertSubsetCharset.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFFont.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFISOAdobeCharset.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFOperator.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFParser.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFStandardEncoding.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFStandardString.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CFFType1Font.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CharStringCommand.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CharStringHandler.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\CIDKeyedType2CharString.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\DataInput.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\FDSelect.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\Type1CharString.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\Type1CharStringParser.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\Type2CharString.cs" />
-    <None Include="Documents\Contents\Fonts\CFF\Type2CharStringParser.cs" />
-    <None Include="Documents\Contents\Fonts\CIDFont\CIDFont.cs" />
-    <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType0.cs" />
-    <None Include="Documents\Contents\Fonts\CIDFont\CIDFontType2.cs" />
-    <None Include="Documents\Contents\Fonts\CIDFont\UniUtil.cs" />
-    <None Include="Documents\Contents\Fonts\CMap\ToUnicodeWriter.cs" />
-    <None Include="Documents\Contents\Fonts\Embedder\PdfCIDFontType2Embedder.cs" />
-    <None Include="Documents\Contents\Fonts\CIDFont\CIDSystemInfo.cs" />
-    <None Include="Documents\Contents\Fonts\CMap\CIDRange.cs" />
-    <None Include="Documents\Contents\Fonts\CMap\CodespaceRange.cs" />
-    <None Include="Documents\Contents\Fonts\Embedder\PdfTrueTypeFontEmbedder.cs" />
-    <None Include="Documents\Contents\Fonts\Embedder\PdfType1FontEmbedder.cs" />
-    <None Include="Documents\Contents\Fonts\Embedder\TrueTypeEmbedder.cs" />
-    <None Include="Documents\Contents\Fonts\IEncodedFont.cs" />
-    <None Include="Documents\Contents\Fonts\Encoding\BuiltInEncoding.cs" />
-    <None Include="Documents\Contents\Fonts\Encoding\DictionaryEncoding.cs" />
-    <None Include="Documents\Contents\Fonts\Encoding\MacExpertEncoding.cs" />
-    <None Include="Documents\Contents\Fonts\Encoding\MacOSRomanEncoding.cs" />
-    <None Include="Documents\Contents\Fonts\Encoding\Type1Encoding.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\CIDFontMapping.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FileSystemFontProvider.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FontCache.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FontFormat.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FontInfo.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\IFontMapper.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FontMapperImpl.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FontMappers.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FontMapping.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\FontProvider.cs" />
-    <None Include="Documents\Contents\Fonts\Mapper\Standard14Fonts.cs" />
-    <None Include="Documents\Contents\Fonts\Panose\Panose.cs" />
-    <None Include="Documents\Contents\Fonts\Panose\PanoseClassification.cs" />
-    <None Include="Documents\Contents\Fonts\PdfType1CFont.cs" />
-    <None Include="Documents\Contents\Fonts\PdfType3CharProc.cs" />
-    <None Include="Documents\Contents\Fonts\TTF\GSUB\CompoundCharacterTokenizer.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\DamagedFontException.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\PfbParser.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\Token.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\IType1CharStringReader.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\Type1Font.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\Type1Lexer.cs" />
-    <None Include="Documents\Contents\Fonts\Type1\Type1Parser.cs" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
     <PackageReference Include="SkiaSharp" Version="1.68.1.1" />

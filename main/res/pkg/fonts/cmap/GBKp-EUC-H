@@ -1,9 +1,9 @@
 %!PS-Adobe-3.0 Resource-CMap
 %%DocumentNeededResources: ProcSet (CIDInit)
 %%IncludeResource: ProcSet (CIDInit)
-%%BeginResource: CMap (GBK-EUC-H)
-%%Title: (GBK-EUC-H Adobe GB1 2)
-%%Version: 11.003
+%%BeginResource: CMap (GBKp-EUC-H)
+%%Title: (GBKp-EUC-H Adobe GB1 2)
+%%Version: 1.002
 %%Copyright: -----------------------------------------------------------
 %%Copyright: Copyright 1990-2009 Adobe Systems Incorporated.
 %%Copyright: All rights reserved.
@@ -54,11 +54,11 @@ begincmap
   /Supplement 2 def
 end def
 
-/CMapName /GBK-EUC-H def
-/CMapVersion 11.003 def
+/CMapName /GBKp-EUC-H def
+/CMapVersion 1.002 def
 /CMapType 1 def
 
-/XUID [1 10 25377] def
+/XUID [1 10 25455] def
 
 /WMode 0 def
 
@@ -68,12 +68,11 @@ end def
 endcodespacerange
 
 1 beginnotdefrange
-<00> <1f> 7716
+<00> <1f> 1
 endnotdefrange
 
 100 begincidrange
-<20> <20> 7716
-<21> <7e> 814
+<20> <7e> 1
 <8140> <8178> 10072
 <8179> <8179> 8281
 <817a> <817e> 10129
@@ -172,10 +171,10 @@ endnotdefrange
 <83ba> <83ba> 7909
 <83bb> <83c8> 10523
 <83c9> <83c9> 8229
+<83ca> <83f5> 10537
 endcidrange
 
 100 begincidrange
-<83ca> <83f5> 10537
 <83f6> <83f6> 7887
 <83f7> <83fe> 10581
 <8440> <844f> 10589
@@ -275,10 +274,10 @@ endcidrange
 <86dc> <86dc> 8408
 <86dd> <86dd> 8896
 <86de> <86e0> 11077
+<86e1> <86e1> 8303
 endcidrange
 
 100 begincidrange
-<86e1> <86e1> 8303
 <86e2> <86e7> 11080
 <86e8> <86e8> 8609
 <86e9> <86ed> 11086
@@ -378,10 +377,10 @@ endcidrange
 <88cc> <88cc> 8843
 <88cd> <88d3> 11386
 <88d4> <88d4> 8069
+<88d5> <88d6> 11393
 endcidrange
 
 100 begincidrange
-<88d5> <88d6> 11393
 <88d7> <88d7> 8997
 <88d8> <88de> 11395
 <88df> <88df> 9004
@@ -481,10 +480,10 @@ endcidrange
 <8bba> <8bbd> 11887
 <8bbe> <8bbe> 9208
 <8bbf> <8bc5> 11891
+<8bc6> <8bc6> 9210
 endcidrange
 
 100 begincidrange
-<8bc6> <8bc6> 9210
 <8bc7> <8bc7> 11898
 <8bc8> <8bc8> 9214
 <8bc9> <8bc9> 8104
@@ -584,10 +583,10 @@ endcidrange
 <8e9b> <8e9b> 8515
 <8e9c> <8e9e> 12374
 <8e9f> <8e9f> 8489
+<8ea0> <8ea3> 12377
 endcidrange
 
 100 begincidrange
-<8ea0> <8ea3> 12377
 <8ea4> <8ea4> 8823
 <8ea5> <8ea6> 12381
 <8ea7> <8ea7> 7847
@@ -687,10 +686,10 @@ endcidrange
 <915e> <9160> 12830
 <9161> <9161> 9148
 <9162> <9162> 12833
+<9163> <9163> 8427
 endcidrange
 
 100 begincidrange
-<9163> <9163> 8427
 <9164> <916d> 12834
 <916e> <916e> 8754
 <916f> <9175> 12844
@@ -790,10 +789,10 @@ endcidrange
 <93c6> <93c6> 8194
 <93c7> <93ce> 13261
 <93cf> <93cf> 8339
+<93d0> <93d6> 13269
 endcidrange
 
 100 begincidrange
-<93d0> <93d6> 13269
 <93d7> <93d7> 9055
 <93d8> <93da> 13276
 <93db> <93db> 7852
@@ -893,10 +892,10 @@ endcidrange
 <95bb> <95ce> 13573
 <95cf> <95cf> 9383
 <95d0> <95d0> 13593
+<95d1> <95d1> 9862
 endcidrange
 
 100 begincidrange
-<95d1> <95d1> 9862
 <95d2> <95d2> 9382
 <95d3> <95d3> 13594
 <95d4> <95d4> 8654
@@ -996,10 +995,10 @@ endcidrange
 <9980> <9984> 14224
 <9985> <9985> 9881
 <9986> <9988> 14229
+<9989> <9989> 9346
 endcidrange
 
 100 begincidrange
-<9989> <9989> 9346
 <998a> <998d> 14232
 <998e> <998e> 8353
 <998f> <9990> 14236
@@ -1099,10 +1098,10 @@ endcidrange
 <9c5b> <9c5b> 14706
 <9c5c> <9c5c> 8404
 <9c5d> <9c74> 14707
+<9c75> <9c75> 8607
 endcidrange
 
 100 begincidrange
-<9c75> <9c75> 8607
 <9c76> <9c78> 14731
 <9c79> <9c79> 7782
 <9c7a> <9c7e> 14734
@@ -1202,10 +1201,10 @@ endcidrange
 <9e46> <9e47> 15013
 <9e48> <9e48> 8593
 <9e49> <9e49> 7760
+<9e4a> <9e51> 15015
 endcidrange
 
 100 begincidrange
-<9e4a> <9e51> 15015
 <9e52> <9e52> 8092
 <9e53> <9e53> 15023
 <9e54> <9e54> 9178
@@ -1305,10 +1304,10 @@ endcidrange
 <a062> <a062> 15370
 <a063> <a063> 9434
 <a064> <a070> 15371
+<a071> <a071> 8521
 endcidrange
 
 100 begincidrange
-<a071> <a071> 8521
 <a072> <a073> 15384
 <a074> <a074> 8262
 <a075> <a07e> 15386
@@ -1408,10 +1407,10 @@ endcidrange
 <ad40> <ad48> 15776
 <ad49> <ad49> 9313
 <ad4a> <ad5d> 15785
+<ad5e> <ad5e> 9307
 endcidrange
 
 100 begincidrange
-<ad5e> <ad5e> 9307
 <ad5f> <ad60> 15805
 <ad61> <ad61> 9314
 <ad62> <ad67> 15807
@@ -1511,10 +1510,10 @@ endcidrange
 <b241> <b241> 9455
 <b242> <b266> 16206
 <b267> <b267> 9454
+<b268> <b26c> 16243
 endcidrange
 
 100 begincidrange
-<b268> <b26c> 16243
 <b26d> <b26d> 8308
 <b26e> <b273> 16248
 <b274> <b274> 9863
@@ -1614,10 +1613,10 @@ endcidrange
 <b844> <b844> 8582
 <b845> <b845> 16738
 <b846> <b846> 8429
+<b847> <b84c> 16739
 endcidrange
 
 100 begincidrange
-<b847> <b84c> 16739
 <b84d> <b84d> 9657
 <b84e> <b850> 16745
 <b851> <b851> 8170
@@ -1717,10 +1716,10 @@ endcidrange
 <bc6d> <bc6d> 8136
 <bc6e> <bc6e> 17115
 <bc6f> <bc6f> 8059
+<bc70> <bc70> 17116
 endcidrange
 
 100 begincidrange
-<bc70> <bc70> 17116
 <bc71> <bc71> 9245
 <bc72> <bc72> 17117
 <bc73> <bc73> 8780
@@ -1820,10 +1819,10 @@ endcidrange
 <be56> <be56> 7961
 <be57> <be57> 8588
 <be58> <be58> 7744
+<be59> <be59> 8883
 endcidrange
 
 100 begincidrange
-<be59> <be59> 8883
 <be5a> <be5c> 17223
 <be5d> <be5d> 8287
 <be5e> <be5e> 9272
@@ -1923,10 +1922,10 @@ endcidrange
 <bf97> <bf97> 8841
 <bf98> <bf98> 8470
 <bf99> <bf9c> 17319
+<bf9d> <bf9d> 9300
 endcidrange
 
 100 begincidrange
-<bf9d> <bf9d> 9300
 <bf9e> <bfa0> 17323
 <bfa1> <bffe> 2350
 <c040> <c040> 8443
@@ -2026,10 +2025,10 @@ endcidrange
 <c380> <c383> 17626
 <c384> <c384> 9415
 <c385> <c39a> 17630
+<c39b> <c39b> 8825
 endcidrange
 
 100 begincidrange
-<c39b> <c39b> 8825
 <c39c> <c3a0> 17652
 <c3a1> <c3fe> 2726
 <c440> <c448> 17657
@@ -2129,10 +2128,10 @@ endcidrange
 <c888> <c891> 18068
 <c892> <c892> 9031
 <c893> <c893> 18078
+<c894> <c894> 8595
 endcidrange
 
 100 begincidrange
-<c894> <c894> 8595
 <c895> <c898> 18079
 <c899> <c899> 9889
 <c89a> <c89c> 18083
@@ -2232,10 +2231,10 @@ endcidrange
 <cc4b> <cc4b> 8531
 <cc4c> <cc4e> 18343
 <cc4f> <cc4f> 8379
+<cc50> <cc5b> 18346
 endcidrange
 
 100 begincidrange
-<cc50> <cc5b> 18346
 <cc5c> <cc5c> 9050
 <cc5d> <cc5f> 18358
 <cc60> <cc60> 9046
@@ -2335,10 +2334,10 @@ endcidrange
 <d0a1> <d0fe> 3948
 <d140> <d154> 18767
 <d155> <d155> 9713
+<d156> <d158> 18788
 endcidrange
 
 100 begincidrange
-<d156> <d158> 18788
 <d159> <d159> 8204
 <d15a> <d160> 18791
 <d161> <d161> 7768
@@ -2438,10 +2437,10 @@ endcidrange
 <d39e> <d39e> 7906
 <d39f> <d39f> 19002
 <d3a0> <d3a0> 8690
+<d3a1> <d3fe> 4230
 endcidrange
 
 100 begincidrange
-<d3a1> <d3fe> 4230
 <d440> <d440> 19003
 <d441> <d441> 8528
 <d442> <d444> 19004
@@ -2541,10 +2540,10 @@ endcidrange
 <d56f> <d571> 19090
 <d572> <d572> 8961
 <d573> <d574> 19093
+<d575> <d575> 7925
 endcidrange
 
 100 begincidrange
-<d575> <d575> 7925
 <d576> <d577> 19095
 <d578> <d578> 8728
 <d579> <d57a> 19097
@@ -2644,10 +2643,10 @@ endcidrange
 <d6a1> <d6fe> 4512
 <d740> <d742> 19179
 <d743> <d743> 8840
+<d744> <d747> 19182
 endcidrange
 
 100 begincidrange
-<d744> <d747> 19182
 <d748> <d748> 8982
 <d749> <d749> 8043
 <d74a> <d74f> 19186
@@ -2747,10 +2746,10 @@ endcidrange
 <d968> <d96b> 19349
 <d96c> <d96c> 9395
 <d96d> <d96d> 19353
+<d96e> <d96e> 7839
 endcidrange
 
 100 begincidrange
-<d96e> <d96e> 7839
 <d96f> <d96f> 19354
 <d970> <d970> 8472
 <d971> <d971> 19355
@@ -2850,10 +2849,10 @@ endcidrange
 <dc8b> <dc8d> 19613
 <dc8e> <dc8e> 8672
 <dc8f> <dc8f> 19616
+<dc90> <dc90> 9356
 endcidrange
 
 100 begincidrange
-<dc90> <dc90> 9356
 <dc91> <dc96> 19617
 <dc97> <dc97> 9357
 <dc98> <dc9a> 19623
@@ -2953,10 +2952,10 @@ endcidrange
 <df4e> <df5b> 19783
 <df5c> <df5c> 8787
 <df5d> <df5d> 19797
+<df5e> <df5e> 7998
 endcidrange
 
 100 begincidrange
-<df5e> <df5e> 7998
 <df5f> <df5f> 7846
 <df60> <df60> 8590
 <df61> <df63> 19798
@@ -3056,10 +3055,10 @@ endcidrange
 <e242> <e242> 20005
 <e243> <e243> 7917
 <e244> <e24e> 20006
+<e24f> <e24f> 9469
 endcidrange
 
 100 begincidrange
-<e24f> <e24f> 9469
 <e250> <e250> 20017
 <e251> <e251> 9465
 <e252> <e252> 20018
@@ -3159,10 +3158,10 @@ endcidrange
 <e396> <e398> 20124
 <e399> <e399> 9501
 <e39a> <e39b> 20127
+<e39c> <e39c> 9525
 endcidrange
 
 100 begincidrange
-<e39c> <e39c> 9525
 <e39d> <e39d> 20129
 <e39e> <e39e> 8717
 <e39f> <e39f> 9510
@@ -3262,10 +3261,10 @@ endcidrange
 <e56e> <e56e> 9527
 <e56f> <e574> 20218
 <e575> <e575> 9546
+<e576> <e576> 8632
 endcidrange
 
 100 begincidrange
-<e576> <e576> 8632
 <e577> <e577> 20224
 <e578> <e578> 9550
 <e579> <e57a> 20225
@@ -3365,10 +3364,10 @@ endcidrange
 <e768> <e768> 9585
 <e769> <e769> 20348
 <e76a> <e76a> 9591
+<e76b> <e773> 20349
 endcidrange
 
 100 begincidrange
-<e76b> <e773> 20349
 <e774> <e774> 9506
 <e775> <e77b> 20358
 <e77c> <e77c> 9523
@@ -3468,10 +3467,10 @@ endcidrange
 <e979> <e979> 7915
 <e97a> <e97b> 20501
 <e97c> <e97c> 7989
+<e97d> <e97d> 8330
 endcidrange
 
 100 begincidrange
-<e97d> <e97d> 8330
 <e97e> <e97e> 20503
 <e980> <e980> 9159
 <e981> <e981> 9161
@@ -3571,10 +3570,10 @@ endcidrange
 <ec56> <ec56> 9741
 <ec57> <ec59> 20699
 <ec5a> <ec5a> 9740
+<ec5b> <ec5b> 20702
 endcidrange
 
 100 begincidrange
-<ec5b> <ec5b> 20702
 <ec5c> <ec5c> 9742
 <ec5d> <ec5f> 20703
 <ec60> <ec60> 8242
@@ -3674,10 +3673,10 @@ endcidrange
 <ee94> <ee94> 9680
 <ee95> <ee96> 20896
 <ee97> <ee97> 9682
+<ee98> <ee98> 20898
 endcidrange
 
 100 begincidrange
-<ee98> <ee98> 20898
 <ee99> <ee99> 7978
 <ee9a> <ee9c> 20899
 <ee9d> <ee9d> 7794
@@ -3777,10 +3776,10 @@ endcidrange
 <f087> <f087> 8042
 <f088> <f088> 8441
 <f089> <f08a> 21017
+<f08b> <f08b> 9830
 endcidrange
 
 100 begincidrange
-<f08b> <f08b> 9830
 <f08c> <f08f> 21019
 <f090> <f090> 9831
 <f091> <f091> 21023
@@ -3880,10 +3879,10 @@ endcidrange
 <f34a> <f34a> 9242
 <f34b> <f34b> 9241
 <f34c> <f34f> 21187
+<f350> <f350> 9228
 endcidrange
 
 100 begincidrange
-<f350> <f350> 9228
 <f351> <f360> 21191
 <f361> <f361> 7721
 <f362> <f373> 21207
@@ -3983,10 +3982,10 @@ endcidrange
 <f655> <f657> 21431
 <f658> <f658> 9796
 <f659> <f660> 21434
+<f661> <f661> 9785
 endcidrange
 
 100 begincidrange
-<f661> <f661> 9785
 <f662> <f662> 21442
 <f663> <f663> 9804
 <f664> <f66b> 21443
@@ -4086,10 +4085,10 @@ endcidrange
 <f886> <f886> 8687
 <f887> <f88c> 21619
 <f88d> <f88d> 9610
+<f88e> <f88e> 9612
 endcidrange
 
 100 begincidrange
-<f88e> <f88e> 9612
 <f88f> <f898> 21625
 <f899> <f899> 8007
 <f89a> <f89c> 21635
@@ -4189,10 +4188,10 @@ endcidrange
 <fb9c> <fb9c> 8305
 <fb9d> <fb9e> 21874
 <fb9f> <fb9f> 9719
+<fba0> <fba0> 21876
 endcidrange
 
-71 begincidrange
-<fba0> <fba0> 21876
+70 begincidrange
 <fc40> <fc43> 21877
 <fc44> <fc44> 9878
 <fc45> <fc48> 21881

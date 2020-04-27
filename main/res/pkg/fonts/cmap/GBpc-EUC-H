@@ -1,8 +1,8 @@
 %!PS-Adobe-3.0 Resource-CMap
 %%DocumentNeededResources: ProcSet (CIDInit)
 %%IncludeResource: ProcSet (CIDInit)
-%%BeginResource: CMap (GB-EUC-H)
-%%Title: (GB-EUC-H Adobe GB1 0)
+%%BeginResource: CMap (GBpc-EUC-H)
+%%Title: (GBpc-EUC-H Adobe GB1 0)
 %%Version: 9.003
 %%Copyright: -----------------------------------------------------------
 %%Copyright: Copyright 1990-2009 Adobe Systems Incorporated.
@@ -54,27 +54,28 @@ begincmap
   /Supplement 0 def
 end def
 
-/CMapName /GB-EUC-H def
+/CMapName /GBpc-EUC-H def
 /CMapVersion 9.003 def
 /CMapType 1 def
 
-/UIDOffset 100 def
-/XUID [1 10 25360] def
+/UIDOffset 0 def
+/XUID [1 10 25364] def
 
 /WMode 0 def
 
-2 begincodespacerange
+3 begincodespacerange
   <00>   <80>
-  <A1A1> <FEFE>
+  <A1A1> <FCFE>
+  <FD>   <FF>
 endcodespacerange
 
 1 beginnotdefrange
-<00> <1f> 7716
+<00> <1f> 1
 endnotdefrange
 
-90 begincidrange
-<20> <20> 7716
-<21> <7e> 814
+91 begincidrange
+<20> <7e> 1
+<80> <80> 7712
 <a1a1> <a1fe> 96
 <a2b1> <a2e2> 190
 <a2e5> <a2ee> 240
@@ -163,6 +164,7 @@ endnotdefrange
 <f5a1> <f5fe> 7421
 <f6a1> <f6fe> 7515
 <f7a1> <f7fe> 7609
+<fd> <ff> 7713
 endcidrange
 endcmap
 CMapName currentdict /CMap defineresource pop
