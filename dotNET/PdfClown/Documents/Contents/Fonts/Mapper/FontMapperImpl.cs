@@ -72,7 +72,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
             try
             {
-                string ttfName = "/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf";
+                string ttfName = "fonts.ttf.LiberationSans-Regular";
                 var ttfStream = typeof(IFontMapper).Assembly.GetManifestResourceStream(ttfName);
                 if (ttfStream == null)
                 {

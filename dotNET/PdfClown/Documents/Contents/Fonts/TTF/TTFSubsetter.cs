@@ -261,8 +261,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private bool ShouldCopyNameRecord(NameRecord nr)
         {
             return nr.PlatformId == NameRecord.PLATFORM_WINDOWS
-                    && nr.PlatformEncodingId == NameRecord.ENCODING_WINDOWS_UNICODE_BMP
-                    && nr.LanguageId == NameRecord.LANGUGAE_WINDOWS_EN_US
+                    && nr.PlatformEncodingId == NameRecord.ENCODING_WIN_UNICODE_BMP
+                    && nr.LanguageId == NameRecord.LANGUGAE_WIN_EN_US
                     && nr.NameId >= 0 && nr.NameId < 7;
         }
 
@@ -1082,10 +1082,10 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private void WriteLongDateTime(BinaryWriter output, DateTime calendar)
         {
             // inverse operation of TTFDataStream.readInternationalDate()
-            DateTime cal = new DateTime(1904, 0, 1, 0, 0, 0, DateTimeKind.Utc);
+            DateTime cal = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 
-            long secondsSince1904 = (long)(((calendar - cal).TotalMilliseconds) / 1000D);
+            long secondsSince1904 = (long)(calendar - cal).TotalSeconds;
             output.Write(secondsSince1904);
         }
 

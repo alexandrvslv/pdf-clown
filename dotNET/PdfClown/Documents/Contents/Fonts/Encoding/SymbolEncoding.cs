@@ -35,6 +35,8 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly SymbolEncoding Instance = new SymbolEncoding();
         public SymbolEncoding()
         {
+            Encodings[PdfName.Symbol] = this;
+
             Put(32, "space");
             Put(33, "exclam");
             Put(34, "universal");

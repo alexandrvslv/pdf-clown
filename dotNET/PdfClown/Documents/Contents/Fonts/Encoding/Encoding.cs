@@ -39,20 +39,7 @@ namespace PdfClown.Documents.Contents.Fonts
     {
         #region static
         #region fields
-        private static readonly Dictionary<PdfName, Encoding> Encodings = new Dictionary<PdfName, Encoding>();
-        #endregion
-
-        #region constructors
-        static Encoding()
-        {
-            //TODO:this collection MUST be automatically populated looking for Encoding subclasses!
-            Encodings[PdfName.StandardEncoding] = StandardEncoding.Instance;
-            Encodings[PdfName.MacRomanEncoding] = MacRomanEncoding.Instance;
-            Encodings[PdfName.WinAnsiEncoding] = WinAnsiEncoding.Instance;
-            Encodings[PdfName.Identity] = IdentityEncoding.Instance;
-            Encodings[PdfName.Symbol] = SymbolEncoding.Instance;
-            Encodings[PdfName.ZapfDingbats] = ZapfDingbatsEncoding.Instance;
-        }
+        protected static readonly Dictionary<PdfName, Encoding> Encodings = new Dictionary<PdfName, Encoding>();
         #endregion
 
         #region interface
@@ -72,7 +59,6 @@ namespace PdfClown.Documents.Contents.Fonts
         #region fields
         protected internal readonly Dictionary<int, string> codeToName = new Dictionary<int, string>();
         protected internal readonly Dictionary<string, int> inverted = new Dictionary<string, int>(StringComparer.Ordinal);
-        private HashSet<string> names;
         #endregion
 
         #region interface
@@ -131,21 +117,7 @@ namespace PdfClown.Documents.Contents.Fonts
          */
         public bool Contains(string name)
         {
-            // we have to wait until all add() calls are done before building the name cache
-            // otherwise /Differences won't be accounted for
-            if (names == null)
-            {
-                lock (this)
-                {
-                    // PDFBOX-3404: avoid possibility that one thread ends up with newly created empty map from other thread
-                    HashSet<string> tmpSet = new HashSet<string>(codeToName.Values, StringComparer.Ordinal);
-                    // make sure that assignment is done after initialisation is complete
-                    names = tmpSet;
-                    // note that it might still happen that 'names' is initialized twice, but this is harmless
-                }
-                // at this point, names will never be null.
-            }
-            return names.Contains(name);
+            return inverted.ContainsKey(name);
         }
 
         public virtual PdfDirectObject GetPdfObject()

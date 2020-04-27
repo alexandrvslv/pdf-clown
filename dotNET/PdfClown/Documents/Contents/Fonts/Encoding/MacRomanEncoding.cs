@@ -37,6 +37,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly MacRomanEncoding Instance = new MacRomanEncoding();
         public MacRomanEncoding()
         {
+            Encodings[PdfName.MacRomanEncoding] = this;
             Put(65, "A");
             Put(174, "AE");
             Put(231, "Aacute");

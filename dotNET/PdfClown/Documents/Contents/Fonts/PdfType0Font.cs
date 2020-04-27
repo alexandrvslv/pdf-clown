@@ -243,7 +243,7 @@ namespace PdfClown.Documents.Contents.Fonts
         */
         public CIDFont CIDFont
         {
-            get => CIDFont.WrapFont((PdfDictionary)DescendantFonts.Resolve(0), this);
+            get => CIDFont.WrapFont(DescendantFonts[0], this);
             set
             {
                 if (DescendantFonts == null)
@@ -544,10 +544,6 @@ namespace PdfClown.Documents.Contents.Fonts
             }
         }
 
-        protected override void OnLoad()
-        {
-            ReadEncoding();
-        }
         #endregion
 
         #region private

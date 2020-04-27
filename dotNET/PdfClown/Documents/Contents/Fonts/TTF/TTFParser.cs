@@ -80,7 +80,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public TrueTypeFont Parse(Stream ttfFile)
         {
-            RAFDataStream raf = new RAFDataStream(ttfFile);
+            var raf = new MemoryTTFDataStream(ttfFile);
             try
             {
                 return Parse(raf);

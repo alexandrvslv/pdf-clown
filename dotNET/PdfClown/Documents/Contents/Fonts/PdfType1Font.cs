@@ -386,11 +386,6 @@ namespace PdfClown.Documents.Contents.Fonts
             return length2;
         }
 
-        protected override void OnLoad()
-        {
-            base.OnLoad();
-        }
-
         public override float GetHeight(int code)
         {
             string name = CodeToName(code);
@@ -623,7 +618,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // I suspect that it does do this for embedded fonts though, but this is untested
             if (name.Equals(".notdef") && !isEmbedded)
             {
-                return SKPathExtension.Empty;
+                return null;
             }
             else
             {

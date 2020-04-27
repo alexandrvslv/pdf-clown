@@ -334,10 +334,10 @@ namespace PdfClown.Documents.Contents.Fonts
         private FileInfo GetDiskCacheFile()
         {
             string path = Environment.GetEnvironmentVariable("PdfBox.FontCache");
-            if (path == null || !Directory.Exists(path) || !new DirectoryInfo(path).GetAccessControl())
+            if (path == null || !Directory.Exists(path))// || !new DirectoryInfo(path).GetAccessControl()
             {
                 path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PdfBox.FontCache");
-                if (Directory.Exists(path))
+                if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
                 }

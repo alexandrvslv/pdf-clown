@@ -84,7 +84,7 @@ namespace PdfClown.Documents.Contents.Fonts
             var codes = new CMap();
             {
                 IList<object> operands = new List<object>();
-                int cmapType;
+
                 while (MoveNext())
                 {
                     switch (TokenType)

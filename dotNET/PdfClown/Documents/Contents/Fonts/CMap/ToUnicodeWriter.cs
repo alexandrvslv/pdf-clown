@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using PdfClown.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -116,7 +117,6 @@ namespace PdfClown.Documents.Contents.Fonts
 
             int srcPrev = -1;
             string dstPrev = "";
-
             int srcCode1 = -1;
 
             foreach (var entry in cidToUnicode)
@@ -125,9 +125,9 @@ namespace PdfClown.Documents.Contents.Fonts
                 string text = entry.Value;
 
                 if (cid == srcPrev + 1 &&                                 // CID must be last CID + 1
-                    dstPrev.codePointCount(0, dstPrev.Length) == 1 &&   // no UTF-16 surrogates
-                    text.codePointAt(0) == dstPrev.codePointAt(0) + 1 &&  // dstString must be prev + 1
-                    dstPrev.codePointAt(0) + 1 <= 255 - (cid - srcCode1)) // increment last byte only
+                    !char.IsSurrogatePair(dstPrev, 0) &&   // no UTF-16 surrogates  dstPrev.codePointCount(0, dstPrev.Length) == 1 
+                    text[0] == dstPrev[0] + 1 &&  // dstString must be prev + 1
+                    dstPrev[0] + 1 <= 255 - (cid - srcCode1)) // increment last byte only
                 {
                     // extend range
                     srcTo.Insert(srcTo.Count - 1, cid);
@@ -156,15 +156,15 @@ namespace PdfClown.Documents.Contents.Fonts
                 {
                     int index = batch * MAX_ENTRIES_PER_OPERATOR + j;
                     writer.Write('<');
-                    writer.Write(Hex.getChars(srcFrom[index].shortValue()));
+                    writer.Write(srcFrom[index].ToString("x4"));
                     writer.Write("> ");
 
                     writer.Write('<');
-                    writer.Write(Hex.getChars(srcTo[index].shortValue()));
+                    writer.Write(srcTo[index].ToString("x4"));
                     writer.Write("> ");
 
                     writer.Write('<');
-                    writer.Write(Hex.getCharsUTF16BE(dstString[index]));
+                    writer.Write(ConvertUtils.ByteArrayToHex(System.Text.Encoding.BigEndianUnicode.GetBytes(dstString[index])));
                     writer.Write(">\n");
                 }
                 WriteLine(writer, "endbfrange\n");

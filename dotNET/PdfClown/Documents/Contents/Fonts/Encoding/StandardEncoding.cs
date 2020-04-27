@@ -37,6 +37,8 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly StandardEncoding Instance = new StandardEncoding();
         public StandardEncoding()
         {
+            Encodings[PdfName.StandardEncoding] = this;
+
             Put(65, "A");
             Put(225, "AE");
             Put(66, "B");

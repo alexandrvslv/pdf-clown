@@ -194,7 +194,7 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 throw new ArgumentException("No AFM for font " + baseFont);
             }
-            FontDescriptor = PdfType1FontEmbedder.BuildFontDescriptor(afmStandard14);
+            fontDescriptor = PdfType1FontEmbedder.BuildFontDescriptor(afmStandard14);
             // standard 14 fonts may be accessed concurrently, as they are singletons
             codeToWidthMap = new Dictionary<int, float>();
         }
@@ -215,8 +215,11 @@ namespace PdfClown.Documents.Contents.Fonts
         public Font(PdfDirectObject baseObject) : base(baseObject)
         {
             Initialize();
-            Load();
+            afmStandard14 = Standard14Fonts.GetAFM(Name); // may be null (it usually is)
+            fontDescriptor = LoadFontDescriptor();
+            toUnicodeCMap = LoadUnicodeCmap();
             LatestFont = this;
+            codeToWidthMap = new Dictionary<int, float>();
         }
         #endregion
 
@@ -508,45 +511,34 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public virtual void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes)
         {
-            var typeface = GetTypeface();
-            var nameTypeface = GetTypefaceByName();
-
-            var text = this is PdfType1Font
-                ? System.Text.Encoding.UTF8.GetBytes(new[] { textChar })
-                //: font is Type1Font && typeface != null
-                //? BitConverter.GetBytes(font.GetGlyph(textChar))                
-                : Encode(textChar.ToString());
-
-            if (fill != null)
+            var path = GetNormalizedPath(code);
+            if (path != null)
             {
-                fill.Typeface = typeface;
-                if (fill.ContainsGlyphs(text))
-                {
-                    context.DrawText(text, 0, 0, fill);
-                }
-                else if (typeface != nameTypeface)
-                {
-                    fill.Typeface = nameTypeface;
-                    context.DrawText(text, 0, 0, fill);
-                }
-                else
-                { }
-            }
+                var w = GetDisplacement(code);
+                context.Save();
+                var m = FontMatrix;
 
-            if (stroke != null)
-            {
-                stroke.Typeface = typeface;
-                if (stroke.ContainsGlyphs(text))
+                if (!IsEmbedded && !IsVertical && !IsStandard14 && HasExplicitWidth(code))
                 {
-                    context.DrawText(text, 0, 0, stroke);
+                    float fontWidth = GetWidthFromFont(code);
+                    if (fontWidth > 0 && // ignore spaces
+                            Math.Abs(fontWidth - w.X * 1000) > 0.0001)
+                    {
+                        float pdfWidth = w.X * 1000;
+                        m.SetScaleTranslate(pdfWidth / fontWidth, 1, 0, 0);
+                    }
                 }
-                else if (typeface != nameTypeface)
+                context.Concat(ref m);
+                if (fill != null)
                 {
-                    stroke.Typeface = nameTypeface;
-                    context.DrawText(text, 0, 0, stroke);
+                    context.DrawPath(path, fill);
                 }
-                else
-                { }
+
+                if (fill == null && stroke != null)
+                {
+                    context.DrawPath(path, stroke);
+                }
+                context.Restore();
             }
         }
 
@@ -1012,31 +1004,57 @@ namespace PdfClown.Documents.Contents.Fonts
 
         #region protected
 
-        /**
-          <summary>Loads font information from existing PDF font structure.</summary>
-        */
-        protected void Load()
+        private FontDescriptor LoadFontDescriptor()
         {
-            if (BaseDataObject.ContainsKey(PdfName.ToUnicode)) // To-Unicode explicit mapping.
+            var fd = FontDescriptor;
+            if (fd != null)
             {
-                toUnicodeCMap = CMap.Get(BaseDataObject.Resolve(PdfName.ToUnicode));
+                return fd;
             }
-
-            if (BaseDataObject.ContainsKey(PdfName.Encoding)) // Encoding explicit mapping.
+            else if (afmStandard14 != null)
             {
-                //PdfStream toUnicodeStream = (PdfStream)BaseDataObject.Resolve(PdfName.Encoding);
-                //CMapParser parser = new CMapParser(toUnicodeStream.Body);
-                //codes = new BiDictionary<ByteArray, int>(parser.Parse());
-                //symbolic = false;
+                // build font descriptor from the AFM
+                return PdfType1FontEmbedder.BuildFontDescriptor(afmStandard14);
             }
-
-            OnLoad();
+            else
+            {
+                return null;
+            }
         }
 
-        /**
-          <summary>Notifies font information loading from an existing PDF font structure.</summary>
-        */
-        protected abstract void OnLoad();
+        private CMap LoadUnicodeCmap()
+        {
+            var toUnicode = Dictionary.Resolve(PdfName.ToUnicode);
+            if (toUnicode == null)
+            {
+                return null;
+            }
+            CMap cmap = null;
+            try
+            {
+                cmap = CMap.Get(toUnicode);
+                if (cmap != null && !cmap.HasUnicodeMappings)
+                {
+                    Debug.WriteLine($"warn: Invalid ToUnicode CMap in font {Name}");
+                    string cmapName = cmap.CMapName ?? "";
+                    string ordering = cmap.Ordering ?? "";
+                    var encoding = Dictionary.Resolve(PdfName.Encoding);
+                    if (cmapName.IndexOf("Identity", StringComparison.Ordinal) > -1 //
+                            || cmapName.IndexOf("Identity", StringComparison.Ordinal) > -1 //
+                            || PdfName.IdentityH.Equals(encoding) //
+                            || PdfName.IdentityV.Equals(encoding))
+                    {
+                        // assume that if encoding is identity, then the reverse is also true
+                        cmap = CMap.Get(PdfName.IdentityH);
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                Debug.WriteLine($"error: Could not read ToUnicode CMap in font {Name} {ex}");
+            }
+            return cmap;
+        }
         #endregion
 
         #region private

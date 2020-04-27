@@ -675,7 +675,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             GlyphData glyph = Glyph.GetGlyph(gid);
             if (glyph == null)
             {
-                return new SKPath();
+                return null;
             }
             else
             {

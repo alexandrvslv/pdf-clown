@@ -119,7 +119,7 @@ namespace PdfClown.Documents.Contents.Fonts
                     }
                     catch (Exception nfe)
                     {
-                        Debug.WriteLine($"warn: Not a number in Unicode character name: {name}");
+                        Debug.WriteLine($"warn: Not a number in Unicode character name: {name} {nfe}");
                     }
                 }
                 if (unicode > 0)

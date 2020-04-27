@@ -41,7 +41,7 @@ namespace PdfClown.Documents.Contents.Fonts
         {
         }
 
-        internal CIDSystemInfo(PdfDirectObject dictionary) : base(dictionary)
+        public CIDSystemInfo(PdfDirectObject dictionary) : base(dictionary)
         {
         }
 

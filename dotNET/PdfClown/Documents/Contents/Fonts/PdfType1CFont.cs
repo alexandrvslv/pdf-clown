@@ -219,7 +219,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // Acrobat only draws .notdef for embedded or "Standard 14" fonts, see PDFBOX-2372
             if (name.Equals(".notdef", StringComparison.Ordinal) && !IsEmbedded && !IsStandard14)
             {
-                return new SKPath();
+                return null;
             }
             else
             {

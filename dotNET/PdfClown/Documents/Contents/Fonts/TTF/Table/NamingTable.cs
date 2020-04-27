@@ -79,13 +79,38 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 int platform = nr.PlatformId;
                 int encoding = nr.PlatformEncodingId;
                 var charset = Charset.ISO88591;
-                if (platform == NameRecord.PLATFORM_WINDOWS && (encoding == NameRecord.ENCODING_WINDOWS_SYMBOL || encoding == NameRecord.ENCODING_WINDOWS_UNICODE_BMP))
+                if (platform == NameRecord.PLATFORM_UNICODE)
                 {
-                    charset = Charset.UTF16LE;
+                    charset = Charset.UTF16BE;
                 }
-                else if (platform == NameRecord.PLATFORM_UNICODE)
+                else if (platform == NameRecord.PLATFORM_WINDOWS)
                 {
-                    charset = Charset.UTF16LE;
+                    if (encoding == NameRecord.ENCODING_WIN_SYMBOL
+                        || encoding == NameRecord.ENCODING_WIN_UNICODE_BMP)
+                        charset = Charset.UTF16BE;
+                }
+                else if (platform == NameRecord.PLATFORM_MACINTOSH)
+                {
+                    if (encoding == NameRecord.ENCODING_MAC_ROMAN)
+                        charset = Charset.GetEnconding("x-mac-romanian");
+                    else if (encoding == NameRecord.ENCODING_MAC_JAPANESE)
+                        charset = Charset.GetEnconding("x-mac-japanese");
+                    else if (encoding == NameRecord.ENCODING_MAC_CHINESE_TRAD)
+                        charset = Charset.GetEnconding("x-mac-chinesetrad");
+                    else if (encoding == NameRecord.ENCODING_MAC_CHINESE_SIMP)
+                        charset = Charset.GetEnconding("x-mac-chinesesimp");
+                    else if (encoding == NameRecord.ENCODING_MAC_KOREAN)
+                        charset = Charset.GetEnconding("x-mac-korean");
+                    else if (encoding == NameRecord.ENCODING_MAC_ARABIC)
+                        charset = Charset.GetEnconding("x-mac-arabic");
+                    else if (encoding == NameRecord.ENCODING_MAC_HEBREW)
+                        charset = Charset.GetEnconding("x-mac-hebrew");
+                    else if (encoding == NameRecord.ENCODING_MAC_GREEK)
+                        charset = Charset.GetEnconding("x-mac-greek");
+                    else if (encoding == NameRecord.ENCODING_MAC_RUSSIAN)
+                        charset = Charset.GetEnconding("x-mac-cyrillic");
+                    else if (encoding == NameRecord.ENCODING_MAC_THAI)
+                        charset = Charset.GetEnconding("x-mac-thai");
                 }
                 else if (platform == NameRecord.PLATFORM_ISO)
                 {
@@ -143,14 +168,14 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             // extract PostScript name, only these two formats are valid
             psName = GetName(NameRecord.NAME_POSTSCRIPT_NAME,
                              NameRecord.PLATFORM_MACINTOSH,
-                             NameRecord.ENCODING_MACINTOSH_ROMAN,
-                             NameRecord.LANGUGAE_MACINTOSH_ENGLISH);
+                             NameRecord.ENCODING_MAC_ROMAN,
+                             NameRecord.LANGUGAE_MAC_ENGLISH);
             if (psName == null)
             {
                 psName = GetName(NameRecord.NAME_POSTSCRIPT_NAME,
                                  NameRecord.PLATFORM_WINDOWS,
-                                 NameRecord.ENCODING_WINDOWS_UNICODE_BMP,
-                                 NameRecord.LANGUGAE_WINDOWS_EN_US);
+                                 NameRecord.ENCODING_WIN_UNICODE_BMP,
+                                 NameRecord.LANGUGAE_WIN_EN_US);
             }
             if (psName != null)
             {
@@ -179,26 +204,26 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 }
             }
 
-            // Windows, Unicode BMP, EN-US
-            string nameWin =
-                    GetName(nameId,
-                            NameRecord.PLATFORM_WINDOWS,
-                            NameRecord.ENCODING_WINDOWS_UNICODE_BMP,
-                            NameRecord.LANGUGAE_WINDOWS_EN_US);
-            if (nameWin != null)
-            {
-                return nameWin;
-            }
-
             // Macintosh, Roman, English
             string nameMac =
                     GetName(nameId,
                             NameRecord.PLATFORM_MACINTOSH,
-                            NameRecord.ENCODING_MACINTOSH_ROMAN,
-                            NameRecord.LANGUGAE_MACINTOSH_ENGLISH);
+                            NameRecord.ENCODING_MAC_ROMAN,
+                            NameRecord.LANGUGAE_MAC_ENGLISH);
             if (nameMac != null)
             {
                 return nameMac;
+            }
+
+            // Windows, Unicode BMP, EN-US
+            string nameWin =
+                    GetName(nameId,
+                            NameRecord.PLATFORM_WINDOWS,
+                            NameRecord.ENCODING_WIN_UNICODE_BMP,
+                            NameRecord.LANGUGAE_WIN_EN_US);
+            if (nameWin != null)
+            {
+                return nameWin;
             }
 
             return null;

@@ -23,6 +23,8 @@
   this list of conditions.
 */
 
+using PdfClown.Objects;
+
 namespace PdfClown.Documents.Contents.Fonts
 {
     /**
@@ -33,6 +35,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly IdentityEncoding Instance = new IdentityEncoding();
         public IdentityEncoding()
         {
+            Encodings[PdfName.Identity] = this;
             for (int index = 1; index < 256; index++)
             { Put(index, GlyphMapping.Default.UnicodeToName(index)); }
         }

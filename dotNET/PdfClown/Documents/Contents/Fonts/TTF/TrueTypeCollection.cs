@@ -17,7 +17,7 @@
 
 namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-
+    using PdfClown.Documents.Interaction.Annotations;
     using System;
     using System.IO;
 
@@ -31,8 +31,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
     public class TrueTypeCollection : IDisposable
     {
         private readonly TTFDataStream stream;
-        private readonly int numFonts;
-        private readonly long[] fontOffsets;
+        private int numFonts;
+        private long[] fontOffsets;
 
         /**
          * Creates a new TrueTypeCollection from a .ttc file.
@@ -41,8 +41,12 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @ If the font could not be parsed.
          */
         public TrueTypeCollection(FileInfo file)
-                : this(new RAFDataStream(file.FullName, FileAccess.Read))
         {
+            using (var stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                this.stream = new MemoryTTFDataStream(stream);
+            }
+            Initialize();
         }
 
         /**
@@ -65,7 +69,11 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         public TrueTypeCollection(TTFDataStream stream)
         {
             this.stream = stream;
+            Initialize();
+        }
 
+        private void Initialize()
+        {
             // TTC header
             string tag = stream.ReadTag();
             if (!tag.Equals("ttcf", StringComparison.Ordinal))

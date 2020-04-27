@@ -37,6 +37,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly WinAnsiEncoding Instance = new WinAnsiEncoding();
         public WinAnsiEncoding()
         {
+            Encodings[PdfName.WinAnsiEncoding] = this;
             Put(65, "A");
             Put(198, "AE");
             Put(193, "Aacute");

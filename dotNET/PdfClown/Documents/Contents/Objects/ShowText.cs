@@ -175,7 +175,7 @@ namespace PdfClown.Documents.Contents.Objects
                     {
                         while (buffer.Position < buffer.Length)
                         {
-                            var code = font.CMap.ReadCode(buffer, out var codeBytes);
+                            var code = font.ReadCode(buffer, out var codeBytes);
                             var textCode = font.ToUnicode(code);
                             if (textCode < 0)
                             {
@@ -190,7 +190,7 @@ namespace PdfClown.Documents.Contents.Objects
                             SKMatrix.PreConcat(ref trm, SKMatrix.MakeScale(1, -1));
 
                             if (context != null
-                                && (textChar == ' '
+                                && !(textChar == ' '
                                 || textChar == '\r'
                                 || textChar == '\n'
                                 || char.IsControl(textChar)

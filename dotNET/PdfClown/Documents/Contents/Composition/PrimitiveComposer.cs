@@ -845,7 +845,7 @@ namespace PdfClown.Documents.Contents.Composition
                     for (int index = 0, length = textLines.Length; index < length; index++)
                     {
                         string textLine = textLines[index];
-                        double width = font.GetKernedWidth(textLine, fontSize) * state.Scale;
+                        double width = font.GetWidth(textLine, fontSize) * state.Scale; //GetKernedWidth
                         if (width > maxLineWidth)
                         { maxLineWidth = width; }
 

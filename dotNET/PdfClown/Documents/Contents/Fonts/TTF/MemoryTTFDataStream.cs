@@ -47,6 +47,25 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
         }
 
+        public MemoryTTFDataStream(Stream stream)
+        {
+            try
+            {
+                data = new byte[stream.Length];
+                stream.Read(data, 0, (int)stream.Length);
+
+            }
+            finally
+            {
+                stream.Dispose();
+            }
+        }
+
+        public MemoryTTFDataStream(byte[] isource)
+        {
+            data = isource;
+        }
+
         /**
          * Read an unsigned byte.
          * @return An unsigned byte.
@@ -54,7 +73,12 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public override long ReadLong()
         {
-            return ((long)(ReadSignedInt()) << 32) + (ReadSignedInt() & 0xFFFFFFFFL);
+            return ((long)ReadUnsignedInt() << 32) | ((long)ReadUnsignedInt() & 0xFFFFFFFFL);
+        }
+
+        public override ulong ReadUnsignedLong()
+        {
+            return ((ulong)(ReadUnsignedInt()) << 32) | ((ulong)ReadUnsignedInt() & 0xFFFFFFFFL);
         }
 
         /**
@@ -69,7 +93,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             int ch2 = Read();
             int ch3 = Read();
             int ch4 = Read();
-            return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));
+            return ((ch1 << 24) | (ch2 << 16) | (ch3 << 8) | (ch4 << 0));
         }
 
         /**
@@ -85,7 +109,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             }
             byte retval = data[currentPosition];
             currentPosition++;
-            return retval;//TODO Test (retval + 256) % 256;
+            return (retval + 256) % 256;
         }
 
         /**
@@ -99,7 +123,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             var ch1 = this.Read();
             var ch2 = this.Read();
 
-            return (ushort)((ch1 << 8) + (ch2 << 0));
+            return (ushort)((ch1 << 8) | (ch2 << 0));
         }
 
         /**
@@ -116,7 +140,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             {
                 throw new EndOfStreamException();
             }
-            return (short)((ch1 << 8) + (ch2 << 0));
+            return (short)((ch1 << 8) | (ch2 << 0));
         }
 
         /**

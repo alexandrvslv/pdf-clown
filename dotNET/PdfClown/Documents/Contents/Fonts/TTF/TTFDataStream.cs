@@ -18,6 +18,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 {
     using PdfClown.Tokens;
     using System;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
 
@@ -87,6 +88,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          * @ If there is an error reading the data.
          */
         public abstract long ReadLong();
+
+        public abstract ulong ReadUnsignedLong();
 
         /**
          * Read a signed byte.
@@ -188,9 +191,17 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public DateTime ReadInternationalDate()
         {
-            long secondsSince1904 = ReadLong();
-            var cal = new DateTime(1904, 0, 1, 0, 0, 0, DateTimeKind.Utc);
-            return cal + TimeSpan.FromMilliseconds(secondsSince1904);
+            try
+            {
+                var secondsSince1904 = ReadUnsignedLong();
+                var cal = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                return cal + TimeSpan.FromSeconds(secondsSince1904);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"error: ReadInternationalDate {ex} ");
+                return DateTime.UtcNow;
+            }
         }
 
         /**
@@ -224,7 +235,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             int totalAmountRead = 0;
             // read at most numberOfBytes bytes from the stream.
             while (totalAmountRead < numberOfBytes
-                    && (amountRead = Read(data, totalAmountRead, numberOfBytes - totalAmountRead)) != -1)
+                    && (amountRead = Read(data, totalAmountRead, numberOfBytes - totalAmountRead)) > 0)
             {
                 totalAmountRead += amountRead;
             }

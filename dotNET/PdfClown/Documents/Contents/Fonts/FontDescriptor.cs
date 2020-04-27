@@ -95,67 +95,67 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public Rectangle FontBBox
         {
-            get => Wrap<Rectangle>(Dictionary.Resolve<PdfArray>(PdfName.FontBBox));
+            get => Wrap<Rectangle>((PdfArray)Dictionary.Resolve(PdfName.FontBBox));
             set => Dictionary[PdfName.FontBBox] = value?.BaseObject;
         }
 
         public float ItalicAngle
         {
-            get => ((PdfReal)Dictionary[PdfName.ItalicAngle])?.FloatValue ?? 0F;
+            get => ((IPdfNumber)Dictionary[PdfName.ItalicAngle])?.FloatValue ?? 0F;
             set => Dictionary[PdfName.ItalicAngle] = new PdfReal(value);
         }
 
         public float Ascent
         {
-            get => ((PdfReal)Dictionary[PdfName.Ascent])?.FloatValue ?? 750F;
+            get => ((IPdfNumber)Dictionary[PdfName.Ascent])?.FloatValue ?? 750F;
             set => Dictionary[PdfName.Ascent] = new PdfReal(value);
         }
 
         public float Descent
         {
-            get => ((PdfReal)Dictionary[PdfName.Descent])?.FloatValue ?? 250F;
+            get => ((IPdfNumber)Dictionary[PdfName.Descent])?.FloatValue ?? 250F;
             set => Dictionary[PdfName.Descent] = new PdfReal(value);
         }
 
         public float? Leading
         {
-            get => ((PdfReal)Dictionary[PdfName.Leading])?.FloatValue;
+            get => ((IPdfNumber)Dictionary[PdfName.Leading])?.FloatValue;
             set => Dictionary[PdfName.Leading] = value.HasValue ? new PdfReal((float)value) : null;
         }
 
         public float? CapHeight
         {
-            get => ((PdfReal)Dictionary[PdfName.CapHeight])?.FloatValue;
+            get => ((IPdfNumber)Dictionary[PdfName.CapHeight])?.FloatValue;
             set => Dictionary[PdfName.CapHeight] = value.HasValue ? new PdfReal((float)value) : null;
         }
 
         public float? XHeight
         {
-            get => ((PdfReal)Dictionary[PdfName.XHeight])?.FloatValue;
+            get => ((IPdfNumber)Dictionary[PdfName.XHeight])?.FloatValue;
             set => Dictionary[PdfName.XHeight] = value.HasValue ? new PdfReal((float)value) : null;
         }
 
         public float StemV
         {
-            get => ((PdfReal)Dictionary[PdfName.StemV])?.FloatValue ?? 0F;
+            get => ((IPdfNumber)Dictionary[PdfName.StemV])?.FloatValue ?? 0F;
             set => Dictionary[PdfName.StemV] = new PdfReal((float)value);
         }
 
         public float StemH
         {
-            get => ((PdfReal)Dictionary[PdfName.StemH])?.FloatValue ?? 0F;
+            get => ((IPdfNumber)Dictionary[PdfName.StemH])?.FloatValue ?? 0F;
             set => Dictionary[PdfName.StemH] = new PdfReal((float)value);
         }
 
         public float? AvgWidth
         {
-            get => ((PdfReal)Dictionary[PdfName.AvgWidth])?.FloatValue;
+            get => ((IPdfNumber)Dictionary[PdfName.AvgWidth])?.FloatValue;
             set => Dictionary[PdfName.AvgWidth] = value.HasValue ? new PdfReal((float)value) : null;
         }
 
         public float? MaxWidth
         {
-            get => ((PdfReal)Dictionary[PdfName.MaxWidth])?.FloatValue;
+            get => ((IPdfNumber)Dictionary[PdfName.MaxWidth])?.FloatValue;
             set => Dictionary[PdfName.MaxWidth] = value.HasValue ? new PdfReal((float)value) : null;
         }
 
@@ -167,19 +167,19 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public FontFile FontFile
         {
-            get => Wrap<FontFile>((PdfDirectObject)Dictionary.Resolve(PdfName.FontFile));
+            get => Wrap<FontFile>((PdfDirectObject)Dictionary[PdfName.FontFile]);
             set => Dictionary[PdfName.FontFile] = value?.BaseObject;
         }
 
         public FontFile FontFile2
         {
-            get => Wrap<FontFile>((PdfDirectObject)Dictionary.Resolve(PdfName.FontFile2));
+            get => Wrap<FontFile>((PdfDirectObject)Dictionary[PdfName.FontFile2]);
             set => Dictionary[PdfName.FontFile2] = value?.BaseObject;
         }
 
         public FontFile FontFile3
         {
-            get => Wrap<FontFile>((PdfDirectObject)Dictionary.Resolve(PdfName.FontFile3));
+            get => Wrap<FontFile>((PdfDirectObject)Dictionary[PdfName.FontFile3]);
             set => Dictionary[PdfName.FontFile3] = value?.BaseObject;
         }
 

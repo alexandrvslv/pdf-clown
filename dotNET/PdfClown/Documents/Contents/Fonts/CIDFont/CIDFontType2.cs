@@ -58,7 +58,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param parent The parent font.
          * @throws IOException
          */
-        public CIDFontType2(PdfDictionary fontDictionary, PdfType0Font parent)
+        public CIDFontType2(PdfDirectObject fontDictionary, PdfType0Font parent)
             : this(fontDictionary, parent, null)
         {
         }
@@ -71,7 +71,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param trueTypeFont The true type font used to create the parent font
          * @throws IOException
          */
-        public CIDFontType2(PdfDictionary fontDictionary, PdfType0Font parent, TrueTypeFont trueTypeFont)
+        public CIDFontType2(PdfDirectObject fontDictionary, PdfType0Font parent, TrueTypeFont trueTypeFont)
             : base(fontDictionary, parent)
         {
 
@@ -215,10 +215,6 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
             }
             return ttf.FontBBox;
-        }
-
-        protected override void OnLoad()
-        {
         }
 
         public override int CodeToCID(int code)
@@ -409,7 +405,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 {
                     return glyph.GetPath();
                 }
-                return new SKPath();
+                return null;
             }
         }
 
@@ -430,7 +426,7 @@ namespace PdfClown.Documents.Contents.Fonts
             if (path == null)
             {
                 // empty glyph (e.g. space, newline)
-                return new SKPath();
+                return null;
             }
             else
             {

@@ -34,18 +34,18 @@ namespace PdfClown.Documents.Contents.Fonts
      */
     public abstract class CIDFont : Font// PDFontLike, PDVectorFont
     {
-        public static CIDFont WrapFont(PdfDictionary pdfDictionary, PdfType0Font PdfType0Font)
+        public static CIDFont WrapFont(PdfDirectObject pdfObject, PdfType0Font PdfType0Font)
         {
-            if (pdfDictionary.Wrapper is CIDFont cidFont)
+            if (pdfObject.Wrapper is CIDFont cidFont)
                 return cidFont;
-            else if (pdfDictionary.Reference.Wrapper is CIDFont cidFontRef)
+            else if (pdfObject.Reference.Wrapper is CIDFont cidFontRef)
                 return cidFontRef;
-
+            var pdfDictionary = (PdfDictionary)pdfObject.Resolve();
             var subType = (PdfName)pdfDictionary[PdfName.Subtype];
             if (subType.Equals(PdfName.CIDFontType0))
-                cidFont = new CIDFontType0(pdfDictionary, PdfType0Font);
+                cidFont = new CIDFontType0(pdfObject, PdfType0Font);
             else if (subType.Equals(PdfName.CIDFontType2))
-                cidFont = new CIDFontType2(pdfDictionary, PdfType0Font);
+                cidFont = new CIDFontType2(pdfObject, PdfType0Font);
             else
                 throw new NotSupportedException();
             return cidFont;
@@ -82,8 +82,8 @@ namespace PdfClown.Documents.Contents.Fonts
          *
          * @param fontDictionary The font dictionary according to the PDF specification.
          */
-        public CIDFont(PdfDictionary fontDictionary, PdfType0Font parent)
-            : base(fontDictionary)
+        public CIDFont(PdfDirectObject fontObject, PdfType0Font parent)
+            : base(fontObject)
         {
             this.parent = parent;
             ReadWidths();
@@ -98,13 +98,13 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public CIDSystemInfo CIDSystemInfo
         {
-            get => Wrap<CIDSystemInfo>((PdfDirectObject)Dictionary.Resolve(PdfName.CIDSystemInfo));
+            get => Wrap<CIDSystemInfo>(Dictionary[PdfName.CIDSystemInfo]);
             set => Dictionary[PdfName.BaseFont] = value?.BaseObject;
         }
 
         public override FontDescriptor FontDescriptor
         {
-            get => fontDescriptor ?? (fontDescriptor = Wrap<FontDescriptor>((PdfDirectObject)Dictionary.Resolve(PdfName.FontDescriptor)));
+            get => fontDescriptor ?? (fontDescriptor = Wrap<FontDescriptor>(Dictionary[PdfName.FontDescriptor]));
             set => Dictionary[PdfName.FontDescriptor] = value?.BaseObject;
         }
 

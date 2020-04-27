@@ -265,8 +265,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     break;
                 default:
                     // Other lookup types are not supported
-                    Debug.WriteLine("debug: Type " + lookupType
-                            + " GSUB lookup table is not supported and will be ignored");
+                    Debug.WriteLine($"debug: Type {lookupType} GSUB lookup table is not supported and will be ignored");
                     break;
             }
             return new LookupTable(lookupType, lookupFlag, markFilteringSet, subTables);
@@ -554,12 +553,16 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
         private void RemoveFeature(List<FeatureRecord> featureRecords, string featureTag)
         {
-            var iter = featureRecords.GetEnumerator();
-            while (iter.MoveNext())
+            for (int i = 0; i < featureRecords.Count;)
             {
-                if (iter.Current.FeatureTag.Equals(featureTag, StringComparison.Ordinal))
+                var item = featureRecords[i];
+                if (item.FeatureTag.Equals(featureTag, StringComparison.Ordinal))
                 {
-                    iter.remove();
+                    featureRecords.RemoveAt(i);
+                }
+                else
+                {
+                    i++;
                 }
             }
         }

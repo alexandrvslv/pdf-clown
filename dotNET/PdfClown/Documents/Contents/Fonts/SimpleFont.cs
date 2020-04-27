@@ -62,7 +62,9 @@ namespace PdfClown.Documents.Contents.Fonts
         }
 
         protected SimpleFont(PdfDirectObject baseObject) : base(baseObject)
-        { }
+        {
+            
+        }
         #endregion
 
         /**
@@ -394,10 +396,6 @@ namespace PdfClown.Documents.Contents.Fonts
          */
         protected abstract Encoding ReadEncodingFromFont();
 
-        protected override void OnLoad()
-        {
-            ReadEncoding();
-        }
         #endregion
         #endregion
     }

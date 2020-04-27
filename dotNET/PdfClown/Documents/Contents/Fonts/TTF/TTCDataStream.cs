@@ -45,6 +45,11 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             return stream.ReadLong();
         }
 
+        public override ulong ReadUnsignedLong()
+        {
+            return stream.ReadUnsignedLong();
+        }
+
         public override ushort ReadUnsignedShort()
         {
             return stream.ReadUnsignedShort();

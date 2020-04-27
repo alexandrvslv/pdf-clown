@@ -404,7 +404,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // some glyphs have no outlines (e.g. space, table, newline)
             if (glyph == null)
             {
-                return SKPathExtension.Empty;
+                return null;
             }
             else
             {
@@ -435,7 +435,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // I'm assuming .notdef paths are not drawn, as it PDFBOX-2421
             if (gid == 0)
             {
-                return new SKPath();
+                return null;
             }
 
             GlyphData glyph = ttf.Glyph.GetGlyph(gid);
@@ -445,7 +445,7 @@ namespace PdfClown.Documents.Contents.Fonts
             }
             else
             {
-                return new SKPath();
+                return null;
             }
         }
 
@@ -464,10 +464,10 @@ namespace PdfClown.Documents.Contents.Fonts
                 path = null;
             }
 
-            if (path == null || path == SKPathExtension.Empty)
+            if (path == null)
             {
                 // empty glyph (e.g. space, newline)
-                return SKPathExtension.Empty;
+                return null;
             }
             else
             {
@@ -658,10 +658,5 @@ namespace PdfClown.Documents.Contents.Fonts
         }
         #endregion
         #endregion
-    }
-
-    public static class SKPathExtension
-    {
-        public static readonly SKPath Empty = new SKPath();
     }
 }

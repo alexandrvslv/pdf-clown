@@ -17,6 +17,7 @@
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -885,7 +886,7 @@ namespace PdfClown.Documents.Contents.Fonts.AFM
         private float Readfloat()
         {
             string thefloat = ReadString();
-            return float.Parse(thefloat);
+            return float.Parse(thefloat, CultureInfo.InvariantCulture);
         }
 
         /**

@@ -59,7 +59,7 @@ namespace PdfClown.Documents.Contents.Fonts
          * @param fontDictionary The font dictionary according to the PDF specification.
          * @param parent The parent font.
          */
-        public CIDFontType0(PdfDictionary fontDictionary, PdfType0Font parent)
+        public CIDFontType0(PdfDirectObject fontDictionary, PdfType0Font parent)
             : base(fontDictionary, parent)
         {
             FontDescriptor fd = FontDescriptor;
@@ -446,11 +446,6 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             // todo: not implemented, highly suspect
             return 500;
-        }
-
-        protected override void OnLoad()
-        {
-            throw new NotImplementedException();
         }
 
         private class FF3ByteSource : CFFParser.IByteSource

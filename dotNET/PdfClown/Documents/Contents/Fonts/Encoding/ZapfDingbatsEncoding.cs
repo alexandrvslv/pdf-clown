@@ -35,6 +35,7 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly ZapfDingbatsEncoding Instance = new ZapfDingbatsEncoding();
         public ZapfDingbatsEncoding()
         {
+            Encodings[PdfName.ZapfDingbats] = this;
             Put(040, "space");
             Put(041, "a1");
             Put(042, "a2");

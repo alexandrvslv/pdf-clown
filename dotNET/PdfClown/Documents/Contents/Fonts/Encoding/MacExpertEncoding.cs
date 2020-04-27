@@ -28,6 +28,8 @@ namespace PdfClown.Documents.Contents.Fonts
         public static readonly MacExpertEncoding Instance = new MacExpertEncoding();
         public MacExpertEncoding()
         {
+            Encodings[PdfName.MacExpertEncoding] = this;
+
             Put(0276, "AEsmall");
             Put(0207, "Aacutesmall");
             Put(0211, "Acircumflexsmall");
