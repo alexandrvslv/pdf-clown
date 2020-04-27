@@ -56,10 +56,6 @@
       <Link>res\fonts\G500.scsv</Link>
       <LogicalName>fonts.G500</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\main\res\pkg\fonts\Embedded_Subset_DLFONT12e+ArialNarrow.scsv">
-      <Link>res\fonts\Embedded_Subset_DLFONT12e+ArialNarrow.scsv</Link>
-      <LogicalName>fonts.Embedded_Subset_DLFONT12e+ArialNarrow</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\afm\Courier.afm">
       <Link>res\fonts\afm\Courier.afm</Link>
       <LogicalName>fonts.afm.Courier</LogicalName>
@@ -293,7 +289,7 @@
       <LogicalName>fonts.cmap.ETen-B5-V</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\ETenms-B5-H">
-      <Link>res\fonts\cmapETenms-B5-H</Link>
+      <Link>res\fonts\cmap\ETenms-B5-H</Link>
       <LogicalName>fonts.cmap.ETenms-B5-H</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\ETenms-B5-V">
@@ -473,7 +469,7 @@
       <LogicalName>fonts.cmap.UniKS-UCS2-V</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniKS-UTF16-H">
-      <Link>res\fonts\cmapUniKS-UTF16-H</Link>
+      <Link>res\fonts\cmap\UniKS-UTF16-H</Link>
       <LogicalName>fonts.cmap.UniKS-UTF16-H</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cmap\UniKS-UTF16-V">
@@ -499,6 +495,10 @@
     <EmbeddedResource Include="..\..\main\res\pkg\fonts\cff\StandardStrings">
       <Link>res\fonts\cff\StandardStrings</Link>
       <LogicalName>fonts.cff.StandardStrings</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\main\res\pkg\fonts\ttf\LiberationSans-Regular.ttf">
+      <Link>res\fonts\ttf\LiberationSans-Regular.ttf</Link>
+      <LogicalName>fonts.ttf.LiberationSans-Regular</LogicalName>
     </EmbeddedResource>
 
     <EmbeddedResource Include="Assets\Comment.svg" />
