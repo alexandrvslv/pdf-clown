@@ -743,54 +743,54 @@ namespace PdfClown.Documents.Contents.Fonts.AFM
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_WX:
-                            charMetric.Wx = float.Parse(metricsTokenizer[i++]);
+                            charMetric.Wx = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_W0X:
-                            charMetric.W0x = float.Parse(metricsTokenizer[i++]);
+                            charMetric.W0x = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_W1X:
-                            charMetric.W1x = float.Parse(metricsTokenizer[i++]);
+                            charMetric.W1x = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_WY:
-                            charMetric.Wy = float.Parse(metricsTokenizer[i++]);
+                            charMetric.Wy = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_W0Y:
-                            charMetric.W0y = float.Parse(metricsTokenizer[i++]);
+                            charMetric.W0y = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_W1Y:
-                            charMetric.W1y = float.Parse(metricsTokenizer[i++]);
+                            charMetric.W1y = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_W:
                             float[] w = new float[2];
-                            w[0] = float.Parse(metricsTokenizer[i++]);
-                            w[1] = float.Parse(metricsTokenizer[i++]);
+                            w[0] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
+                            w[1] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             charMetric.W = w;
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_W0:
                             float[] w0 = new float[2];
-                            w0[0] = float.Parse(metricsTokenizer[i++]);
-                            w0[1] = float.Parse(metricsTokenizer[i++]);
+                            w0[0] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
+                            w0[1] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             charMetric.W0 = w0;
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_W1:
                             float[] w1 = new float[2];
-                            w1[0] = float.Parse(metricsTokenizer[i++]);
-                            w1[1] = float.Parse(metricsTokenizer[i++]);
+                            w1[0] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
+                            w1[1] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             charMetric.W1 = w1;
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
                         case CHARMETRICS_VV:
                             float[] vv = new float[2];
-                            vv[0] = float.Parse(metricsTokenizer[i++]);
-                            vv[1] = float.Parse(metricsTokenizer[i++]);
+                            vv[0] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
+                            vv[1] = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             charMetric.Vv = vv;
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;
@@ -800,10 +800,10 @@ namespace PdfClown.Documents.Contents.Fonts.AFM
                             break;
                         case CHARMETRICS_B:
                             var box = new SKRect();
-                            box.Left = float.Parse(metricsTokenizer[i++]);
-                            box.Bottom = float.Parse(metricsTokenizer[i++]);
-                            box.Right = float.Parse(metricsTokenizer[i++]);
-                            box.Top = float.Parse(metricsTokenizer[i++]);
+                            box.Left = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
+                            box.Bottom = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
+                            box.Right = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
+                            box.Top = float.Parse(metricsTokenizer[i++], CultureInfo.InvariantCulture);
                             charMetric.BoundingBox = box;
                             VerifySemicolon(metricsTokenizer, ref i);
                             break;

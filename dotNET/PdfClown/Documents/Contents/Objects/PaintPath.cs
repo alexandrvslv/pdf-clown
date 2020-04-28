@@ -164,7 +164,7 @@ namespace PdfClown.Documents.Contents.Objects
                     if (stroked)
                     {
                         using (var paint = state.CreateStrokePaint())
-                        {
+                        { 
                             context.DrawPath(pathObject, paint);
                         }
                     }

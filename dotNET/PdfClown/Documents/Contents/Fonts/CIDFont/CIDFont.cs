@@ -38,7 +38,7 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             if (pdfObject.Wrapper is CIDFont cidFont)
                 return cidFont;
-            else if (pdfObject.Reference.Wrapper is CIDFont cidFontRef)
+            else if (pdfObject.Reference?.Wrapper is CIDFont cidFontRef)
                 return cidFontRef;
             var pdfDictionary = (PdfDictionary)pdfObject.Resolve();
             var subType = (PdfName)pdfDictionary[PdfName.Subtype];
@@ -132,9 +132,9 @@ namespace PdfClown.Documents.Contents.Fonts
             set => Dictionary[PdfName.W2] = value;
         }
 
-        public PdfStream CIDToGIDMap
+        public PdfDataObject CIDToGIDMap
         {
-            get => (PdfStream)Dictionary.Resolve(PdfName.CIDToGIDMap);
+            get => Dictionary.Resolve(PdfName.CIDToGIDMap);
             set => Dictionary[PdfName.CIDToGIDMap] = value.Reference;
         }
 
@@ -359,21 +359,23 @@ namespace PdfClown.Documents.Contents.Fonts
         public virtual int[] ReadCIDToGIDMap()
         {
             int[] cid2gid = null;
-            var stream = CIDToGIDMap;
+            var stream = CIDToGIDMap as PdfStream;
             if (stream != null)
             {
                 var input = stream.GetBody(false);
-                input = Bytes.Buffer.Extract(input, stream.Filter, stream.Parameters);
-                byte[] mapAsBytes = input.ToByteArray();
-
-                int numberOfInts = mapAsBytes.Length / 2;
-                cid2gid = new int[numberOfInts];
-                int offset = 0;
-                for (int index = 0; index < numberOfInts; index++)
+                using (input = Bytes.Buffer.Extract(input, stream.Filter, stream.Parameters))
                 {
-                    int gid = (mapAsBytes[offset] & 0xff) << 8 | mapAsBytes[offset + 1] & 0xff;
-                    cid2gid[index] = gid;
-                    offset += 2;
+                    byte[] mapAsBytes = input.GetBuffer();
+
+                    int numberOfInts = mapAsBytes.Length / 2;
+                    cid2gid = new int[numberOfInts];
+                    int offset = 0;
+                    for (int index = 0; index < numberOfInts; index++)
+                    {
+                        int gid = (mapAsBytes[offset] & 0xff) << 8 | mapAsBytes[offset + 1] & 0xff;
+                        cid2gid[index] = gid;
+                        offset += 2;
+                    }
                 }
             }
             return cid2gid;

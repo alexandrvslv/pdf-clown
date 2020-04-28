@@ -19,6 +19,7 @@ using PdfClown.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -408,7 +409,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             }
             try
             {
-                return float.Parse(sb.ToString());
+                return float.Parse(sb.ToString(), CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {

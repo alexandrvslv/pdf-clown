@@ -509,32 +509,35 @@ namespace PdfClown.Documents.Contents.Fonts
             return new SKPoint(GetWidth(code) / 1000, 0);
         }
 
-        public virtual void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes)
+        public virtual void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes, ref SKMatrix parameters)
         {
             var path = GetNormalizedPath(code);
             if (path != null)
             {
-                var w = GetDisplacement(code);
                 context.Save();
                 var m = FontMatrix;
 
-                if (!IsEmbedded && !IsVertical && !IsStandard14 && HasExplicitWidth(code))
-                {
-                    float fontWidth = GetWidthFromFont(code);
-                    if (fontWidth > 0 && // ignore spaces
-                            Math.Abs(fontWidth - w.X * 1000) > 0.0001)
-                    {
-                        float pdfWidth = w.X * 1000;
-                        m.SetScaleTranslate(pdfWidth / fontWidth, 1, 0, 0);
-                    }
-                }
+                //if (!IsEmbedded && !IsVertical && !IsStandard14 && HasExplicitWidth(code))
+                //{
+                //    var w = GetDisplacement(code);
+                //    float fontWidth = GetWidthFromFont(code);
+                //    if (fontWidth > 0 && // ignore spaces
+                //            Math.Abs(fontWidth - w.X * 1000) > 0.0001)
+                //    {
+                //        float pdfWidth = w.X * 1000;
+                //        m.SetScaleTranslate(pdfWidth / fontWidth, 1, 0, 0);
+                //    }
+                //}
+
+                SKMatrix.PreConcat(ref m, parameters);
                 context.Concat(ref m);
+
                 if (fill != null)
                 {
                     context.DrawPath(path, fill);
                 }
 
-                if (fill == null && stroke != null)
+                if (stroke != null)
                 {
                     context.DrawPath(path, stroke);
                 }
@@ -796,7 +799,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // embedded", however PDFBOX-427 shows that it also applies to embedded fonts.
 
             // Type1, Type1C, Type3
-            if (Widths != null || FontDescriptor?.MissingWidth != null)
+            if (Widths != null)
             {
                 var widths = Widths;
                 int firstChar = FirstChar ?? 0;
@@ -809,15 +812,14 @@ namespace PdfClown.Documents.Contents.Fonts
                     codeToWidthMap[code] = width;
                     return width;
                 }
-
-                var fd = FontDescriptor;
-                if (fd != null)
-                {
-                    // get entry from /MissingWidth entry
-                    width = fd.MissingWidth ?? 0;
-                    codeToWidthMap[code] = width;
-                    return width;
-                }
+            }
+            var fd = FontDescriptor;
+            if (fd?.MissingWidth != null)
+            {
+                // get entry from /MissingWidth entry
+                width = fd.MissingWidth ?? 0;
+                codeToWidthMap[code] = width;
+                return width;
             }
 
             // standard 14 font widths are specified by an AFM
@@ -1067,7 +1069,8 @@ namespace PdfClown.Documents.Contents.Fonts
               NOTE: Font structures are reified as complex objects, both IO- and CPU-intensive to load.
               So, it's convenient to put them into a common cache for later reuse.
             */
-            Document.Cache[(PdfReference)BaseObject] = this;
+            if (Document != null)
+                Document.Cache[(PdfReference)BaseObject] = this;
         }
         #endregion
         #endregion

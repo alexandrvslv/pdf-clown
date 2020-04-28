@@ -237,6 +237,8 @@ namespace PdfClown.Documents.Contents.Fonts
         public override SKPath GetPath(int code)
         {
             string name = Encoding.GetName(code);
+            if (name == null)
+                return null;
             name = GetNameInFont(name);
             return GetPath(name);
         }
@@ -244,6 +246,8 @@ namespace PdfClown.Documents.Contents.Fonts
         public override SKPath GetNormalizedPath(int code)
         {
             string name = Encoding.GetName(code);
+            if (name == null)
+                return null;
             name = GetNameInFont(name);
             SKPath path = GetPath(name);
             if (path == null)
@@ -307,6 +311,10 @@ namespace PdfClown.Documents.Contents.Fonts
         public override float GetHeight(int code)
         {
             string name = CodeToName(code);
+            if (name == null)
+            {
+                return (float)(Ascent - Descent);
+            }
             if (!glyphHeights.TryGetValue(name, out float height))
             {
                 glyphHeights[name] =

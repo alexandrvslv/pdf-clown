@@ -86,9 +86,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                     }
                     else
                     {
-                        Debug.WriteLine("warn: CALLSUBR is ignored, operand: " + operand
-                                + ", subrs.Count: " + subrs.Count + " in glyph '"
-                                + glyphName + "' of font " + fontName);
+                        Debug.WriteLine($"warn: CALLSUBR is ignored, operand: {operand}, subrs.Count: {subrs.Count} in glyph '{glyphName}' of font {fontName}");
                         // remove all parameters (there can be more than one)
                         while (sequence[sequence.Count - 1] is int intValue)
                         {
@@ -99,7 +97,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                 else if (b0 == TWO_BYTE && input.PeekUnsignedByte(0) == CALLOTHERSUBR)
                 {
                     // callothersubr command (needed in order to expand Subrs)
-                    input.ReadByte();
+                    input.ReadUnsignedByte();
 
                     int othersubrNum = (int)sequence.RemoveAtValue(sequence.Count - 1);
                     int numArgs = (int)sequence.RemoveAtValue(sequence.Count - 1);
@@ -137,8 +135,8 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
                     // pop must follow immediately
                     while (input.PeekUnsignedByte(0) == TWO_BYTE && input.PeekUnsignedByte(1) == POP)
                     {
-                        input.ReadByte(); // B0_POP
-                        input.ReadByte(); // B1_POP
+                        input.ReadUnsignedByte(); // B0_POP
+                        input.ReadUnsignedByte(); // B1_POP
                         sequence.Add(results.Pop());
                     }
 

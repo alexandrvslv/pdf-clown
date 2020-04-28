@@ -124,27 +124,36 @@ namespace PdfClown.Documents.Contents.Objects
               TODO: support to vertical writing mode.
             */
 
-            double contextHeight = state.Scanner.ContextSize.Height;
             Font font = state.Font ?? Font.LatestFont;
             if (font == null)
                 return;
-            double fontSize = state.FontSize;
-            double scaledFactor = Font.GetScalingFactor(fontSize) * state.Scale;
+
             bool wordSpaceSupported = !(font is PdfType0Font);
+            bool vertical = font.IsVertical;
+
+            double fontSize = Font.GetScalingFactor(state.FontSize);
+            double hScaling = fontSize * state.Scale;
             double wordSpace = wordSpaceSupported ? state.WordSpace * state.Scale : 0;
             double charSpace = state.CharSpace * state.Scale;
+            double ascent = -font.Ascent * fontSize;
             SKMatrix ctm = state.Ctm;
             SKMatrix tm = state.TextState.Tm;
             //var encoding = font.GetEnoding();
             var context = state.Scanner.RenderContext;
+
+            // put the text state parameters into matrix form
+            var parameters = new SKMatrix(
+                (float)(state.FontSize * state.Scale), 0f, 0f,
+                0f, (float)state.FontSize, (float)state.Rise,
+                0f, 0f, 1f);
 
             if (context != null)
             {
                 context.Save();
             }
 
-            var fill = context != null ? state.CreateFillPaint() : null;
-            var stroke = context != null ? state.CreateStrokePaint() : null;
+            var fill = context != null && state.RenderModeFill ? state.CreateFillPaint() : null;
+            var stroke = context != null && state.RenderModeStroke ? state.CreateStrokePaint() : null;
 
             if (this is ShowTextToNextLine showTextToNextLine)
             {
@@ -187,7 +196,7 @@ namespace PdfClown.Documents.Contents.Objects
                             // during a text-showing operation.
                             SKMatrix trm = ctm;
                             SKMatrix.PreConcat(ref trm, tm);
-                            SKMatrix.PreConcat(ref trm, SKMatrix.MakeScale(1, -1));
+
 
                             if (context != null
                                 && !(textChar == ' '
@@ -197,14 +206,15 @@ namespace PdfClown.Documents.Contents.Objects
                                 ))
                             {
                                 context.SetMatrix(trm);
-                                font.DrawChar(context, fill, stroke, textChar, code, codeBytes);
+                                font.DrawChar(context, fill, stroke, textChar, code, codeBytes, ref parameters);
                             }
-                            double charWidth = font.GetWidth(textChar) * scaledFactor;
-
+                            var charWidth = font.GetWidth(code) * hScaling;
+                            var charHeight = font.GetHeight(code) * fontSize;
                             if (textScanner != null)
                             {
-                                var charBox = SKRect.Create(0, (float)(-font.GetAscent(fontSize)), (float)charWidth, (float)font.GetHeight(textChar, fontSize));
+                                var charBox = SKRect.Create(0, (float)ascent, (float)charWidth, (float)charHeight);
                                 var quad = new Quad(charBox);
+                                SKMatrix.PreConcat(ref trm, SKMatrix.MakeScale(1, -1));
                                 quad.Transform(ref trm);
                                 textScanner.ScanChar(textChar, quad);
                             }
@@ -212,13 +222,20 @@ namespace PdfClown.Documents.Contents.Objects
                               NOTE: After the glyph is painted, the text matrix is updated
                               according to the glyph displacement and any applicable spacing parameter.
                             */
-                            SKMatrix.PreConcat(ref tm, SKMatrix.MakeTranslation((float)(charWidth + charSpace + (textChar == ' ' ? wordSpace : 0)), 0));
+                            if (vertical)
+                            {
+                                SKMatrix.PreConcat(ref tm, SKMatrix.MakeTranslation(0f, (float)(charHeight + charSpace + (textChar == ' ' ? wordSpace : 0))));
+                            }
+                            else
+                            {
+                                SKMatrix.PreConcat(ref tm, SKMatrix.MakeTranslation((float)(charWidth + charSpace + (textChar == ' ' ? wordSpace : 0)), 0f));
+                            }
                         }
                     }
                 }
                 else // Text position adjustment.
                 {
-                    SKMatrix.PreConcat(ref tm, SKMatrix.MakeTranslation((float)(-Convert.ToSingle(textElement) * scaledFactor), 0));
+                    SKMatrix.PreConcat(ref tm, SKMatrix.MakeTranslation((float)(-Convert.ToSingle(textElement) * hScaling), 0));
                 }
             }
             if (context != null)

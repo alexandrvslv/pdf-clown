@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 using System;
+using System.Globalization;
 
 namespace PdfClown.Documents.Contents.Fonts.Type1
 {
@@ -76,7 +77,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 			get
 			{
 				// some fonts have reals where integers should be, so we tolerate it
-				return (int)float.Parse(text);
+				return (int)float.Parse(text, CultureInfo.InvariantCulture);
 			}
 		}
 
@@ -84,7 +85,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		{
 			get
 			{
-				return float.Parse(text);
+				return float.Parse(text, CultureInfo.InvariantCulture);
 			}
 		}
 

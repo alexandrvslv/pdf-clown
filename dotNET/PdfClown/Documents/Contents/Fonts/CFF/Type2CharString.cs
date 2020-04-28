@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using PdfClown.Documents.Contents.Fonts.Type1;
 using System;
 using System.Linq;
+using System.Diagnostics;
 
 namespace PdfClown.Documents.Contents.Fonts.CCF
 {
@@ -55,7 +56,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             type2sequence = sequence;
             defWidthX = defaultWidthX;
             nominalWidthX = nomWidthX;
-            convertType1ToType2(sequence);
+            ConvertType1ToType2(sequence);
         }
 
         /**
@@ -69,62 +70,67 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         /**
 		 * Returns the Type 2 charstring sequence.
 		 */
-        public List<object> getType2Sequence()
+        public List<object> Type2Sequence
         {
-            return type2sequence;
+            get => type2sequence;
         }
 
         /**
 		 * Converts a sequence of Type 2 commands into a sequence of Type 1 commands.
 		 * @param sequence the Type 2 char string sequence
 		 */
-        private void convertType1ToType2(List<object> sequence)
+        private void ConvertType1ToType2(List<object> sequence)
         {
             type1Sequence = new List<object>();
             pathCount = 0;
-            CharStringHandler handler = (CharStringHandler)this;
-            handler.HandleSequence(sequence);
+            CharStringHandler handler = new CharStringHandler();
+            handler.HandleSequence(sequence, TranslateHandleCommand);
         }
 
         //@SuppressWarnings(value = { "unchecked" })
-        public override List<float> HandleCommand(List<float> numbers, CharStringCommand command)
+        public List<float> TranslateHandleCommand(List<float> numbers, CharStringCommand command)
         {
             commandCount++;
             if (!CharStringCommand.TYPE2_VOCABULARY.TryGetValue(command.Key, out string name))
             {
+                if (command.Key.Data[0] == 10)
+                {
+                    Debug.WriteLine($"warn: Parameter {numbers} for CALLSUBR is ignored, integer expected in glyph '{Name}' of font {FontName}");
+                    return new List<float>(0);
+                }
                 AddCommand(numbers, command);
                 return new List<float>(0);
             }
             switch (name)
             {
                 case "hstem":
-                    numbers = clearStack(numbers, numbers.Count % 2 != 0);
-                    expandStemHints(numbers, true);
+                    numbers = ClearStack(numbers, numbers.Count % 2 != 0);
+                    ExpandStemHints(numbers, true);
                     break;
                 case "vstem":
-                    numbers = clearStack(numbers, numbers.Count % 2 != 0);
-                    expandStemHints(numbers, false);
+                    numbers = ClearStack(numbers, numbers.Count % 2 != 0);
+                    ExpandStemHints(numbers, false);
                     break;
                 case "vmoveto":
-                    numbers = clearStack(numbers, numbers.Count > 1);
-                    markPath();
+                    numbers = ClearStack(numbers, numbers.Count > 1);
+                    MarkPath();
                     AddCommand(numbers, command);
                     break;
                 case "rlineto":
                     AddCommandList(Split(numbers, 2), command);
                     break;
                 case "hlineto":
-                    drawAlternatingLine(numbers, true);
+                    DrawAlternatingLine(numbers, true);
                     break;
                 case "vlineto":
-                    drawAlternatingLine(numbers, false);
+                    DrawAlternatingLine(numbers, false);
                     break;
                 case "rrcurveto":
                     AddCommandList(Split(numbers, 6), command);
                     break;
                 case "endchar":
-                    numbers = clearStack(numbers, numbers.Count == 5 || numbers.Count == 1);
-                    closePath();
+                    numbers = ClearStack(numbers, numbers.Count == 5 || numbers.Count == 1);
+                    ClosePath();
                     if (numbers.Count == 4)
                     {
                         // deprecated "seac" operator
@@ -137,20 +143,20 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                     }
                     break;
                 case "rmoveto":
-                    numbers = clearStack(numbers, numbers.Count > 2);
-                    markPath();
+                    numbers = ClearStack(numbers, numbers.Count > 2);
+                    MarkPath();
                     AddCommand(numbers, command);
                     break;
                 case "hmoveto":
-                    numbers = clearStack(numbers, numbers.Count > 1);
-                    markPath();
+                    numbers = ClearStack(numbers, numbers.Count > 1);
+                    MarkPath();
                     AddCommand(numbers, command);
                     break;
                 case "vhcurveto":
-                    drawAlternatingCurve(numbers, false);
+                    DrawAlternatingCurve(numbers, false);
                     break;
                 case "hvcurveto":
-                    drawAlternatingCurve(numbers, true);
+                    DrawAlternatingCurve(numbers, true);
                     break;
                 case "hflex":
                     {
@@ -165,7 +171,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 case "flex":
                     {
                         List<float> first = numbers.GetRange(0, 6);
-                        List<float> second = numbers.GetRange(6, 12);
+                        List<float> second = numbers.GetRange(6, 6);
                         AddCommandList(new List<List<float>> { first, second }, new CharStringCommand(8));
                         break;
                     }
@@ -195,27 +201,27 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                         break;
                     }
                 case "hstemhm":
-                    numbers = clearStack(numbers, numbers.Count % 2 != 0);
-                    expandStemHints(numbers, true);
+                    numbers = ClearStack(numbers, numbers.Count % 2 != 0);
+                    ExpandStemHints(numbers, true);
                     break;
                 case "hintmask":
                 case "cntrmask":
-                    numbers = clearStack(numbers, numbers.Count % 2 != 0);
+                    numbers = ClearStack(numbers, numbers.Count % 2 != 0);
                     if (numbers.Count > 0)
                     {
-                        expandStemHints(numbers, false);
+                        ExpandStemHints(numbers, false);
                     }
                     break;
                 case "vstemhm":
-                    numbers = clearStack(numbers, numbers.Count % 2 != 0);
-                    expandStemHints(numbers, false);
+                    numbers = ClearStack(numbers, numbers.Count % 2 != 0);
+                    ExpandStemHints(numbers, false);
                     break;
                 case "rcurveline":
                     if (numbers.Count >= 2)
                     {
                         AddCommandList(Split(numbers.GetRange(0, numbers.Count - 2), 6),
                                 new CharStringCommand(8));
-                        AddCommand(numbers.GetRange(numbers.Count - 2, numbers.Count),
+                        AddCommand(numbers.GetRange(numbers.Count - 2, 2),
                                 new CharStringCommand(5));
                     }
                     break;
@@ -224,15 +230,15 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                     {
                         AddCommandList(Split(numbers.GetRange(0, numbers.Count - 6), 2),
                                 new CharStringCommand(5));
-                        AddCommand(numbers.GetRange(numbers.Count - 6, numbers.Count),
+                        AddCommand(numbers.GetRange(numbers.Count - 6, 6),
                                 new CharStringCommand(8));
                     }
                     break;
                 case "vvcurveto":
-                    drawCurve(numbers, false);
+                    DrawCurve(numbers, false);
                     break;
                 case "hhcurveto":
-                    drawCurve(numbers, true);
+                    DrawCurve(numbers, true);
                     break;
                 default:
                     AddCommand(numbers, command);
@@ -241,19 +247,19 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             return new List<float>(0);
         }
 
-        private List<float> clearStack(List<float> numbers, bool flag)
+        private List<float> ClearStack(List<float> numbers, bool flag)
         {
             if (type1Sequence.Count == 0)
             {
                 if (flag)
                 {
-                    AddCommand(new List<float> { (float)0f, numbers[0] + nominalWidthX },
+                    AddCommand(new List<float> { 0f, numbers[0] + nominalWidthX },
                             new CharStringCommand(13));
-                    numbers = numbers.GetRange(1, numbers.Count);
+                    numbers = numbers.GetRange(1, numbers.Count - 1);
                 }
                 else
                 {
-                    AddCommand(new List<float> { (float)0f, defWidthX }, new CharStringCommand(13));
+                    AddCommand(new List<float> { 0f, defWidthX }, new CharStringCommand(13));
                 }
             }
             return numbers;
@@ -263,21 +269,21 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 * @param numbers  
 		 * @param horizontal 
 		 */
-        private void expandStemHints(List<float> numbers, bool horizontal)
+        private void ExpandStemHints(List<float> numbers, bool horizontal)
         {
             // TODO
         }
 
-        private void markPath()
+        private void MarkPath()
         {
             if (pathCount > 0)
             {
-                closePath();
+                ClosePath();
             }
             pathCount++;
         }
 
-        private void closePath()
+        private void ClosePath()
         {
             CharStringCommand command = pathCount > 0 ? (CharStringCommand)type1Sequence
                     [type1Sequence.Count - 1]
@@ -290,18 +296,18 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             }
         }
 
-        private void drawAlternatingLine(List<float> numbers, bool horizontal)
+        private void DrawAlternatingLine(List<float> numbers, bool horizontal)
         {
             while (numbers.Count > 0)
             {
                 AddCommand(numbers.GetRange(0, 1), new CharStringCommand(
                         horizontal ? (byte)6 : (byte)7));
-                numbers = numbers.GetRange(1, numbers.Count);
+                numbers = numbers.GetRange(1, numbers.Count - 1);
                 horizontal = !horizontal;
             }
         }
 
-        private void drawAlternatingCurve(List<float> numbers, bool horizontal)
+        private void DrawAlternatingCurve(List<float> numbers, bool horizontal)
         {
             while (numbers.Count >= 4)
             {
@@ -316,12 +322,12 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                     AddCommand(new List<float> { 0, numbers[0], numbers[1], numbers[2], numbers[3], last ? numbers[4] : 0 },
                             new CharStringCommand(8));
                 }
-                numbers = numbers.GetRange(last ? 5 : 4, numbers.Count);
+                numbers = numbers.GetRange(last ? 5 : 4, numbers.Count - (last ? 5 : 4));
                 horizontal = !horizontal;
             }
         }
 
-        private void drawCurve(List<float> numbers, bool horizontal)
+        private void DrawCurve(List<float> numbers, bool horizontal)
         {
             while (numbers.Count >= 4)
             {
@@ -337,7 +343,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                     AddCommand(new List<float> { first ? numbers[0] : 0, numbers[first ? 1 : 0], numbers[first ? 2 : 1], numbers[first ? 3 : 2], 0, numbers[first ? 4 : 3] },
                             new CharStringCommand(8));
                 }
-                numbers = numbers.GetRange(first ? 5 : 4, numbers.Count);
+                numbers = numbers.GetRange(first ? 5 : 4, numbers.Count - (first ? 5 : 4));
             }
         }
 
@@ -358,7 +364,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             List<List<E>> result = new List<List<E>>();
             for (int i = 0; i < list.Count / size; i++)
             {
-                result.Add(list.GetRange(i * size, (i + 1) * size));
+                result.Add(list.GetRange(i * size, size));
             }
             return result;
         }

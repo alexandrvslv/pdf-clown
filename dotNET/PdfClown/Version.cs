@@ -28,6 +28,7 @@ using PdfClown.Util.Metadata;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace PdfClown
@@ -98,7 +99,7 @@ namespace PdfClown
 
         public float GetFloat()
         {
-            return float.Parse($"{Major}.{Minor}");
+            return float.Parse($"{Major}.{Minor}", CultureInfo.InvariantCulture);
         }
         #endregion
         #endregion

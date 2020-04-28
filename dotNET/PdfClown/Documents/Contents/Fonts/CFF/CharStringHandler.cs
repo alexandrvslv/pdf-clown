@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,7 +30,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      * @author John Hewson
      * 
      */
-    public abstract class CharStringHandler
+    public sealed class CharStringHandler
     {
         /**
 		 * Handler for a sequence of CharStringCommands.
@@ -37,21 +38,22 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 * @param sequence of CharStringCommands
 		 *
 		 */
-        public List<float> HandleSequence(List<object> sequence)
+        public List<float> HandleSequence(List<object> sequence, HandleCommand handleCommand)
         {
             Stack<float> stack = new Stack<float>();
-            foreach (var obj in sequence)
+            for (int i = 0; i < sequence.Count; i++)
             {
+                var obj = sequence[i];
                 if (obj is CharStringCommand charStringCommand)
                 {
-                    List<float> results = HandleCommand(stack.ToList(), charStringCommand);
+                    List<float> results = handleCommand(stack.ToList(), charStringCommand);
                     stack.Clear();  // this is basically returning the new stack
                     foreach (var item in results)
                         stack.Push(item);
                 }
                 else
                 {
-                    stack.Push((float)obj);
+                    stack.Push(Convert.ToSingle(obj));
                 }
             }
             return stack.ToList();
@@ -64,6 +66,6 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
          * @param command the CharStringCommand
          * @return a list of commands. This can be empty but never be null.
          */
-        public abstract List<float> HandleCommand(List<float> numbers, CharStringCommand command);
+        public delegate List<float> HandleCommand(List<float> numbers, CharStringCommand command);
     }
 }

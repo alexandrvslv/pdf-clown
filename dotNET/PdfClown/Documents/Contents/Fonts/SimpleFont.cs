@@ -63,7 +63,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         protected SimpleFont(PdfDirectObject baseObject) : base(baseObject)
         {
-            
+
         }
         #endregion
 
@@ -72,7 +72,10 @@ namespace PdfClown.Documents.Contents.Fonts
         */
         public Encoding Encoding
         {
-            get => encoding;
+            get
+            {
+                return encoding;
+            }
         }
 
         /**
@@ -215,25 +218,12 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override int ToUnicode(int code, GlyphMapping customGlyphList)
         {
-            // allow the glyph list to be overridden for the purpose of extracting Unicode
-            // we only do this when the font's glyph list is the AGL, to avoid breaking Zapf Dingbats
-            GlyphMapping unicodeGlyphList;
-            if (this.glyphList == GlyphMapping.Default)
-            {
-                unicodeGlyphList = customGlyphList;
-            }
-            else
-            {
-                unicodeGlyphList = this.glyphList;
-            }
-
             // first try to use a ToUnicode CMap
             var unicode = base.ToUnicode(code);
             if (unicode > -1)
             {
                 return unicode;
             }
-
             // if the font is a "simple font" and uses MacRoman/MacExpert/WinAnsi[Encoding]
             // or has Differences with names from only Adobe Standard and/or Symbol, then:
             //
@@ -244,6 +234,19 @@ namespace PdfClown.Documents.Contents.Fonts
             if (encoding != null)
             {
                 name = encoding.GetName(code);
+
+                // allow the glyph list to be overridden for the purpose of extracting Unicode
+                // we only do this when the font's glyph list is the AGL, to avoid breaking Zapf Dingbats
+                GlyphMapping unicodeGlyphList;
+                if (this.glyphList == GlyphMapping.Default)
+                {
+                    unicodeGlyphList = customGlyphList;
+                }
+                else
+                {
+                    unicodeGlyphList = this.glyphList;
+                }
+
                 var temp = unicodeGlyphList.ToUnicode(name);
                 if (temp != null)
                 {

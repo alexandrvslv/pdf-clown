@@ -226,6 +226,24 @@ namespace PdfClown.Documents.Contents.Fonts
 
         internal PdfType0Font(PdfDirectObject baseObject) : base(baseObject)
         {
+            gsubData = DefaultGsubData.NO_DATA_FOUND;
+            cmapLookup = null;
+
+            var fonts = Dictionary.Resolve(PdfName.DescendantFonts);
+            if (!(fonts is PdfArray))
+            {
+                throw new IOException("Missing descendant font array");
+            }
+            var descendantFonts = (PdfArray)fonts;
+            if (descendantFonts.Count == 0)
+            {
+                throw new IOException("Descendant font array is empty");
+            }
+            var descendantFontDictBase = descendantFonts.Resolve(0);
+            if (!(descendantFontDictBase is PdfDictionary))
+            {
+                throw new IOException("Missing descendant font dictionary");
+            }
             ReadEncoding();
         }
         #endregion

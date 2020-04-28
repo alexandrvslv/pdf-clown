@@ -81,7 +81,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 * @return the byte
 		 * @throws IOException if an error occurs during reading
 		 */
-        public byte ReadByte()
+        public byte ReadUnsignedByte()
         {
             try
             {
@@ -97,28 +97,59 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         }
 
         /**
-		 * Read one single unsigned byte from the buffer.
-		 * @return the unsigned byte as int
-		 * @throws IOException if an error occurs during reading
-		 */
-        public byte ReadUnsignedByte()
-        {
-            return ReadByte();
-        }
-
-        /**
 		 * Peeks one single unsigned byte from the buffer.
 		 * @return the unsigned byte as int
 		 * @throws IOException if an error occurs during reading
 		 */
         public byte PeekUnsignedByte(int offset)
         {
-            var b = Peek(offset);
-            if (b < 0)
+            try
             {
+                return inputBuffer[bufferPosition + offset];
+            }
+            catch (Exception re)
+            {
+                Debug.WriteLine("debug: An error occurred peeking at offset " + offset + " - returning -1", re);
                 throw new EndOfStreamException();
             }
-            return b;
+        }
+
+        /**
+		 * Read one single signed byte from the buffer.
+		 * @return the signed byte as int
+		 * @throws IOException if an error occurs during reading
+		 */
+        public sbyte ReadSignedByte()
+        {
+            try
+            {
+                sbyte value = unchecked((sbyte)inputBuffer[bufferPosition]);
+                bufferPosition++;
+                return value;
+            }
+            catch (Exception re)
+            {
+                Debug.WriteLine("debug: An error occurred reading a byte - returning -1", re);
+                throw new EndOfStreamException();
+            }
+        }
+
+        /**
+		 * Peeks one single signed byte from the buffer.
+		 * @return the signed byte as int
+		 * @throws IOException if an error occurs during reading
+		 */
+        public sbyte PeekSignedByte(int offset)
+        {
+            try
+            {
+                return unchecked((sbyte)inputBuffer[bufferPosition + offset]);
+            }
+            catch (Exception re)
+            {
+                Debug.WriteLine("debug: An error occurred peeking at offset " + offset + " - returning -1", re);
+                throw new EndOfStreamException();
+            }
         }
 
         /**
@@ -128,7 +159,10 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 */
         public short ReadShort()
         {
-            return (short)ReadUnsignedShort();
+            var b1 = ReadUnsignedByte();
+            var b2 = ReadUnsignedByte();
+
+            return (short)(b1 << 8 | b2);
         }
 
         /**
@@ -138,8 +172,8 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 */
         public ushort ReadUnsignedShort()
         {
-            var b1 = Read();
-            var b2 = Read();
+            var b1 = ReadUnsignedByte();
+            var b2 = ReadUnsignedByte();
 
             return (ushort)(b1 << 8 | b2);
         }
@@ -151,10 +185,10 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 */
         public int ReadInt()
         {
-            var b1 = Read();
-            var b2 = Read();
-            var b3 = Read();
-            var b4 = Read();
+            var b1 = ReadUnsignedByte();
+            var b2 = ReadUnsignedByte();
+            var b3 = ReadUnsignedByte();
+            var b4 = ReadUnsignedByte();
             return b1 << 24 | b2 << 16 | b3 << 8 | b4;
         }
 
@@ -176,11 +210,11 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             return bytes;
         }
 
-        private byte Read()
+        public int Read()
         {
             try
             {
-                byte value = inputBuffer[bufferPosition];
+                var value = inputBuffer[bufferPosition] & 0xff;
                 bufferPosition++;
                 return value;
             }
@@ -191,11 +225,11 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             }
         }
 
-        private byte Peek(int offset)
+        public int Peek(int offset)
         {
             try
             {
-                return inputBuffer[bufferPosition + offset];
+                return inputBuffer[bufferPosition + offset] & 0xff;
             }
             catch (Exception re)
             {

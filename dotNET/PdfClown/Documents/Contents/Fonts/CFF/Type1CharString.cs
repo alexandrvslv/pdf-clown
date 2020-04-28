@@ -29,7 +29,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
      * @author Villu Ruusmann
      * @author John Hewson
      */
-    public class Type1CharString : CharStringHandler
+    public class Type1CharString
     {
         private IType1CharStringReader font;
         private readonly string fontName;
@@ -73,9 +73,14 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         }
 
         // todo: NEW name (or CID as hex)
-        public string getName()
+        public string Name
         {
-            return glyphName;
+            get => glyphName;
+        }
+
+        public string FontName
+        {
+            get => fontName;
         }
 
         /**
@@ -139,188 +144,172 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
          */
         private void Render()
         {
-            path = new SKPath();
+            path = new SKPath() { FillType = SKPathFillType.EvenOdd };
             leftSideBearing = new SKPoint(0, 0);
             width = 0;
-            CharStringHandler handler = (CharStringHandler)this;
-            handler.HandleSequence(type1Sequence);
+            CharStringHandler handler = new CharStringHandler();
+            handler.HandleSequence(type1Sequence, RenderHandleCommand);
         }
 
-        public override List<float> HandleCommand(List<float> numbers, CharStringCommand command)
+        public List<float> RenderHandleCommand(List<float> numbers, CharStringCommand command)
         {
             commandCount++;
-            string name = CharStringCommand.TYPE1_VOCABULARY[command.Key];
+            CharStringCommand.TYPE1_VOCABULARY.TryGetValue(command.Key, out string name);
 
-            if (string.Equals("rmoveto", name, StringComparison.Ordinal))
+            switch (name)
             {
-                if (numbers.Count >= 2)
-                {
-                    if (isFlex)
+                case "rmoveto":
+                    if (numbers.Count >= 2)
                     {
-                        flexPoints.Add(new SKPoint(numbers[0], numbers[1]));
+                        if (isFlex)
+                        {
+                            flexPoints.Add(new SKPoint(numbers[0], numbers[1]));
+                        }
+                        else
+                        {
+                            rmoveTo(numbers[0], numbers[1]);
+                        }
+                    }
+                    break;
+                case "vmoveto":
+                    if (numbers.Count > 0)
+                    {
+                        if (isFlex)
+                        {
+                            // not in the Type 1 spec, but exists in some fonts
+                            flexPoints.Add(new SKPoint(0f, numbers[0]));
+                        }
+                        else
+                        {
+                            rmoveTo(0, numbers[0]);
+                        }
+                    }
+                    break;
+                case "hmoveto":
+                    if (numbers.Count > 0)
+                    {
+                        if (isFlex)
+                        {
+                            // not in the Type 1 spec, but exists in some fonts
+                            flexPoints.Add(new SKPoint(numbers[0], 0f));
+                        }
+                        else
+                        {
+                            rmoveTo(numbers[0], 0);
+                        }
+                    }
+                    break;
+                case "rlineto":
+                    if (numbers.Count >= 2)
+                    {
+                        rlineTo(numbers[0], numbers[1]);
+                    }
+                    break;
+                case "hlineto":
+                    if (numbers.Count > 0)
+                    {
+                        rlineTo(numbers[0], 0);
+                    }
+                    break;
+                case "vlineto":
+                    if (numbers.Count > 0)
+                    {
+                        rlineTo(0, numbers[0]);
+                    }
+                    break;
+                case "rrcurveto":
+                    if (numbers.Count >= 6)
+                    {
+                        rrcurveTo(numbers[0], numbers[1], numbers[2],
+                                numbers[3], numbers[4], numbers[5]);
+                    }
+                    break;
+                case "closepath":
+                    closepath();
+                    break;
+                case "sbw":
+                    if (numbers.Count >= 3)
+                    {
+                        leftSideBearing = new SKPoint(numbers[0], numbers[1]);
+                        width = (int)numbers[2];
+                        current = leftSideBearing;
+                    }
+                    break;
+                case "hsbw":
+                    if (numbers.Count >= 2)
+                    {
+                        leftSideBearing = new SKPoint(numbers[0], 0);
+                        width = (int)numbers[1];
+                        current = leftSideBearing;
+                    }
+                    break;
+                case "vhcurveto":
+                    if (numbers.Count >= 4)
+                    {
+                        rrcurveTo(0, numbers[0], numbers[1], numbers[2], numbers[3], 0);
+                    }
+                    break;
+                case "hvcurveto":
+                    if (numbers.Count >= 4)
+                    {
+                        rrcurveTo(numbers[0], 0, numbers[1], numbers[2], 0, numbers[3]);
+                    }
+                    break;
+                case "seac":
+                    if (numbers.Count >= 5)
+                    {
+                        seac(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]);
+                    }
+                    break;
+                case "setcurrentpoint":
+                    if (numbers.Count >= 2)
+                    {
+                        SetCurrentPoint(numbers[0], numbers[1]);
+                    }
+                    break;
+                case "callothersubr":
+                    if (numbers.Count > 0)
+                    {
+                        callothersubr((int)numbers[0]);
+                    }
+                    break;
+                case "div":
+                    float b = numbers[numbers.Count - 1];
+                    float a = numbers[numbers.Count - 2];
+
+                    float result = a / b;
+
+                    List<float> list = new List<float>(numbers);
+                    list.RemoveAt(list.Count - 1);
+                    list.RemoveAt(list.Count - 1);
+                    list.Add(result);
+                    return list;
+                case "hstem":
+                case "vstem":
+                case "hstem3":
+                case "vstem3":
+                case "dotsection":
+                    // ignore hints
+                    break;
+                case "endchar":
+                    // end
+                    break;
+                case "return":
+                    // indicates an invalid charstring
+                    Debug.WriteLine($"warn: Unexpected charstring command: {command.Key} in glyph {glyphName} of font {fontName}");
+                    break;
+                default:
+                    if (name != null)
+                    {
+                        // indicates a PDFBox bug
+                        throw new ArgumentException($"Unhandled command: {name}");
                     }
                     else
                     {
-                        rmoveTo(numbers[0], numbers[1]);
+                        // indicates an invalid charstring
+                        Debug.WriteLine($"warn: Unknown charstring command: {command.Key} in glyph {glyphName} of font {fontName}");
                     }
-                }
-            }
-            else if (string.Equals("vmoveto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count > 0)
-                {
-                    if (isFlex)
-                    {
-                        // not in the Type 1 spec, but exists in some fonts
-                        flexPoints.Add(new SKPoint(0f, numbers[0]));
-                    }
-                    else
-                    {
-                        rmoveTo(0, numbers[0]);
-                    }
-                }
-            }
-            else if (string.Equals("hmoveto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count > 0)
-                {
-                    if (isFlex)
-                    {
-                        // not in the Type 1 spec, but exists in some fonts
-                        flexPoints.Add(new SKPoint(numbers[0], 0f));
-                    }
-                    else
-                    {
-                        rmoveTo(numbers[0], 0);
-                    }
-                }
-            }
-            else if (string.Equals("rlineto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 2)
-                {
-                    rlineTo(numbers[0], numbers[1]);
-                }
-            }
-            else if (string.Equals("hlineto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count > 0)
-                {
-                    rlineTo(numbers[0], 0);
-                }
-            }
-            else if (string.Equals("vlineto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count > 0)
-                {
-                    rlineTo(0, numbers[0]);
-                }
-            }
-            else if (string.Equals("rrcurveto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 6)
-                {
-                    rrcurveTo(numbers[0], numbers[1], numbers[2],
-                            numbers[3], numbers[4], numbers[5]);
-                }
-            }
-            else if (string.Equals("closepath", name, StringComparison.Ordinal))
-            {
-                closepath();
-            }
-            else if (string.Equals("sbw", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 3)
-                {
-                    leftSideBearing = new SKPoint(numbers[0], numbers[1]);
-                    width = (int)numbers[2];
-                    current = leftSideBearing;
-                }
-            }
-            else if (string.Equals("hsbw", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 2)
-                {
-                    leftSideBearing = new SKPoint(numbers[0], 0);
-                    width = (int)numbers[1];
-                    current = leftSideBearing;
-                }
-            }
-            else if (string.Equals("vhcurveto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 4)
-                {
-                    rrcurveTo(0, numbers[0], numbers[1], numbers[2], numbers[3], 0);
-                }
-            }
-            else if (string.Equals("hvcurveto", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 4)
-                {
-                    rrcurveTo(numbers[0], 0, numbers[1], numbers[2], 0, numbers[3]);
-                }
-            }
-            else if (string.Equals("seac", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 5)
-                {
-                    seac(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]);
-                }
-            }
-            else if (string.Equals("setcurrentpoint", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count >= 2)
-                {
-                    SetCurrentPoint(numbers[0], numbers[1]);
-                }
-            }
-            else if (string.Equals("callothersubr", name, StringComparison.Ordinal))
-            {
-                if (numbers.Count > 0)
-                {
-                    callothersubr((int)numbers[0]);
-                }
-            }
-            else if (string.Equals("div", name, StringComparison.Ordinal))
-            {
-                float b = numbers[numbers.Count - 1];
-                float a = numbers[numbers.Count - 2];
-
-                float result = a / b;
-
-                List<float> list = new List<float>(numbers);
-                list.RemoveAt(list.Count - 1);
-                list.RemoveAt(list.Count - 1);
-                list.Add(result);
-                return list;
-            }
-            else if (string.Equals("hstem", name, StringComparison.Ordinal)
-                || string.Equals("vstem", name, StringComparison.Ordinal)
-                || string.Equals("hstem3", name, StringComparison.Ordinal)
-                || string.Equals("vstem3", name, StringComparison.Ordinal)
-                || string.Equals("dotsection", name, StringComparison.Ordinal))
-            {
-                // ignore hints
-            }
-            else if (string.Equals("endchar", name, StringComparison.Ordinal))
-            {
-                // end
-            }
-            else if (string.Equals("return", name, StringComparison.Ordinal))
-            {
-                // indicates an invalid charstring
-                Debug.WriteLine("warn: Unexpected charstring command: " + command.Key + " in glyph " + glyphName + " of font " + fontName);
-            }
-            else if (name != null)
-            {
-                // indicates a PDFBox bug
-                throw new ArgumentException("Unhandled command: " + name);
-            }
-            else
-            {
-                // indicates an invalid charstring
-                Debug.WriteLine("warn: Unknown charstring command: " + command.Key + " in glyph " + glyphName +
-                         " of font " + fontName);
+                    break;
             }
             return new List<float>();
         }
@@ -405,7 +394,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             float y = (float)current.Y + dy;
             if (path.PointCount == 0)
             {
-                Debug.Write("warning: rlineTo without initial moveTo in font " + fontName + ", glyph " + glyphName);
+                Debug.WriteLine($"warn: rlineTo without initial moveTo in font {fontName}, glyph {glyphName}");
                 path.MoveTo(x, y);
             }
             else
@@ -428,10 +417,10 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
             float y3 = y2 + dy3;
             if (path.PointCount == 0)
             {
-                Debug.Write("warning: rrcurveTo without initial moveTo in font " + fontName + ", glyph " + glyphName);
-                path.MoveTo(x3, y3);
+                Debug.WriteLine($"warn: rrcurveTo without initial moveTo in font {fontName}, glyph {glyphName}");
+                path.MoveTo(x1, y1);
             }
-            else
+
             {
                 path.CubicTo(x1, y1, x2, y2, x3, y3);
             }
@@ -445,7 +434,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         {
             if (path.PointCount == 0)
             {
-                Debug.Write("warning: closepath without initial moveTo in font " + fontName + ", glyph " + glyphName);
+                Debug.WriteLine($"warn: closepath without initial moveTo in font {fontName}, glyph {glyphName}");
             }
             else
             {

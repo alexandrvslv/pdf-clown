@@ -175,6 +175,16 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             return array;
         }
 
+        public short[] ReadSignedShortArray(int length)
+        {
+            short[] array = new short[length];
+            for (int i = 0; i < length; i++)
+            {
+                array[i] = ReadSignedShort();
+            }
+            return array;
+        }
+
         /**
          * Read an signed short.
          * 

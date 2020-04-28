@@ -85,19 +85,19 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         {
             data.Seek(cmap.Offset + subTableOffset);
             int subtableFormat = data.ReadUnsignedShort();
-            long length;
-            long version;
+            uint length;
+            uint language;
             if (subtableFormat < 8)
             {
                 length = data.ReadUnsignedShort();
-                version = data.ReadUnsignedShort();
+                language = data.ReadUnsignedShort();
             }
             else
             {
                 // read an other UnsignedShort to read a Fixed32
                 data.ReadUnsignedShort();
                 length = data.ReadUnsignedInt();
-                version = data.ReadUnsignedInt();
+                language = data.ReadUnsignedInt();
             }
 
             switch (subtableFormat)
@@ -410,10 +410,10 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             var searchRange = data.ReadUnsignedShort();
             var entrySelector = data.ReadUnsignedShort();
             var rangeShift = data.ReadUnsignedShort();
-            var endCount = data.ReadUnsignedShortArray(segCount);
+            var endCode = data.ReadUnsignedShortArray(segCount);
             var reservedPad = data.ReadUnsignedShort();
-            var startCount = data.ReadUnsignedShortArray(segCount);
-            var idDelta = data.ReadUnsignedShortArray(segCount);
+            var startCode = data.ReadUnsignedShortArray(segCount);
+            var idDelta = data.ReadSignedShortArray(segCount);
             var idRangeOffsetPosition = data.CurrentPosition;
             var idRangeOffset = data.ReadUnsignedShortArray(segCount);
 
@@ -422,8 +422,8 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
             for (int i = 0; i < segCount; i++)
             {
-                int start = startCount[i];
-                int end = endCount[i];
+                int start = startCode[i];
+                int end = endCode[i];
                 int delta = idDelta[i];
                 int rangeOffset = idRangeOffset[i];
                 long segmentRangeOffset = idRangeOffsetPosition + (i * 2) + rangeOffset;

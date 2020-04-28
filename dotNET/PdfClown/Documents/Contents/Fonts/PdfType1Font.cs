@@ -143,81 +143,6 @@ namespace PdfClown.Documents.Contents.Fonts
         { }
 
         internal PdfType1Font(PdfDirectObject baseObject) : base(baseObject)
-        { }
-
-        public PdfType1Font(Document context, string baseFont) : base(context, baseFont)
-        {
-            Dictionary[PdfName.Subtype] = PdfName.Type1;
-            Dictionary[PdfName.BaseFont] = PdfName.Get(baseFont);
-            switch (baseFont)
-            {
-                case "ZapfDingbats":
-                    encoding = ZapfDingbatsEncoding.Instance;
-                    break;
-                case "Symbol":
-                    encoding = SymbolEncoding.Instance;
-                    break;
-                default:
-                    encoding = WinAnsiEncoding.Instance;
-                    Dictionary[PdfName.Encoding] = PdfName.WinAnsiEncoding;
-                    break;
-            }
-
-            // standard 14 fonts may be accessed concurrently, as they are singletons
-            codeToBytesMap = new Dictionary<int, byte[]>();
-
-            // todo: could load the PFB font here if we wanted to support Standard 14 embedding
-            type1font = null;
-            FontMapping<BaseFont> mapping = FontMappers.Instance.GetBaseFont(BaseFont, FontDescriptor);
-            genericFont = mapping.Font;
-
-            if (mapping.IsFallback)
-            {
-                string fontName;
-                try
-                {
-                    fontName = genericFont.Name;
-                }
-                catch (IOException e)
-                {
-                    Debug.WriteLine($"debug: Couldn't get font name - setting to '?' {e}");
-                    fontName = "?";
-                }
-                Debug.WriteLine($"warn: Using fallback font {fontName} for base font {BaseFont}");
-            }
-            isEmbedded = false;
-            isDamaged = false;
-            fontMatrixTransform = SKMatrix.MakeIdentity();
-        }
-
-        public PdfType1Font(Document doc, Bytes.IInputStream pfbIn) : base(doc)
-        {
-            PdfType1FontEmbedder embedder = new PdfType1FontEmbedder(doc, Dictionary, pfbIn, null);
-            encoding = embedder.FontEncoding;
-            glyphList = embedder.GlyphList;
-            type1font = embedder.Type1Font;
-            genericFont = embedder.Type1Font;
-            isEmbedded = true;
-            isDamaged = false;
-            fontMatrixTransform = SKMatrix.MakeIdentity();
-            codeToBytesMap = new Dictionary<int, byte[]>();
-        }
-
-        public PdfType1Font(Document doc, Bytes.IInputStream pfbIn, Encoding encoding) : base(doc)
-        {
-            PdfType1FontEmbedder embedder = new PdfType1FontEmbedder(doc, Dictionary, pfbIn, encoding);
-            this.encoding = encoding;
-            glyphList = embedder.GlyphList;
-            type1font = embedder.Type1Font;
-            genericFont = embedder.Type1Font;
-            isEmbedded = true;
-            isDamaged = false;
-            fontMatrixTransform = SKMatrix.MakeIdentity();
-            codeToBytesMap = new Dictionary<int, byte[]>();
-        }
-
-        public PdfType1Font(PdfDictionary fontDictionary)
-            : base(fontDictionary)
         {
             codeToBytesMap = new Dictionary<int, byte[]>();
 
@@ -303,6 +228,77 @@ namespace PdfClown.Documents.Contents.Fonts
             ReadEncoding();
             fontMatrixTransform = FontMatrix;
             fontMatrixTransform.SetScaleTranslate(1000, 1000, 0, 0);
+        }
+
+        public PdfType1Font(Document context, string baseFont) : base(context, baseFont)
+        {
+            Dictionary[PdfName.Subtype] = PdfName.Type1;
+            Dictionary[PdfName.BaseFont] = PdfName.Get(baseFont);
+            switch (baseFont)
+            {
+                case "ZapfDingbats":
+                    encoding = ZapfDingbatsEncoding.Instance;
+                    break;
+                case "Symbol":
+                    encoding = SymbolEncoding.Instance;
+                    break;
+                default:
+                    encoding = WinAnsiEncoding.Instance;
+                    Dictionary[PdfName.Encoding] = PdfName.WinAnsiEncoding;
+                    break;
+            }
+
+            // standard 14 fonts may be accessed concurrently, as they are singletons
+            codeToBytesMap = new Dictionary<int, byte[]>();
+
+            // todo: could load the PFB font here if we wanted to support Standard 14 embedding
+            type1font = null;
+            FontMapping<BaseFont> mapping = FontMappers.Instance.GetBaseFont(BaseFont, FontDescriptor);
+            genericFont = mapping.Font;
+
+            if (mapping.IsFallback)
+            {
+                string fontName;
+                try
+                {
+                    fontName = genericFont.Name;
+                }
+                catch (IOException e)
+                {
+                    Debug.WriteLine($"debug: Couldn't get font name - setting to '?' {e}");
+                    fontName = "?";
+                }
+                Debug.WriteLine($"warn: Using fallback font {fontName} for base font {BaseFont}");
+            }
+            isEmbedded = false;
+            isDamaged = false;
+            fontMatrixTransform = SKMatrix.MakeIdentity();
+        }
+
+        public PdfType1Font(Document doc, Bytes.IInputStream pfbIn) : base(doc)
+        {
+            PdfType1FontEmbedder embedder = new PdfType1FontEmbedder(doc, Dictionary, pfbIn, null);
+            encoding = embedder.FontEncoding;
+            glyphList = embedder.GlyphList;
+            type1font = embedder.Type1Font;
+            genericFont = embedder.Type1Font;
+            isEmbedded = true;
+            isDamaged = false;
+            fontMatrixTransform = SKMatrix.MakeIdentity();
+            codeToBytesMap = new Dictionary<int, byte[]>();
+        }
+
+        public PdfType1Font(Document doc, Bytes.IInputStream pfbIn, Encoding encoding) : base(doc)
+        {
+            PdfType1FontEmbedder embedder = new PdfType1FontEmbedder(doc, Dictionary, pfbIn, encoding);
+            this.encoding = encoding;
+            glyphList = embedder.GlyphList;
+            type1font = embedder.Type1Font;
+            genericFont = embedder.Type1Font;
+            isEmbedded = true;
+            isDamaged = false;
+            fontMatrixTransform = SKMatrix.MakeIdentity();
+            codeToBytesMap = new Dictionary<int, byte[]>();
         }
 
         #endregion

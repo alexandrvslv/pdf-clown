@@ -16,7 +16,7 @@
  */
 namespace PdfClown.Documents.Contents.Fonts.TTF
 {
-
+    using System.Collections.Generic;
     using System.IO;
 
     /**
@@ -31,24 +31,12 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public const string TAG = "glyf";
 
-        private GlyphData[] glyphs;
+        private Dictionary<int, GlyphData> glyphs = new Dictionary<int, GlyphData>();
 
         // lazy table reading
         private TTFDataStream data;
         private IndexToLocationTable loca;
         private int numGlyphs;
-
-        private int cached = 0;
-
-        /**
-         * Don't even bother to cache huge fonts.
-         */
-        private static readonly int MAX_CACHE_SIZE = 5000;
-
-        /**
-         * Don't cache more glyphs than this.
-         */
-        private static readonly int MAX_CACHED_GLYPHS = 100;
 
         public GlyphTable(TrueTypeFont font) : base(font)
         {
@@ -66,11 +54,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             loca = ttf.IndexToLocation;
             numGlyphs = ttf.NumberOfGlyphs;
 
-            if (numGlyphs < MAX_CACHE_SIZE)
-            {
-                // don't cache the huge fonts to save memory
-                glyphs = new GlyphData[numGlyphs];
-            }
+            glyphs = new Dictionary<int, GlyphData>();
 
             // we don't actually read the complete table here because it can contain tens of thousands of glyphs
             this.data = data;
@@ -82,7 +66,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          *
          * @ If there is an error reading the data.
          */
-        public GlyphData[] Glyphs
+        public Dictionary<int, GlyphData> Glyphs
         {
             get
             {
@@ -101,7 +85,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                     long offset = Offset;
                     if (glyphs == null)
                     {
-                        glyphs = new GlyphData[numGlyphs];
+                        glyphs = new Dictionary<int, GlyphData>();
                     }
 
                     for (int gid = 0; gid < numGlyphs; gid++)
@@ -117,7 +101,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                         {
                             continue;
                         }
-                        if (glyphs[gid] != null)
+                        if (glyphs.TryGetValue(gid, out _))
                         {
                             // already cached
                             continue;
@@ -125,10 +109,6 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
 
                         data.Seek(offset + offsets[gid]);
 
-                        if (glyphs[gid] == null)
-                        {
-                            ++cached;
-                        }
                         glyphs[gid] = GetGlyphData(gid);
                     }
                     initialized = true;
@@ -151,9 +131,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 return null;
             }
 
-            if (glyphs != null && glyphs[gid] != null)
+            if (glyphs != null && glyphs.TryGetValue(gid, out var gdata))
             {
-                return glyphs[gid];
+                return gdata;
             }
 
             // PDFBOX-4219: synchronize on data because it is accessed by several threads
@@ -179,10 +159,9 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 // restore
                 data.Seek(currentPosition);
 
-                if (glyphs != null && glyphs[gid] == null && cached < MAX_CACHED_GLYPHS)
+                if (glyphs != null)
                 {
                     glyphs[gid] = glyph;
-                    ++cached;
                 }
 
                 return glyph;

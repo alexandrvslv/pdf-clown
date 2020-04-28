@@ -77,7 +77,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             {
                 ReadInstructions(bais, (bais.ReadUnsignedShort()));
             }
-            initDescriptions();
+            InitDescriptions();
         }
 
         /**
@@ -274,7 +274,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             return null;
         }
 
-        private void initDescriptions()
+        private void InitDescriptions()
         {
             foreach (GlyfCompositeComp component in components)
             {
