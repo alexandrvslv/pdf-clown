@@ -612,6 +612,8 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override SKPath GetPath(string name)
         {
+            if (name == null)
+                return null;
             // Acrobat does not draw .notdef for Type 1 fonts, see PDFBOX-2421
             // I suspect that it does do this for embedded fonts though, but this is untested
             if (name.Equals(".notdef") && !isEmbedded)

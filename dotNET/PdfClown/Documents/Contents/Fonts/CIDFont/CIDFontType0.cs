@@ -150,7 +150,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 isDamaged = fontIsDamaged;
             }
             fontMatrixTransform = FontMatrix;
-            fontMatrixTransform.SetScaleTranslate(1000, 1000, 0, 0);
+            SKMatrix.PostConcat(ref fontMatrixTransform, SKMatrix.MakeScale(1000, 1000));
         }
 
         public override SKMatrix FontMatrix

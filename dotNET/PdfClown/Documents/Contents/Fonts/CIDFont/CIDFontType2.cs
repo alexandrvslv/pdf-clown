@@ -182,7 +182,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 if (fontMatrix == null)
                 {
                     // 1000 upem, this is not strictly true
-                    fontMatrix = new SKMatrix(0.001f, 0, 0, 0.001f, 0, 0, 0, 0, 1);
+                    fontMatrix = new SKMatrix(0.001f, 0, 0, 0, 0.001f, 0, 0, 0, 1);
                 }
                 return (SKMatrix)fontMatrix;
             }
@@ -317,7 +317,7 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             // todo: really we want the BBox, (for text extraction:)
             return (ttf.HorizontalHeader.Ascender + -ttf.HorizontalHeader.Descender);
-                    /// ttf.UnitsPerEm; // todo: shouldn't this be the yMax/yMin?
+            /// ttf.UnitsPerEm; // todo: shouldn't this be the yMax/yMin?
         }
 
         override public float GetWidthFromFont(int code)
