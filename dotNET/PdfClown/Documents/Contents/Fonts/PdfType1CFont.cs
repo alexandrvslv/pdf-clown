@@ -245,14 +245,23 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override SKPath GetNormalizedPath(int code)
         {
-            string name = Encoding.GetName(code);
-            if (name == null)
-                return null;
-            name = GetNameInFont(name);
-            SKPath path = GetPath(name);
-            if (path == null)
+            if (!cacheGlyphs.TryGetValue(code, out SKPath path))
             {
-                return GetPath(".notdef");
+                string name = Encoding.GetName(code);
+                if (name == null)
+                {
+                    path = null;
+                }
+                else
+                {
+                    name = GetNameInFont(name);
+                    path = GetPath(name);
+                }
+                if (path == null)
+                {
+                    path = GetPath(".notdef");
+                }
+                cacheGlyphs[code] = path;
             }
             return path;
         }

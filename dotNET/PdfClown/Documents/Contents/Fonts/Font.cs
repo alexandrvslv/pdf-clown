@@ -163,11 +163,11 @@ namespace PdfClown.Documents.Contents.Fonts
         protected FontMetrics afmStandard14;
         protected FontDescriptor fontDescriptor;
         protected readonly Dictionary<int, float> codeToWidthMap;
+        protected readonly Dictionary<int, SKPath> cacheGlyphs = new Dictionary<int, SKPath>();
         protected SKTypeface typeface;
         protected List<float> widths;
         protected float avgFontWidth;
         protected float fontWidthOfSpace = -1f;
-
         /**
           <summary>Maximum character code byte size.</summary>
         */

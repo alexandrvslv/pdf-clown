@@ -389,12 +389,12 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override SKPath GetPath(int code)
         {
-            if (ttf is OpenTypeFont && ((OpenTypeFont)ttf).IsPostScript)
+            if (ttf is OpenTypeFont otf && otf.IsPostScript)
             {
                 // we're not supposed to have CFF fonts inside PDCIDFontType2, but if we do,
                 // then we treat their CIDs as GIDs, see PDFBOX-3344
                 int cid = CodeToGID(code);
-                Type2CharString charstring = ((OpenTypeFont)ttf).CFF.Font.GetType2CharString(cid);
+                Type2CharString charstring = otf.CFF.Font.GetType2CharString(cid);
                 return charstring.Path;
             }
             else
@@ -411,31 +411,30 @@ namespace PdfClown.Documents.Contents.Fonts
 
         override public SKPath GetNormalizedPath(int code)
         {
-            bool hasScaling = ttf.UnitsPerEm != 1000;
-            float scale = 1000f / ttf.UnitsPerEm;
-            int gid = CodeToGID(code);
-
-            SKPath path = GetPath(code);
-
-            // Acrobat only draws GID 0 for embedded CIDFonts, see PDFBOX-2372
-            if (gid == 0 && !IsEmbedded)
+            if (!cacheGlyphs.TryGetValue(code, out SKPath path))
             {
-                path = null;
-            }
+                bool hasScaling = ttf.UnitsPerEm != 1000;
+                float scale = 1000f / ttf.UnitsPerEm;
+                int gid = CodeToGID(code);
 
-            if (path == null)
-            {
-                // empty glyph (e.g. space, newline)
-                return null;
-            }
-            else
-            {
-                if (hasScaling)
+                path = GetPath(code);
+
+                // Acrobat only draws GID 0 for embedded CIDFonts, see PDFBOX-2372
+                if (gid == 0 && !IsEmbedded)
                 {
-                    path.Transform(SKMatrix.MakeScale(scale, scale));
+                    path = null;
                 }
-                return path;
+
+                // empty glyph (e.g. space, newline)
+                if (path != null && hasScaling)
+                {
+                    var scaledPath = new SKPath(path);
+                    scaledPath.Transform(SKMatrix.MakeScale(scale, scale));
+                    path = scaledPath;
+                }
+                cacheGlyphs[code] = path;
             }
+            return path;
         }
 
         public override bool HasGlyph(int code)

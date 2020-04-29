@@ -68,7 +68,7 @@ namespace PdfClown.Documents.Contents.Fonts
         private bool cmapInitialized = false;
         private Dictionary<int, int> gidToCode; // for embedding
         private SKRect? fontBBox;
-        private readonly Dictionary<int, SKPath> scaledPaths = new Dictionary<int, SKPath>();
+
 
         #region dynamic
         #region constructors
@@ -452,37 +452,31 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override SKPath GetNormalizedPath(int code)
         {
-            bool hasScaling = ttf.UnitsPerEm != 1000;
-            float scale = 1000f / ttf.UnitsPerEm;
-            int gid = CodeToGID(code);
-
-            SKPath path = GetPath(code);
-
-            // Acrobat only draws GID 0 for embedded or "Standard 14" fonts, see PDFBOX-2372
-            if (gid == 0 && !IsEmbedded && !IsStandard14)
+            if (!cacheGlyphs.TryGetValue(code, out SKPath path))
             {
-                path = null;
-            }
+                bool hasScaling = ttf.UnitsPerEm != 1000;
+                float scale = 1000f / ttf.UnitsPerEm;
+                int gid = CodeToGID(code);
 
-            if (path == null)
-            {
-                // empty glyph (e.g. space, newline)
-                return null;
-            }
-            else
-            {
-                if (hasScaling)
+                path = GetPath(code);
+
+                // Acrobat only draws GID 0 for embedded or "Standard 14" fonts, see PDFBOX-2372
+                if (gid == 0 && !IsEmbedded && !IsStandard14)
                 {
-                    if (!scaledPaths.TryGetValue(code, out var scaledPath))
-                    {
-                        scaledPath = new SKPath(path);
-                        scaledPath.Transform(SKMatrix.MakeScale(scale, scale));
-                        scaledPaths[code] = scaledPath;
-                    }
-                    path = scaledPath;
+                    path = null;
                 }
-                return path;
+                //check empty glyph (e.g. space, newline)
+                if (path != null && hasScaling)
+                {
+
+                    var scaledPath = new SKPath(path);
+                    scaledPath.Transform(SKMatrix.MakeScale(scale, scale));
+                    path = scaledPath;
+
+                }
+                cacheGlyphs[code] = path;
             }
+            return path;
         }
 
 

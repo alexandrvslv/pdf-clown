@@ -321,7 +321,11 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public override SKPath GetNormalizedPath(int code)
         {
-            return GetPath(code);
+            if (!cacheGlyphs.TryGetValue(code, out SKPath path))
+            {
+                cacheGlyphs[code] = GetPath(code);
+            }
+            return path;
         }
 
         public override bool HasGlyph(int code)

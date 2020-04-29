@@ -104,7 +104,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
                 {
                     Point firstPoint = points[start];
                     Point lastPoint = points[p];
-                    List<Point> contour = new List<Point>();
+                    var contour = new List<Point>();
                     for (int q = start; q <= p; ++q)
                     {
                         contour.Add(points[q]);
