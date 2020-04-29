@@ -86,7 +86,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 CFFParser cffParser = new CFFParser();
                 try
                 {
-                    cffFont = cffParser.Parse(bytes, new FF3ByteSource(fd))[0];
+                    cffFont = cffParser.Parse(bytes, new FF3ByteSource(fd, bytes))[0];
                 }
                 catch (IOException e)
                 {
@@ -450,16 +450,19 @@ namespace PdfClown.Documents.Contents.Fonts
 
         private class FF3ByteSource : CFFParser.IByteSource
         {
-            public FF3ByteSource(FontDescriptor fontDescriptor)
+            private readonly byte[] data;
+
+            public FF3ByteSource(FontDescriptor fontDescriptor, byte[] data)
             {
                 FontDescriptor = fontDescriptor;
+                this.data = data;
             }
 
             public FontDescriptor FontDescriptor { get; }
 
             public byte[] GetBytes()
             {
-                return FontDescriptor.FontFile3.BaseDataObject.ExtractBody(true).ToByteArray();
+                return data;
             }
         }
     }

@@ -40,20 +40,19 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 */
         public List<float> HandleSequence(List<object> sequence, HandleCommand handleCommand)
         {
-            Stack<float> stack = new Stack<float>();
+            var stack = new List<float>();
             for (int i = 0; i < sequence.Count; i++)
             {
                 var obj = sequence[i];
                 if (obj is CharStringCommand charStringCommand)
                 {
-                    List<float> results = handleCommand(stack.ToList(), charStringCommand);
+                    List<float> results = handleCommand(stack, charStringCommand);
                     stack.Clear();  // this is basically returning the new stack
-                    foreach (var item in results)
-                        stack.Push(item);
+                    stack.AddRange(results);
                 }
                 else
                 {
-                    stack.Push(Convert.ToSingle(obj));
+                    stack.Add(Convert.ToSingle(obj));
                 }
             }
             return stack.ToList();

@@ -75,7 +75,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 {
                     // note: this could be an OpenType file, fortunately CFFParser can handle that
                     CFFParser cffParser = new CFFParser();
-                    cffEmbedded = (CFFType1Font)cffParser.Parse(bytes, new FF3ByteSource(fd))[0];
+                    cffEmbedded = (CFFType1Font)cffParser.Parse(bytes, new FF3ByteSource(fd, bytes))[0];
                 }
             }
             catch (Exception e)
@@ -387,16 +387,19 @@ namespace PdfClown.Documents.Contents.Fonts
 
         private class FF3ByteSource : CFFParser.IByteSource
         {
-            public FF3ByteSource(FontDescriptor fontDescriptor)
+            private readonly byte[] data;
+
+            public FF3ByteSource(FontDescriptor fontDescriptor, byte[] data)
             {
                 FontDescriptor = fontDescriptor;
+                this.data = data;
             }
 
             public FontDescriptor FontDescriptor { get; }
 
             public byte[] GetBytes()
             {
-                return FontDescriptor.FontFile3.BaseDataObject.ExtractBody(true).GetBuffer();
+                return data;
             }
         }
     }
