@@ -584,9 +584,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 		 */
         override public string ToString()
         {
-            return GetType().Name + "[fontName=" + fontName + ", fullName=" + fullName
-                    + ", encoding=" + encoding + ", charStringsDict=" + charstrings
-                    + "]";
+            return $"{GetType().Name}[fontName={fontName}, fullName={fullName}, encoding={encoding}, charStringsDict={charstrings}]";
         }
     }
 }

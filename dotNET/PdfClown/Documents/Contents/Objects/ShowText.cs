@@ -199,10 +199,11 @@ namespace PdfClown.Documents.Contents.Objects
 
 
                             if (context != null
-                                && !(textChar == ' '
+                                && !(
+                                code == 32
+                                || textChar == ' '
                                 || textChar == '\r'
                                 || textChar == '\n'
-                                || char.IsControl(textChar)
                                 ))
                             {
                                 context.SetMatrix(trm);
@@ -214,7 +215,7 @@ namespace PdfClown.Documents.Contents.Objects
                             {
                                 var charBox = SKRect.Create(0, (float)ascent, (float)charWidth, (float)charHeight);
                                 var quad = new Quad(charBox);
-                                SKMatrix.PreConcat(ref trm, SKMatrix.MakeScale(1, -1));
+                                //SKMatrix.PreConcat(ref trm, SKMatrix.MakeScale(1, -1));
                                 quad.Transform(ref trm);
                                 textScanner.ScanChar(textChar, quad);
                             }

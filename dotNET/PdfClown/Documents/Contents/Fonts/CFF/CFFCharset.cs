@@ -202,7 +202,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 throw new InvalidOperationException("Not a CIDFont");
             }
 
-            if (!gidToCid.TryGetValue(gid, out int cid))
+            if (gidToCid.TryGetValue(gid, out int cid))
             {
                 return cid;
             }

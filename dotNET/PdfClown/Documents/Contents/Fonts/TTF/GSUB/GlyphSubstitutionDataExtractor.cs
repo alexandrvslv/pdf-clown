@@ -199,7 +199,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
                 glyphsToBeSubstituted.Add(componentGlyphID);
             }
 
-            Debug.WriteLine("debug: glyphsToBeSubstituted: " + glyphsToBeSubstituted);
+            Debug.WriteLine($"debug: glyphsToBeSubstituted: {glyphsToBeSubstituted}");
 
             PutNewSubstitutionEntry(glyphSubstitutionMap, ligatureTable.LigatureGlyph,
                     glyphsToBeSubstituted);
@@ -211,9 +211,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF.GSUB
         {
             if (glyphSubstitutionMap.TryGetValue(glyphsToBeSubstituted, out int oldValue))
             {
-                string message = "warning: For the newGlyph: " + newGlyph + ", newValue: "
-                        + glyphsToBeSubstituted + " is trying to override the oldValue: " + oldValue;
-                Debug.WriteLine(message);
+                Debug.WriteLine($"warning: For the newGlyph: {newGlyph}, newValue: {glyphsToBeSubstituted} is trying to override the oldValue: {oldValue}");
             }
             glyphSubstitutionMap[glyphsToBeSubstituted] = newGlyph;
         }

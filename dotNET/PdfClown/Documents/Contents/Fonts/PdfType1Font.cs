@@ -573,7 +573,9 @@ namespace PdfClown.Documents.Contents.Fonts
             }
 
             // try alternative name
-            if (ALT_NAMES.TryGetValue(name, out string altName) && !name.Equals(".notdef", StringComparison.Ordinal) && genericFont.HasGlyph(altName))
+            if (ALT_NAMES.TryGetValue(name, out string altName)
+                && !name.Equals(".notdef", StringComparison.Ordinal)
+                && genericFont.HasGlyph(altName))
             {
                 return altName;
             }

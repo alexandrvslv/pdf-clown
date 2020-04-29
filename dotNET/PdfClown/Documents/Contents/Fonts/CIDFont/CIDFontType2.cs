@@ -316,8 +316,8 @@ namespace PdfClown.Documents.Contents.Fonts
         override public float GetHeight(int code)
         {
             // todo: really we want the BBox, (for text extraction:)
-            return (ttf.HorizontalHeader.Ascender + -ttf.HorizontalHeader.Descender)
-                    / ttf.UnitsPerEm; // todo: shouldn't this be the yMax/yMin?
+            return (ttf.HorizontalHeader.Ascender + -ttf.HorizontalHeader.Descender);
+                    /// ttf.UnitsPerEm; // todo: shouldn't this be the yMax/yMin?
         }
 
         override public float GetWidthFromFont(int code)

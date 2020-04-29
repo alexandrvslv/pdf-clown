@@ -60,6 +60,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
             set => platformId = value;
         }
 
+        public ICollection<int> Glyphs => characterCodeToGlyphId.Values;
         /**
          * This will read the required data from the stream.
          * 

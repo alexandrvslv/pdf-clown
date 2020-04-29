@@ -73,7 +73,8 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 var b0 = input.ReadUnsignedByte();
                 if (b0 == 10 && localSubroutineIndexProvided)
                 { // process subr command
-                    int operand = Convert.ToInt32(sequence.RemoveAtValue(sequence.Count - 1));
+                    var removed = sequence.RemoveAtValue(sequence.Count - 1);
+                    int operand = Convert.ToInt32(removed);
                     //get subrbias
                     int bias = 0;
                     int nSubrs = localSubrIndex.Length;
@@ -105,7 +106,8 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 }
                 else if (b0 == 29 && globalSubroutineIndexProvided)
                 { // process globalsubr command
-                    int operand = (int)sequence.RemoveAtValue(sequence.Count - 1);
+                    var removed = sequence.RemoveAtValue(sequence.Count - 1);
+                    int operand = Convert.ToInt32(removed);
                     //get subrbias
                     int bias;
                     int nSubrs = globalSubrIndex.Length;
@@ -186,7 +188,6 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 {
                     value[i] = input.ReadUnsignedByte();
                 }
-
                 return new CharStringCommand(value);
             }
 
@@ -250,7 +251,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 {
                     return numbers;
                 }
-                numbers.AddRange(new[] { 0F, (float)obj });
+                numbers.Insert(0, (float)obj);
             }
             return numbers;
         }

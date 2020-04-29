@@ -287,7 +287,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
         private static CFFOperator ReadOperator(CFFDataInput input, byte b0)
         {
             var key = ReadOperatorKey(input, b0);
-            return CFFOperator.getOperator(key);
+            return CFFOperator.GetOperator(key);
         }
 
         private static ByteArray ReadOperatorKey(CFFDataInput input, byte b0)

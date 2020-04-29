@@ -34,7 +34,6 @@ namespace PdfClown.Documents.Contents.Fonts
         private static readonly HashSet<string> StandardNames = new HashSet<string>(StringComparer.Ordinal);
         private static readonly Dictionary<string, string> StandardMapping = new Dictionary<string, string>(34, StringComparer.Ordinal);
         private static readonly Dictionary<string, FontMetrics> StandardAFMMapping = new Dictionary<string, FontMetrics>(34, StringComparer.Ordinal);
-        private static readonly Dictionary<string, FontMetrics> AFMMetricsMapping = new Dictionary<string, FontMetrics>(16, StringComparer.Ordinal);
         static Standard14Fonts()
         {
             try
@@ -101,15 +100,7 @@ namespace PdfClown.Documents.Contents.Fonts
 
         private static void AddAFM(string fontName, string afmName)
         {
-            StandardNames.Add(fontName);
-            StandardMapping[fontName] = afmName;
-
-            if (StandardAFMMapping.ContainsKey(afmName))
-            {
-                StandardAFMMapping[fontName] = StandardAFMMapping.TryGetValue(afmName, out var fontMetrics) ? fontMetrics : null;
-            }
-
-            if (!AFMMetricsMapping.TryGetValue(afmName, out var metric))
+            if (!StandardAFMMapping.TryGetValue(afmName, out var metric))
             {
                 using (var afmStream = typeof(Standard14Fonts).Assembly.GetManifestResourceStream("fonts.afm." + afmName))
                 {
@@ -118,10 +109,12 @@ namespace PdfClown.Documents.Contents.Fonts
                         throw new IOException(fontName + " not found");
                     }
                     AFMParser parser = new AFMParser(afmStream);
-                    AFMMetricsMapping[afmName] = metric = parser.Parse(true);
+                    StandardAFMMapping[afmName] = metric = parser.Parse(true);
                 }
             }
 
+            StandardNames.Add(fontName);
+            StandardMapping[fontName] = afmName;
             StandardAFMMapping[fontName] = metric;
         }
 

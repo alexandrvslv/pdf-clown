@@ -98,7 +98,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 * @param key the given key
 		 * @return the corresponding operator
 		 */
-        public static CFFOperator getOperator(ByteArray key)
+        public static CFFOperator GetOperator(ByteArray key)
         {
             return keyMap.TryGetValue(key, out var cFFOperator) ? cFFOperator : null;
         }
@@ -108,7 +108,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
 		 * @param name the given name
 		 * @return the corresponding operator
 		 */
-        public static CFFOperator getOperator(string name)
+        public static CFFOperator GetOperator(string name)
         {
             return nameMap.TryGetValue(name, out var cFFOperator) ? cFFOperator : null;
         }

@@ -122,13 +122,24 @@ namespace PdfClown.Documents.Contents.Fonts
                         Debug.WriteLine($"warn: Not a number in Unicode character name: {name} {nfe}");
                     }
                 }
+                //else if (int.TryParse(name, out var number))
+                //{
+                //    if (number > 0xD7FF && number < 0xE000)
+                //    {
+                //        Debug.WriteLine($"Unicode character name with disallowed code area: {name}");
+                //    }
+                //    else
+                //    {
+                //        unicode = number;
+                //    }
+                //}
                 if (unicode > 0)
                 {
                     // null value not allowed in ConcurrentHashMap
                     uniNameToUnicodeCache[name] = unicode;
                 }
             }
-            return unicode;
+            return unicode != 0 ? unicode : (int?)null;
         }
 
         public string UnicodeToName(int unicode)

@@ -532,8 +532,7 @@ namespace PdfClown.Documents.Contents.Fonts
             // or whose descendant CIDFont uses the Adobe-GB1, Adobe-CNS1, Adobe-Japan1, or
             // Adobe-Korea1 character collection:
 
-            if (isCMapPredefined && !(encoding == PdfName.IdentityH || encoding == PdfName.IdentityV) ||
-                isDescendantCJK)
+            if ((isCMapPredefined && !(encoding == PdfName.IdentityH || encoding == PdfName.IdentityV)) || isDescendantCJK)
             {
                 // a) Dictionary the character code to a CID using the font's CMap
                 // b) Obtain the ROS from the font's CIDSystemInfo

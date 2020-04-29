@@ -67,7 +67,7 @@ namespace PdfClown.Documents
 
         #region dynamic
         #region fields
-        internal Dictionary<PdfReference, object> Cache = new Dictionary<PdfReference, object>();
+        internal Dictionary<PdfDirectObject, object> Cache = new Dictionary<PdfDirectObject, object>();
 
         private DocumentConfiguration configuration;
         #endregion

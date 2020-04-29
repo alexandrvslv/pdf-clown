@@ -171,7 +171,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
             {
                 return topDictValue;
             }
-            if (privateDict.TryGetValue(name, out object privateDictValue))
+            if (privateDict.TryGetValue(name, out var privateDictValue))
             {
                 return privateDictValue;
             }

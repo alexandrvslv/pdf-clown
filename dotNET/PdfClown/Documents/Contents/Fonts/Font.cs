@@ -88,33 +88,30 @@ namespace PdfClown.Documents.Contents.Fonts
                 baseObject.Wrapper = referenceFont;
                 return referenceFont;
             }
-            PdfReference reference = (PdfReference)baseObject;
-            {
-                // Has the font been already instantiated?
-                /*
-                  NOTE: Font structures are reified as complex objects, both IO- and CPU-intensive to load.
-                  So, it's convenient to retrieve them from a common cache whenever possible.
-                */
-                Dictionary<PdfReference, object> cache = reference.IndirectObject.File.Document.Cache;
-                if (cache.ContainsKey(reference))
-                { return (Font)cache[reference]; }
-            }
+            // Has the font been already instantiated?
+            /*
+              NOTE: Font structures are reified as complex objects, both IO- and CPU-intensive to load.
+              So, it's convenient to retrieve them from a common cache whenever possible.
+            */
+            if (baseObject.IndirectObject.File.Document.Cache.TryGetValue(baseObject, out var cache))
+            { return (Font)cache; }
 
-            PdfDictionary fontDictionary = (PdfDictionary)reference.DataObject;
+
+            PdfDictionary fontDictionary = (PdfDictionary)baseObject.Resolve();
             PdfName fontType = (PdfName)fontDictionary[PdfName.Subtype];
             if (fontType == null)
-                throw new Exception("Font type undefined (reference: " + reference + ")");
+                throw new Exception("Font type undefined (reference: " + baseObject + ")");
 
             if (fontType.Equals(PdfName.Type1)) // Type 1.
             {
                 var fd = fontDictionary.Resolve(PdfName.FontDescriptor);
                 if (fd is PdfDictionary fdDictionary && fdDictionary.ContainsKey(PdfName.FontFile3))
                 {
-                    return new PdfType1CFont(reference);
+                    return new PdfType1CFont(baseObject);
                 }
                 else
                 {
-                    return new PdfType1Font(reference);
+                    return new PdfType1Font(baseObject);
                 }
             }
             else if (fontType.Equals(PdfName.MMType1)) // MMType1.
@@ -122,29 +119,29 @@ namespace PdfClown.Documents.Contents.Fonts
                 var fd = fontDictionary.Resolve(PdfName.FontDescriptor);
                 if (fd is PdfDictionary fdDictionary && fdDictionary.ContainsKey(PdfName.FontFile3))
                 {
-                    return new PdfType1CFont(reference);
+                    return new PdfType1CFont(baseObject);
                 }
                 else
                 {
-                    return new PdfMMType1Font(reference);
+                    return new PdfMMType1Font(baseObject);
                 }
             }
             else if (fontType.Equals(PdfName.TrueType)) // TrueType.
             {
-                return new PdfTrueTypeFont(reference);
+                return new PdfTrueTypeFont(baseObject);
             }
-            else if (fontType.Equals(PdfName.Type0)) // OpenFont.
+            else if (fontType.Equals(PdfName.Type0)) // CompositeFont.
             {
-                return new PdfType0Font(reference);
+                return new PdfType0Font(baseObject);
             }
             else if (fontType.Equals(PdfName.Type3)) // Type 3.
             {
-                return new PdfType3Font(reference);
+                return new PdfType3Font(baseObject);
             }
             else // Unknown.
             {
                 Debug.WriteLine($"warn: Invalid font subtype '{fontType}'");
-                return new PdfType1Font(reference);
+                return new PdfType1Font(baseObject);
             }
         }
         #endregion
@@ -512,37 +509,39 @@ namespace PdfClown.Documents.Contents.Fonts
         public virtual void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes, ref SKMatrix parameters)
         {
             var path = GetNormalizedPath(code);
-            if (path != null)
+            if (path == null)
             {
-                context.Save();
-                var m = FontMatrix;
-
-                //if (!IsEmbedded && !IsVertical && !IsStandard14 && HasExplicitWidth(code))
-                //{
-                //    var w = GetDisplacement(code);
-                //    float fontWidth = GetWidthFromFont(code);
-                //    if (fontWidth > 0 && // ignore spaces
-                //            Math.Abs(fontWidth - w.X * 1000) > 0.0001)
-                //    {
-                //        float pdfWidth = w.X * 1000;
-                //        m.SetScaleTranslate(pdfWidth / fontWidth, 1, 0, 0);
-                //    }
-                //}
-
-                SKMatrix.PreConcat(ref m, parameters);
-                context.Concat(ref m);
-
-                if (fill != null)
-                {
-                    context.DrawPath(path, fill);
-                }
-
-                if (stroke != null)
-                {
-                    context.DrawPath(path, stroke);
-                }
-                context.Restore();
+                Debug.WriteLine($"info: no path for Code: {code}  Char: '{textChar}'");
+                return;
             }
+            context.Save();
+            var m = FontMatrix;
+
+            if (!IsEmbedded && !IsVertical && !IsStandard14 && HasExplicitWidth(code))
+            {
+                var w = GetDisplacement(code);
+                float fontWidth = GetWidthFromFont(code);
+                if (fontWidth > 0 && // ignore spaces
+                        Math.Abs(fontWidth - w.X * 1000) > 0.0001)
+                {
+                    float pdfWidth = w.X * 1000;
+                    SKMatrix.PostConcat(ref m, SKMatrix.MakeScale(pdfWidth / fontWidth, 1));
+                }
+            }
+
+            SKMatrix.PreConcat(ref m, parameters);
+            context.Concat(ref m);
+
+            if (fill != null)
+            {
+                context.DrawPath(path, fill);
+            }
+
+            if (stroke != null)
+            {
+                context.DrawPath(path, stroke);
+            }
+            context.Restore();
         }
 
         public virtual int ToUnicode(int code, GlyphMapping customGlyphList)
@@ -1070,7 +1069,7 @@ namespace PdfClown.Documents.Contents.Fonts
               So, it's convenient to put them into a common cache for later reuse.
             */
             if (Document != null)
-                Document.Cache[(PdfReference)BaseObject] = this;
+                Document.Cache[BaseObject] = this;
         }
         #endregion
         #endregion

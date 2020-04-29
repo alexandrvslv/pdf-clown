@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System;
 using SkiaSharp;
 using System.Diagnostics;
+using System.Linq;
 
 namespace PdfClown.Documents.Contents.Fonts.Type1
 {
@@ -480,7 +481,7 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
 
         override public string ToString()
         {
-            return type1Sequence.ToString().Replace("|", "\n").Replace(",", " ");
+            return string.Join("\n", type1Sequence.Select(p => p.ToString().Replace("|", "\n").Replace(",", " ")));
         }
     }
 }

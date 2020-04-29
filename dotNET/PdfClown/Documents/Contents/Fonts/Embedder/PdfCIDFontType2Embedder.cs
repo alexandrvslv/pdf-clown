@@ -99,7 +99,7 @@ namespace PdfClown.Documents.Contents.Fonts
             BuildFontFile2(ttfSubset);
             AddNameTag(tag);
             BuildWidths(cidToGid);
-            buildCIDToGIDMap(cidToGid);
+            BuildCIDToGIDMap(cidToGid);
             BuildCIDSet(cidToGid);
         }
 
@@ -205,7 +205,7 @@ namespace PdfClown.Documents.Contents.Fonts
             cidFont[PdfName.BaseFont] = new PdfName(newName);
         }
 
-        private void buildCIDToGIDMap(Dictionary<int, int> cidToGid)
+        private void BuildCIDToGIDMap(Dictionary<int, int> cidToGid)
         {
             MemoryStream output = new MemoryStream();
             int cidMax = cidToGid.Keys.Max();

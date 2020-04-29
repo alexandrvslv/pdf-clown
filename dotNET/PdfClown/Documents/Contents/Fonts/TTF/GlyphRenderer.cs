@@ -154,7 +154,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private void MoveTo(SKPath path, Point point)
         {
             path.MoveTo(point.x, point.y);
-#if DEBUG
+#if TRACEPATH
             Debug.WriteLine("trace: moveTo: " + $"{point.x},{point.y}");
 #endif
         }
@@ -162,7 +162,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private void LineTo(SKPath path, Point point)
         {
             path.LineTo(point.x, point.y);
-#if DEBUG
+#if TRACEPATH
             Debug.WriteLine("trace: lineTo: " + $"{point.x},{point.y}");
 #endif
         }
@@ -170,7 +170,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
         private void QuadTo(SKPath path, Point ctrlPoint, Point point)
         {
             path.QuadTo(ctrlPoint.x, ctrlPoint.y, point.x, point.y);
-#if DEBUG
+#if TRACEPATH
             Debug.WriteLine("trace: quadTo: " + $"{ctrlPoint.x},{ctrlPoint.y} {point.x},{point.y}");
 #endif
         }
