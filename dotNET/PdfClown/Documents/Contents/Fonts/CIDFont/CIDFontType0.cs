@@ -272,9 +272,9 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 return cidFont.GetType2CharString(cid);
             }
-            else if (t1Font is CFFType1Font)
+            else if (t1Font is CFFType1Font cffFont)
             {
-                return ((CFFType1Font)t1Font).GetType2CharString(cid);
+                return cffFont.GetType2CharString(cid);
             }
             else
             {
@@ -323,7 +323,7 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             if (!cacheGlyphs.TryGetValue(code, out SKPath path))
             {
-                cacheGlyphs[code] = GetPath(code);
+                cacheGlyphs[code] = path = GetPath(code);
             }
             return path;
         }

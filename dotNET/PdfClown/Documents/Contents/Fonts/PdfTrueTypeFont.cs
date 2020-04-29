@@ -468,11 +468,9 @@ namespace PdfClown.Documents.Contents.Fonts
                 //check empty glyph (e.g. space, newline)
                 if (path != null && hasScaling)
                 {
-
                     var scaledPath = new SKPath(path);
                     scaledPath.Transform(SKMatrix.MakeScale(scale, scale));
                     path = scaledPath;
-
                 }
                 cacheGlyphs[code] = path;
             }
