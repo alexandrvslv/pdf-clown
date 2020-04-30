@@ -121,7 +121,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 return 1000;
             }
             Dictionary<string, object> privDict = this.privateDictionaries[fdArrayIndex];
-            return privDict.ContainsKey("defaultWidthX") ? ((int)(float)privDict["defaultWidthX"]) : 1000;
+            return privDict.TryGetValue("defaultWidthX", out var defaultWidthX) ? (int)(float)defaultWidthX : 1000;
         }
 
         /**
@@ -137,7 +137,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 return 0;
             }
             Dictionary<string, object> privDict = this.privateDictionaries[fdArrayIndex];
-            return privDict.ContainsKey("nominalWidthX") ? ((int)(float)privDict["nominalWidthX"]) : 0;
+            return privDict.TryGetValue("nominalWidthX", out var nominalWidthX) ? (int)(float)nominalWidthX : 0;
         }
 
         /**
@@ -153,7 +153,7 @@ namespace PdfClown.Documents.Contents.Fonts.CCF
                 return null;
             }
             Dictionary<string, object> privDict = this.privateDictionaries[fdArrayIndex];
-            return (byte[][])privDict["Subrs"];
+            return privDict.TryGetValue("Subrs", out var subrs) ? (byte[][])subrs : null;
         }
 
         public Type1CharString GetType1CharString(string name)
