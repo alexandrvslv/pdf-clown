@@ -74,6 +74,10 @@ namespace PdfClown.Documents.Contents.Objects
             get
             {
                 var space = ColorSpace;
+                if (space == null)
+                {
+                    return PdfName.DeviceGray;
+                }
                 if (space.Equals(PdfName.G)) return PdfName.DeviceGray;
                 if (space.Equals(PdfName.RGB)) return PdfName.DeviceRGB;
                 if (space.Equals(PdfName.CMYK)) return PdfName.DeviceCMYK;
@@ -90,13 +94,13 @@ namespace PdfClown.Documents.Contents.Objects
 
         public PdfDirectObject DecodeParms
         {
-            get => ((PdfDirectObject)this[PdfName.DP]) ?? ((PdfDirectObject)this[PdfName.DecodeParms]);
+            get => this[PdfName.DP] ?? this[PdfName.DecodeParms];
             set => this[PdfName.DP] = value;
         }
 
         public PdfDirectObject Filter
         {
-            get => ((PdfDirectObject)this[PdfName.F]) ?? ((PdfDirectObject)this[PdfName.Filter]);
+            get => this[PdfName.F] ?? this[PdfName.Filter];
             set => this[PdfName.F] = value;
         }
 
@@ -114,19 +118,19 @@ namespace PdfClown.Documents.Contents.Objects
 
         public string ImageMask
         {
-            get => (((PdfName)this[PdfName.IM]) ?? ((PdfName)this[PdfName.ImageMask]))?.StringValue;
+            get => (this[PdfName.IM] ?? this[PdfName.ImageMask])?.ToString();
             set => this[PdfName.IM] = new PdfName(value);
         }
 
         public string Interpolate
         {
-            get => (((PdfName)this[PdfName.I]) ?? ((PdfName)this[PdfName.Interpolate]))?.StringValue;
+            get => (this[PdfName.I] ?? this[PdfName.Interpolate])?.ToString();
             set => this[PdfName.I] = new PdfName(value);
         }
 
         public string Intent
         {
-            get => ((PdfName)this[PdfName.Intent])?.StringValue;
+            get => this[PdfName.Intent]?.ToString();
             set => this[PdfName.Intent] = new PdfName(value);
         }
 

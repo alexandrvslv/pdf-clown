@@ -40,9 +40,9 @@ namespace PdfClown.Bytes.Filters
 
         #region interface
         #region public
-        public override byte[] Decode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Decode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
-            var imageParams = ((PdfStream)parameters.Container.DataObject).Header;
+            var imageParams = header;
             var width = imageParams.Resolve(PdfName.Width) as PdfInteger;
             var height = imageParams.Resolve(PdfName.Height) as PdfInteger;
             var bpp = imageParams.Resolve(PdfName.BitsPerComponent) as PdfInteger;
@@ -51,16 +51,14 @@ namespace PdfClown.Bytes.Filters
             using (var input = new MemoryStream(data, offset, length))
             {
                 var bmp = FreeImage.LoadFromStream(input);
-
                 FreeImage.SaveToStream(bmp, output, FREE_IMAGE_FORMAT.FIF_JPEG, FREE_IMAGE_SAVE_FLAGS.JPEG_OPTIMIZE);
-
                 FreeImage.Unload(bmp);
 
                 return output.ToArray();
             }
         }
 
-        public override byte[] Encode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Encode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
             using (var output = new MemoryStream())
             using (var input = new MemoryStream(data, offset, length))

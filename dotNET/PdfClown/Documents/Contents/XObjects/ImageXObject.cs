@@ -104,7 +104,7 @@ namespace PdfClown.Documents.Contents.XObjects
 
         public PdfDirectObject Parameters => Stream.Parameters;
 
-        public PdfDirectObject Header => Stream.Header;
+        public PdfDictionary Header => Stream.Header;
 
         /**
           <summary>Gets the size of the image (in samples).</summary>

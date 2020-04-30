@@ -38,8 +38,7 @@ namespace PdfClown.Bytes.Filters
       <summary>ASCII base-85 filter [PDF:1.6:3.3.2].</summary>
     */
     [PDF(VersionEnum.PDF10)]
-    public sealed class ASCII85Filter
-      : Filter
+    public sealed class ASCII85Filter : Filter
     {
         #region static
         #region fields
@@ -128,7 +127,7 @@ namespace PdfClown.Bytes.Filters
 
         #region interface
         #region public
-        public override byte[] Decode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Decode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
             byte[] decodedBlock = new byte[4];
             byte[] encodedBlock = new byte[5];
@@ -206,7 +205,7 @@ namespace PdfClown.Bytes.Filters
             return stream.ToArray();
         }
 
-        public override byte[] Encode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Encode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
             byte[] decodedBlock = new byte[4];
             byte[] encodedBlock = new byte[5];

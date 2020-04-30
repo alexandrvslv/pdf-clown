@@ -363,7 +363,7 @@ namespace PdfClown.Documents.Contents.Fonts
             if (stream != null)
             {
                 var input = stream.GetBody(false);
-                using (input = Bytes.Buffer.Extract(input, stream.Filter, stream.Parameters))
+                using (input = Bytes.Buffer.Extract(input, stream.Filter, stream.Parameters, stream.Header))
                 {
                     byte[] mapAsBytes = input.GetBuffer();
 

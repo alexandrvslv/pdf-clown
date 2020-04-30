@@ -16,7 +16,7 @@ namespace PdfClown.Documents.Contents
         IImageObject SMask { get; }
         bool ImageMask { get; }
         PdfArray Matte { get; }
-        PdfDirectObject Header { get; }
+        PdfDictionary Header { get; }
         PdfArray Decode { get; }
         SKBitmap LoadImage(GraphicsState state);
     }

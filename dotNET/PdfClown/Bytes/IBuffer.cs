@@ -99,9 +99,9 @@ namespace PdfClown.Bytes
           <param name="filter">Filter to use for decoding the buffer.</param>
           <param name="parameters">Decoding parameters.</param>
         */
-        void Decode(Filter filter, PdfDictionary parameters);
+        void Decode(Filter filter, PdfDirectObject parameters, PdfDictionary header);
 
-        IBuffer Extract(Filter filter, PdfDictionary parameters);
+        IBuffer Extract(Filter filter, PdfDirectObject parameters, PdfDictionary header);
 
         /**
           <summary>Deletes a byte chunk from the buffer.</summary>
@@ -121,7 +121,7 @@ namespace PdfClown.Bytes
           <param name="parameters">Encoding parameters.</param>
           <returns>Encoded buffer.</returns>
         */
-        byte[] Encode(Filter filter, PdfDictionary parameters);
+        byte[] Encode(Filter filter, PdfDirectObject parameters, PdfDictionary header);
 
         /**
           <summary>Gets the byte at a specified location.</summary>

@@ -50,7 +50,9 @@ namespace PdfClown.Documents.Contents.Fonts
         { }
 
         internal PdfType3Font(PdfDirectObject baseObject) : base(baseObject)
-        { }
+        {
+            ReadEncoding();
+        }
         #endregion
 
         #region interface
@@ -207,6 +209,11 @@ namespace PdfClown.Documents.Contents.Fonts
             return FontMatrix.MapVector(base.GetWidth(code), 0);
         }
 
+        public override double GetScalingFactor(double size)
+        {
+            return base.GetScalingFactor(size);
+        }
+
         public override float GetWidth(int code)
         {
             int firstChar = FirstChar ?? -1;
@@ -330,6 +337,34 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             var baseObject = CharProcs[name];
             return PdfType3CharProc.Wrap(baseObject, this);
+        }
+
+        public override void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes, ref SKMatrix parameters)
+        {
+            var proc = GetCharProc(code);
+            if (proc == null)
+            {
+                Debug.WriteLine($"info: no Glyph for Code: {code}  Char: '{textChar}'");
+                return;
+            }
+            context.Save();
+            var m = FontMatrix;
+
+            //SKMatrix.PreConcat(ref m,parameters );
+            context.Concat(ref m);
+
+            if (fill != null)
+            {
+                var picture = proc.Render();
+                context.DrawPicture(picture, fill);
+            }
+
+            if (stroke != null)
+            {
+                var picture = proc.Render();
+                context.DrawPicture(picture, stroke);
+            }
+            context.Restore();
         }
         #endregion
         #endregion

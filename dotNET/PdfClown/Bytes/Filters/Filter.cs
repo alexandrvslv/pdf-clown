@@ -103,9 +103,9 @@ namespace PdfClown.Bytes.Filters
 
         #region interface
         #region public
-        public abstract byte[] Decode(byte[] data, int offset, int length, PdfDictionary parameters);
+        public abstract byte[] Decode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header);
 
-        public abstract byte[] Encode(byte[] data, int offset, int length, PdfDictionary parameters);
+        public abstract byte[] Encode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header);
         #endregion
         #endregion
         #endregion

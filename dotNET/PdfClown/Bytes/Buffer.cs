@@ -54,12 +54,12 @@ namespace PdfClown.Bytes
             return @object == null ? null : @object.Resolve();
         }
 
-        public static void Decode(IBuffer buffer, PdfDataObject filter, PdfDirectObject parameters)
+        public static void Decode(IBuffer buffer, PdfDataObject filter, PdfDirectObject parameters, PdfDictionary header)
         {
 
-            if (filter is PdfName) // Single filter.
+            if (filter is PdfName name) // Single filter.
             {
-                buffer.Decode(Filter.Get((PdfName)filter), (PdfDictionary)parameters);
+                buffer.Decode(Filter.Get(name), (PdfDictionary)parameters, header);
             }
             else // Multiple filters.
             {
@@ -75,12 +75,12 @@ namespace PdfClown.Bytes
                         parametersIterator.MoveNext();
                         filterParameters = (PdfDictionary)Resolve(parametersIterator.Current);
                     }
-                    buffer.Decode(Filter.Get((PdfName)Resolve(filterIterator.Current)), filterParameters);
+                    buffer.Decode(Filter.Get((PdfName)Resolve(filterIterator.Current)), filterParameters, header);
                 }
             }
         }
 
-        public static IBuffer Extract(IBuffer buffer, PdfDataObject filter, PdfDirectObject parameters)
+        public static IBuffer Extract(IBuffer buffer, PdfDataObject filter, PdfDirectObject parameters, PdfDictionary header)
         {
             if (filter == null)
             {
@@ -88,7 +88,7 @@ namespace PdfClown.Bytes
             }
             if (filter is PdfName) // Single filter.
             {
-                buffer = buffer.Extract(Filter.Get((PdfName)filter), (PdfDictionary)parameters);
+                buffer = buffer.Extract(Filter.Get((PdfName)filter), (PdfDictionary)parameters, header);
             }
             else // Multiple filters.
             {
@@ -104,7 +104,7 @@ namespace PdfClown.Bytes
                         parametersIterator.MoveNext();
                         filterParameters = (PdfDictionary)Resolve(parametersIterator.Current);
                     }
-                    buffer = buffer.Extract(Filter.Get((PdfName)Resolve(filterIterator.Current)), filterParameters);
+                    buffer = buffer.Extract(Filter.Get((PdfName)Resolve(filterIterator.Current)), filterParameters, header);
                 }
             }
             return buffer;
@@ -211,15 +211,15 @@ namespace PdfClown.Bytes
             return clone;
         }
 
-        public void Decode(Filter filter, PdfDictionary parameters)
+        public void Decode(Filter filter, PdfDirectObject parameters, PdfDictionary header)
         {
-            data = filter.Decode(data, 0, length, parameters);
+            data = filter.Decode(data, 0, length, parameters, header);
             length = data.Length;
         }
 
-        public IBuffer Extract(Filter filter, PdfDictionary parameters)
+        public IBuffer Extract(Filter filter, PdfDirectObject parameters, PdfDictionary header)
         {
-            var data = filter.Decode(this.data, 0, this.length, parameters);
+            var data = filter.Decode(this.data, 0, this.length, parameters, header);
             return new Buffer(data);
         }
 
@@ -231,8 +231,8 @@ namespace PdfClown.Bytes
             NotifyChange();
         }
 
-        public byte[] Encode(Filter filter, PdfDictionary parameters)
-        { return filter.Encode(data, 0, length, parameters); }
+        public byte[] Encode(Filter filter, PdfDirectObject parameters, PdfDictionary header)
+        { return filter.Encode(data, 0, length, parameters, header); }
 
         public int GetByte(int index)
         { return data[index]; }

@@ -50,19 +50,19 @@ namespace PdfClown.Bytes.Filters
 
         #region interface
         #region public
-        public override byte[] Decode(byte[] data, int offset, int length, PdfDictionary parameters)
-        {            
+        public override byte[] Decode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
+        {
             using (MemoryStream outputStream = new MemoryStream())
             using (MemoryStream inputStream = new MemoryStream(data, offset, length))
             using (DeflateStream inputFilter = new DeflateStream(inputStream, CompressionMode.Decompress))
             {
                 inputStream.Position = 2; // Skips zlib's 2-byte header [RFC 1950] [FIX:0.0.8:JCT].
                 Transform(inputFilter, outputStream);
-                return DecodePredictor(outputStream.ToArray(), parameters);
+                return DecodePredictor(outputStream.ToArray(), parameters, header);
             }
         }
 
-        public override byte[] Encode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Encode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
             MemoryStream inputStream = new MemoryStream(data, offset, length);
             MemoryStream outputStream = new MemoryStream();
@@ -76,18 +76,19 @@ namespace PdfClown.Bytes.Filters
         #endregion
 
         #region private
-        private byte[] DecodePredictor(byte[] data, PdfDictionary parameters)
+        private byte[] DecodePredictor(byte[] data, PdfDirectObject parameters, PdfDictionary header)
         {
-            if (parameters == null)
+            if (!(parameters is PdfDictionary))
                 return data;
+            var dictionary = parameters as PdfDictionary;
 
-            int predictor = (parameters.ContainsKey(PdfName.Predictor) ? ((PdfInteger)parameters[PdfName.Predictor]).RawValue : 1);
+            int predictor = (dictionary.ContainsKey(PdfName.Predictor) ? ((PdfInteger)dictionary[PdfName.Predictor]).RawValue : 1);
             if (predictor == 1) // No predictor was applied during data encoding.
                 return data;
 
-            int sampleComponentBitsCount = (parameters.ContainsKey(PdfName.BitsPerComponent) ? ((PdfInteger)parameters[PdfName.BitsPerComponent]).RawValue : 8);
-            int sampleComponentsCount = (parameters.ContainsKey(PdfName.Colors) ? ((PdfInteger)parameters[PdfName.Colors]).RawValue : 1);
-            int rowSamplesCount = (parameters.ContainsKey(PdfName.Columns) ? ((PdfInteger)parameters[PdfName.Columns]).RawValue : 1);
+            int sampleComponentBitsCount = (dictionary.TryGetValue(PdfName.BitsPerComponent, out var bintsPerComponent) ? ((PdfInteger)bintsPerComponent).RawValue : 8);
+            int sampleComponentsCount = (dictionary.TryGetValue(PdfName.Colors, out var colors) ? ((PdfInteger)colors).RawValue : 1);
+            int rowSamplesCount = (dictionary.TryGetValue(PdfName.Columns, out var columns) ? ((PdfInteger)columns).RawValue : 1);
 
             MemoryStream input = new MemoryStream(data);
             MemoryStream output = new MemoryStream();

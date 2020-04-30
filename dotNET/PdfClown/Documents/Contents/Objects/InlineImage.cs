@@ -46,6 +46,7 @@ namespace PdfClown.Documents.Contents.Objects
 
         private static readonly string DataOperatorKeyword = "ID";
         private SKBitmap image;
+        private IContentContext Context;
         #endregion
         #endregion
 
@@ -70,7 +71,7 @@ namespace PdfClown.Documents.Contents.Objects
         */
         public override Operation Header => (Operation)Objects[0];
 
-        PdfDirectObject IImageObject.Header => null;
+        PdfDictionary IImageObject.Header => null;
 
         public InlineImageHeader ImageHeader => (InlineImageHeader)Header;
 
@@ -92,7 +93,7 @@ namespace PdfClown.Documents.Contents.Objects
 
         public IImageObject SMask => null;
 
-        public bool ImageMask => false;
+        public bool ImageMask => bool.TryParse(ImageHeader.ImageMask, out var isMask) ? isMask : false;
 
         public IBuffer Data => ImageBody.Value;
 
@@ -104,12 +105,30 @@ namespace PdfClown.Documents.Contents.Objects
 
         public int BitsPerComponent => ImageHeader.BitsPerComponent;
 
-        public ColorSpace ColorSpace => ColorSpace.Wrap(ImageHeader.FormatColorSpace);
+        public ColorSpace ColorSpace
+        {
+            get
+            {
+                var name = ImageHeader.FormatColorSpace;
+                if (name.Equals(PdfName.DeviceGray))
+                    return DeviceGrayColorSpace.Default;
+                else if (name.Equals(PdfName.DeviceRGB))
+                    return DeviceRGBColorSpace.Default;
+                else if (name.Equals(PdfName.DeviceCMYK))
+                    return DeviceCMYKColorSpace.Default;
+                else if (name.Equals(PdfName.Pattern))
+                    return PatternColorSpace.Default;
+                else
+                    return Context.Resources.ColorSpaces[name];
+            }
+
+        }
 
         public PdfArray Matte => null;
 
         public override void Scan(GraphicsState state)
         {
+            Context = state.Scanner.ContentContext;
             if (state.Scanner?.RenderContext != null)
             {
                 var canvas = state.Scanner.RenderContext;

@@ -30,10 +30,10 @@ namespace PdfClown.Documents.Contents
                 {
                     var filterItem = (PdfName)filterArray[i];
                     var parameterItem = parameterArray?[i];
-                    image = LoadImage(imageObject, data, filterItem, parameterItem);
+                    image = LoadImage(imageObject, data, filterItem, parameterItem, imageObject.Header);
                     if (image == null)
                     {
-                        buffer = Bytes.Buffer.Extract(buffer, filterItem, parameterItem ?? imageObject.Header);
+                        buffer = Bytes.Buffer.Extract(buffer, filterItem, parameterItem, imageObject.Header);
                         data = buffer.GetBuffer();
                     }
                 }
@@ -41,10 +41,10 @@ namespace PdfClown.Documents.Contents
             else if (filter != null)
             {
                 var filterItem = (PdfName)filter;
-                image = LoadImage(imageObject, data, filterItem, imageObject.Parameters ?? imageObject.Header);
+                image = LoadImage(imageObject, data, filterItem, imageObject.Parameters, imageObject.Header);
                 if (image == null)
                 {
-                    buffer = Bytes.Buffer.Extract(buffer, filter, imageObject.Parameters ?? imageObject.Header);
+                    buffer = Bytes.Buffer.Extract(buffer, filter, imageObject.Parameters, imageObject.Header);
                     data = buffer.GetBuffer();
                     image = SKBitmap.Decode(data);
                 }
@@ -58,7 +58,7 @@ namespace PdfClown.Documents.Contents
             return image;
         }
 
-        public static SKBitmap LoadImage(IImageObject imageObject, byte[] data, PdfName filterItem, PdfDirectObject parameterItem)
+        public static SKBitmap LoadImage(IImageObject imageObject, byte[] data, PdfName filterItem, PdfDirectObject parameterItem, PdfDictionary header)
         {
             SKBitmap image = null;
             if (filterItem.Equals(PdfName.DCTDecode)
@@ -69,24 +69,24 @@ namespace PdfClown.Documents.Contents
             else if (filterItem.Equals(PdfName.CCITTFaxDecode)
                 || filterItem.Equals(PdfName.CCF))
             {
-                image = LoadTiff(data, parameterItem ?? imageObject.Header);
+                image = LoadTiff(data, parameterItem, imageObject.Header);
             }
             else if (filterItem.Equals(PdfName.JPXDecode))
             {
-                image = LoadJPEG2000(data, parameterItem ?? imageObject.Header);
+                image = LoadJPEG2000(data, parameterItem, imageObject.Header);
             }
             else if (filterItem.Equals(PdfName.JBIG2Decode))
             {
-                image = LoadJBIG(data, parameterItem ?? imageObject.Header);
+                image = LoadJBIG(data, parameterItem, imageObject.Header);
             }
 
             return image;
         }
 
-        private static SKBitmap LoadJBIG(byte[] data, PdfDirectObject parameters = null)
+        private static SKBitmap LoadJBIG(byte[] data, PdfDirectObject parameters, PdfDictionary header)
         {
 
-            var imageParams = ((PdfStream)parameters.Container.DataObject).Header;
+            var imageParams = header;
             var width = imageParams.Resolve(PdfName.Width) as PdfInteger;
             var height = imageParams.Resolve(PdfName.Height) as PdfInteger;
             var bpp = imageParams.Resolve(PdfName.BitsPerComponent) as PdfInteger;
@@ -127,9 +127,9 @@ namespace PdfClown.Documents.Contents
             }
         }
 
-        public static SKBitmap LoadJPEG2000(byte[] jpegStream, PdfDirectObject parameters = null)
+        public static SKBitmap LoadJPEG2000(byte[] jpegStream, PdfDirectObject parameters, PdfDictionary header)
         {
-            var imageParams = ((PdfStream)parameters.Container.DataObject).Header;
+            var imageParams = header;
             var width = imageParams.Resolve(PdfName.Width) as PdfInteger;
             var height = imageParams.Resolve(PdfName.Height) as PdfInteger;
             var bpp = imageParams.Resolve(PdfName.BitsPerComponent) as PdfInteger;
@@ -152,10 +152,10 @@ namespace PdfClown.Documents.Contents
             }
         }
 
-        public static SKBitmap LoadTiff(byte[] data, PdfDirectObject parameters)
+        public static SKBitmap LoadTiff(byte[] data, PdfDirectObject parameters, PdfDictionary header)
         {
             var length = data.Length;
-            var imageParams = ((PdfStream)parameters.Container.DataObject).Header;
+            var imageParams = header;
             const short TIFF_BIGENDIAN = 0x4d4d;
             const short TIFF_LITTLEENDIAN = 0x4949;
             const int ifd_length = 10;
@@ -255,7 +255,7 @@ namespace PdfClown.Documents.Contents
             var filter = image.Filter;
             if (filter != null)
             {
-                buffer = Bytes.Buffer.Extract(buffer, filter, image.Parameters ?? image.Header);
+                buffer = Bytes.Buffer.Extract(buffer, filter, image.Parameters, image.Header);
                 data = buffer.ToByteArray();
             }
             Init(image, data, state);
@@ -398,13 +398,26 @@ namespace PdfClown.Documents.Contents
             };
             var skColor = state.FillColorSpace.GetSKColor(state.FillColor);
             var raster = new int[info.Width * info.Height];
-
+            var emptyBytes = info.Width % 8 > 0;
             for (int y = 0; y < info.Height; y++)
             {
                 for (int x = 0; x < info.Width; x++)
                 {
                     var index = (y * info.Width + x);
-                    var value = index < buffer.Length ? buffer[index] : (byte)0;
+                    byte value = 0;
+                    if (bitPerComponent == 1)
+                    {
+                        var byteIndex = index / 8;
+                        if (emptyBytes)
+                            byteIndex += y;
+                        var bitIndex = 7 - index % 8;
+                        var byteValue = buffer[byteIndex];
+                        value = (byteValue & (1 << bitIndex)) == 0 ? (byte)0 : (byte)255;
+                    }
+                    else
+                    {
+                        value = index < buffer.Length ? buffer[index] : (byte)0;
+                    }
                     raster[index] = (int)(uint)skColor.WithAlpha(value);
                 }
             }
@@ -413,6 +426,7 @@ namespace PdfClown.Documents.Contents
             var ptr = GCHandle.Alloc(raster, GCHandleType.Pinned);
             var bitmap = new SKBitmap();
             bitmap.InstallPixels(info, ptr.AddrOfPinnedObject(), info.RowBytes, (addr, ctx) => ptr.Free(), null);
+
             return bitmap;
         }
 

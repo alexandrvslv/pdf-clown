@@ -41,9 +41,9 @@ namespace PdfClown.Bytes.Filters
 
         #region interface
         #region public
-        public override byte[] Decode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Decode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
-            var imageParams = ((PdfStream)parameters.Container.DataObject).Header;
+            var imageParams = header;
             const short TIFF_BIGENDIAN = 0x4d4d;
             const short TIFF_LITTLEENDIAN = 0x4949;
             const int ifd_length = 10;
@@ -80,7 +80,7 @@ namespace PdfClown.Bytes.Filters
             }
         }
 
-        public override byte[] Encode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Encode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
             return data;
         }

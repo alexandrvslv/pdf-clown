@@ -131,11 +131,12 @@ namespace PdfClown.Documents.Contents.Objects
             bool wordSpaceSupported = !(font is PdfType0Font);
             bool vertical = font.IsVertical;
 
-            double fontSize = Font.GetScalingFactor(state.FontSize);
+            double fontSize = font.GetScalingFactor(state.FontSize);
             double hScaling = fontSize * state.Scale;
             double wordSpace = wordSpaceSupported ? state.WordSpace * state.Scale : 0;
             double charSpace = state.CharSpace * state.Scale;
             double ascent = -font.Ascent * fontSize;
+            var charHeight = (font.BoundingBox.Height + font.Descent) * fontSize;
             SKMatrix ctm = state.Ctm;
             SKMatrix tm = state.TextState.Tm;
             //var encoding = font.GetEnoding();
@@ -210,12 +211,12 @@ namespace PdfClown.Documents.Contents.Objects
                                 font.DrawChar(context, fill, stroke, textChar, code, codeBytes, ref parameters);
                             }
                             var charWidth = font.GetWidth(code) * hScaling;
-                            var charHeight = font.GetHeight(code) * fontSize;
+
                             if (textScanner != null)
                             {
                                 var charBox = SKRect.Create(0, (float)ascent, (float)charWidth, (float)charHeight);
                                 var quad = new Quad(charBox);
-                                //SKMatrix.PreConcat(ref trm, SKMatrix.MakeScale(1, -1));
+                                SKMatrix.PreConcat(ref trm, SKMatrix.MakeScale(1, -1));
                                 quad.Transform(ref trm);
                                 textScanner.ScanChar(textChar, quad);
                             }

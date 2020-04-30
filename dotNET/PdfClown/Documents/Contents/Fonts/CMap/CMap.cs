@@ -337,7 +337,9 @@ namespace PdfClown.Documents.Contents.Fonts
         {
             int code = ConvertUtils.ByteArrayToInt(codes);
             charToUnicode[code] = unicode;
-            unicodeToChar[unicode] = codes;
+            var copy = new byte[codes.Length];
+            Array.Copy(codes, copy, codes.Length);
+            unicodeToChar[unicode] = copy;
 
             // fixme: ugly little hack
             if (SPACE.Equals(unicode))

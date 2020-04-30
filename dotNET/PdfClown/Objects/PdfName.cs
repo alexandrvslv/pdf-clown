@@ -501,6 +501,7 @@ namespace PdfClown.Objects
         public static readonly PdfName Root = new PdfName("Root");
         public static readonly PdfName ROpenArrow = new PdfName("ROpenArrow");
         public static readonly PdfName Rotate = new PdfName("Rotate");
+        public static readonly PdfName Rows = new PdfName("Rows");
         public static readonly PdfName RT = new PdfName("RT");
         public static readonly PdfName RunLengthDecode = new PdfName("RunLengthDecode");
         public static readonly PdfName S = new PdfName("S");

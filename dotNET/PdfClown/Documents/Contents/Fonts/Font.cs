@@ -68,7 +68,7 @@ namespace PdfClown.Documents.Contents.Fonts
           <summary>Gets the scaling factor to be applied to unscaled metrics to get actual
           measures.</summary>
         */
-        public static double GetScalingFactor(double size)
+        public virtual double GetScalingFactor(double size)
         { return 0.001 * size; }
 
         /**
@@ -278,7 +278,7 @@ namespace PdfClown.Documents.Contents.Fonts
          */
         public Rectangle FontBBox
         {
-            get => Wrap<Rectangle>(Dictionary.Resolve<PdfArray>(PdfName.FontBBox));
+            get => Wrap<Rectangle>(Dictionary[PdfName.FontBBox]);
             set => Dictionary[PdfName.FontBBox] = value?.BaseObject;
         }
 
@@ -511,7 +511,7 @@ namespace PdfClown.Documents.Contents.Fonts
             var path = GetNormalizedPath(code);
             if (path == null)
             {
-                Debug.WriteLine($"info: no path for Code: {code}  Char: '{textChar}'");
+                Debug.WriteLine($"info: no Glyph for Code: {code}  Char: '{textChar}'");
                 return;
             }
             context.Save();

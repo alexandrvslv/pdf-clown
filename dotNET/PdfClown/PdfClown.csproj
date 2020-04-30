@@ -516,7 +516,10 @@
     <RestoreSources>../FreeImage.NETCore/Package;$(RestoreSources);</RestoreSources>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.633" />
+    <None Include="Bytes\Filters\CCITTFaxDecoderStream.cs" />
+    <None Include="Bytes\Filters\CCITTFaxEncoderStream.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="SkiaSharp" Version="1.68.1.1" />
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="1.68.1.1" />

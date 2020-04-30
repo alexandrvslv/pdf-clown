@@ -359,8 +359,26 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 var value = ConvertUtils.ByteArrayToInt(tokenBytes);
                 cmap.AddCharMapping(startCode, value);
-                OperationUtils.Increment(startCode);
-                OperationUtils.Increment(tokenBytes);
+                Increment(startCode);
+                Increment(tokenBytes);
+            }
+        }
+
+        private void Increment(byte[] data)
+        {
+            Increment(data, data.Length - 1);
+        }
+
+        private void Increment(byte[] data, int position)
+        {
+            if (position > 0 && (data[position] & 0xFF) == 255)
+            {
+                data[position] = 0;
+                Increment(data, position - 1);
+            }
+            else
+            {
+                data[position] = (byte)(data[position] + 1);
             }
         }
         #endregion

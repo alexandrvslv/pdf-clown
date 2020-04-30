@@ -1,105 +1,137 @@
 ﻿/*
-  Copyright 2006-2013 Stefano Chizzolini. http://www.pdfclown.org
-
-  Contributors:
-
-  This file should be part of the source code distribution of "PDF Clown library" (the
-  Program): see the accompanying README files for more info.
-
-  This Program is free software; you can redistribute it and/or modify it under the terms
-  of the GNU Lesser General Public License as published by the Free Software Foundation;
-  either version 3 of the License, or (at your option) any later version.
-
-  This Program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY,
-  either expressed or implied; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE. See the License for more details.
-
-  You should have received a copy of the GNU Lesser General Public License along with this
-  Program (see README files); if not, go to the GNU website (http://www.gnu.org/licenses/).
-
-  Redistribution and use, with or without modification, are permitted provided that such
-  redistributions retain the above copyright notice, license and disclaimer, along with
-  this list of conditions.
-*/
-
-using BitMiracle.LibTiff.Classic;
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 using PdfClown.Objects;
-
 using System;
-using System.IO;
 
 namespace PdfClown.Bytes.Filters
 {
-    //https://github.com/gheeres/PDFSharp.Extensions/blob/master/Pdf/PdfDictionaryExtensions.cs
-    public sealed class CCITTFaxFilter : Filter
+    /**
+     * Decodes image data that has been encoded using either Group 3 or Group 4
+     * CCITT facsimile (fax) encoding, and encodes image data to Group 4.
+     *
+     * @author Ben Litchfield
+     * @author Marcel Kammer
+     * @author Paul King
+     */
+    public class CCITTFaxFilter : Filter
     {
-        #region dynamic
-        #region constructors
-        internal CCITTFaxFilter()
-        { }
-        #endregion
 
-        #region interface
-        #region public
-        public override byte[] Decode(byte[] data, int offset, int length, PdfDictionary parameters)
+        public override byte[] Вecode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
-            var imageParams = ((PdfStream)parameters.Container.DataObject).Header;
-            const short TIFF_BIGENDIAN = 0x4d4d;
-            const short TIFF_LITTLEENDIAN = 0x4949;
-            const int ifd_length = 10;
-            const int header_length = 10 + (ifd_length * 12 + 4);
-            var width = imageParams.Resolve(PdfName.Width) as PdfInteger;
-            var height = imageParams.Resolve(PdfName.Height) as PdfInteger;
-            var bpp = imageParams.Resolve(PdfName.BitsPerComponent) as PdfInteger;
-            var flag = imageParams.Resolve(PdfName.ImageMask) as PdfBoolean;
-            using (MemoryStream output = new MemoryStream())
+            // get decode parameters
+            PdfDictionary decodeParms = parameters as PdfDictionary;
+
+            // parse dimensions
+            int cols = decodeParms.getInt(PdfName.Columns, 1728);
+            int rows = decodeParms.getInt(PdfName.Rows, 0);
+            int height = ((PdfInteger)(header[PdfName.Height] ?? header[PdfName.H]))?.IntValue ?? 0;
+            if (rows > 0 && height > 0)
             {
-                output.Write(BitConverter.GetBytes(BitConverter.IsLittleEndian ? TIFF_LITTLEENDIAN : TIFF_BIGENDIAN), 0, 2); // tiff_magic (big/little endianness)
-                output.Write(BitConverter.GetBytes((uint)42), 0, 2);         // tiff_version
-                output.Write(BitConverter.GetBytes((uint)8), 0, 4);          // first_ifd (Image file directory) / offset
-                output.Write(BitConverter.GetBytes((uint)ifd_length), 0, 2); // ifd_length, number of tags (ifd entries)
+                // PDFBOX-771, PDFBOX-3727: rows in DecodeParms sometimes contains an incorrect value
+                rows = height;
+            }
+            else
+            {
+                // at least one of the values has to have a valid value
+                rows = Math.max(rows, height);
+            }
 
-                // Dictionary should be in order based on the TiffTag value
-                WriteTiffTag(output, TiffTag.SUBFILETYPE, TiffType.LONG, 1, 0);
-                WriteTiffTag(output, TiffTag.IMAGEWIDTH, TiffType.LONG, 1, (uint)width.RawValue);
-                WriteTiffTag(output, TiffTag.IMAGELENGTH, TiffType.LONG, 1, (uint)height.RawValue);
-                WriteTiffTag(output, TiffTag.BITSPERSAMPLE, TiffType.SHORT, 1, (uint)bpp.RawValue);
-                WriteTiffTag(output, TiffTag.COMPRESSION, TiffType.SHORT, 1, (uint)Compression.CCITTFAX4); // CCITT Group 4 fax encoding.
-                WriteTiffTag(output, TiffTag.PHOTOMETRIC, TiffType.SHORT, 1, flag?.BooleanValue ?? false
-                    ? (uint)(int)Photometric.MINISWHITE : (uint)(int)Photometric.MINISBLACK); // WhiteIsZero
-                WriteTiffTag(output, TiffTag.STRIPOFFSETS, TiffType.LONG, 1, header_length);
-                WriteTiffTag(output, TiffTag.SAMPLESPERPIXEL, TiffType.SHORT, 1, 1);
-                WriteTiffTag(output, TiffTag.ROWSPERSTRIP, TiffType.LONG, 1, (uint)height.RawValue);
-                WriteTiffTag(output, TiffTag.STRIPBYTECOUNTS, TiffType.LONG, 1, (uint)length);
+            // decompress data
+            int k = decodeParms.getInt(PdfName.K, 0);
+            bool encodedByteAlign = decodeParms.getBoolean(PdfName.ENCODED_BYTE_ALIGN, false);
+            int arraySize = (cols + 7) / 8 * rows;
+            // TODO possible options??
+            byte[]
+        decompressed = new byte[arraySize];
+            CCITTFaxDecoderStream s;
+            int type;
+            long tiffOptions;
+            if (k == 0)
+            {
+                tiffOptions = encodedByteAlign ? TIFFExtension.GROUP3OPT_BYTEALIGNED : 0;
+                type = TIFFExtension.COMPRESSION_CCITT_MODIFIED_HUFFMAN_RLE;
+            }
+            else
+            {
+                if (k > 0)
+                {
+                    tiffOptions = encodedByteAlign ? TIFFExtension.GROUP3OPT_BYTEALIGNED : 0;
+                    tiffOptions |= TIFFExtension.GROUP3OPT_2DENCODING;
+                    type = TIFFExtension.COMPRESSION_CCITT_T4;
+                }
+                else
+                {
+                    // k < 0
+                    tiffOptions = encodedByteAlign ? TIFFExtension.GROUP4OPT_BYTEALIGNED : 0;
+                    type = TIFFExtension.COMPRESSION_CCITT_T6;
+                }
+            }
+            s = new CCITTFaxDecoderStream(encoded, cols, type, TIFFExtension.FILL_LEFT_TO_RIGHT, tiffOptions);
+            readFromDecoderStream(s, decompressed);
 
-                // Next IFD Offset
-                output.Write(BitConverter.GetBytes((uint)0), 0, 4);
+            // invert bitmap
+            bool blackIsOne = decodeParms.getBoolean(PdfName.BLACK_IS_1, false);
+            if (!blackIsOne)
+            {
+                // Inverting the bitmap
+                // Note the previous approach with starting from an IndexColorModel didn't work
+                // reliably. In some cases the image wouldn't be painted for some reason.
+                // So a safe but slower approach was taken.
+                invertBitmap(decompressed);
+            }
 
-                output.Write(data, offset, length);
-                return output.ToArray();
+            decoded.write(decompressed);
+            return new DecodeResult(parameters);
+        }
+
+        void readFromDecoderStream(CCITTFaxDecoderStream decoderStream, byte[] result)
+
+        {
+            int pos = 0;
+            int read;
+            while ((read = decoderStream.read(result, pos, result.length - pos)) > -1)
+            {
+                pos += read;
+                if (pos >= result.length)
+                {
+                    break;
+                }
+            }
+            decoderStream.close();
+        }
+
+        private void invertBitmap(byte[] bufferData)
+        {
+            for (int i = 0, c = bufferData.length; i < c; i++)
+            {
+                bufferData[i] = (byte)(~bufferData[i] & 0xFF);
             }
         }
 
-        public override byte[] Encode(byte[] data, int offset, int length, PdfDictionary parameters)
+        override
+            protected void encode(InputStream input, OutputStream encoded, PdfDictionary parameters)
+
         {
-            return data;
+            int cols = parameters.getInt(PdfName.COLUMNS);
+            int rows = parameters.getInt(PdfName.ROWS);
+            CCITTFaxEncoderStream ccittFaxEncoderStream =
+                        new CCITTFaxEncoderStream(encoded, cols, rows, TIFFExtension.FILL_LEFT_TO_RIGHT);
+            IOUtils.copy(input, ccittFaxEncoderStream);
+            input.close();
         }
-        #endregion
-
-        #region private
-        public static void WriteTiffTag(System.IO.Stream stream, TiffTag tag, TiffType type, uint count, uint value)
-        {
-            if (stream == null) return;
-
-            stream.Write(BitConverter.GetBytes((uint)tag), 0, 2);
-            stream.Write(BitConverter.GetBytes((uint)type), 0, 2);
-            stream.Write(BitConverter.GetBytes(count), 0, 4);
-            stream.Write(BitConverter.GetBytes(value), 0, 4);
-        }
-
-
-        #endregion
-        #endregion
-        #endregion
     }
 }
