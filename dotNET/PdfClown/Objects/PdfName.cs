@@ -105,6 +105,7 @@ namespace PdfClown.Objects
         public static readonly PdfName BitsPerSample = new PdfName("BitsPerSample");
         public static readonly PdfName Bl = new PdfName("Bl");
         public static readonly PdfName BlackPoint = new PdfName("BlackPoint");
+        public static readonly PdfName BlackIs1 = new PdfName("BlackIs1");
         public static readonly PdfName BleedBox = new PdfName("BleedBox");
         public static readonly PdfName Blinds = new PdfName("Blinds");
         public static readonly PdfName BM = new PdfName("BM");
@@ -212,6 +213,7 @@ namespace PdfClown.Objects
         public static readonly PdfName EmbeddedFile = new PdfName("EmbeddedFile");
         public static readonly PdfName EmbeddedFiles = new PdfName("EmbeddedFiles");
         public static readonly PdfName Encode = new PdfName("Encode");
+        public static readonly PdfName EncodedByteAlign = new PdfName("EncodedByteAlign");
         public static readonly PdfName Encoding = new PdfName("Encoding");
         public static readonly PdfName Encrypt = new PdfName("Encrypt");
         public static readonly PdfName Event = new PdfName("Event");

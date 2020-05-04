@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using System.Diagnostics;
+using PdfClown.Util.Collections.Generic;
 
 namespace PdfClown.Documents.Contents.Fonts.Type1
 {
@@ -221,21 +222,5 @@ namespace PdfClown.Documents.Contents.Fonts.Type1
         }
     }
 
-    public static class ListExtension
-    {
-        public static T RemoveAtValue<T>(this List<T> list, int index)
-        {
-            var item = list[index];
-            list.RemoveAt(index);
-            return item;
-        }
 
-        public static void Fill<T>(this T[] list, T value)
-        {
-            for (int i = 0; i < list.Length; i++)
-            {
-                list[i] = value;
-            }
-        }
-    }
 }

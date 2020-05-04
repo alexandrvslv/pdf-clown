@@ -52,6 +52,32 @@ namespace PdfClown.Util.Collections.Generic
             foreach (KeyValuePair<TKey, TValue> entry in enumerable)
             { dictionary[entry.Key] = entry.Value; }
         }
+
+        public static T RemoveAtValue<T>(this List<T> list, int index)
+        {
+            var item = list[index];
+            list.RemoveAt(index);
+            return item;
+        }
+
+        public static void Fill<T>(this T[] list, T value)
+        {
+            for (int i = 0; i < list.Length; i++)
+            {
+                list[i] = value;
+            }
+        }
+
+        public static void Fill<T>(this T[] list, int offset, int length, T value)
+        {
+            var max = System.Math.Min(list.Length, offset + length);
+            for (int i = offset; i < max; i++)
+            {
+                list[i] = value;
+            }
+        }
     }
+
+
 }
 

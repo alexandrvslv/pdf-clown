@@ -27,7 +27,9 @@
  */
 
 using PdfClown.Objects;
+using PdfClown.Util.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace PdfClown.Bytes.Filters
@@ -76,7 +78,7 @@ namespace PdfClown.Bytes.Filters
         private bool optionUncompressed = false;
         private bool optionByteAligned = false;
 
-        public CCITTFaxDecoderStream(Stream stream, int columns, int type, int fillOrder, long options)
+        public CCITTFaxDecoderStream(System.IO.Stream stream, int columns, int type, int fillOrder, long options)
              : base(stream)
         {
             this.columns = columns;
@@ -120,7 +122,7 @@ namespace PdfClown.Bytes.Filters
                 {
                     DecodeRow();
                 }
-                catch (EOFException e)
+                catch (Exception e)
                 {
                     // TODO: Rewrite to avoid throw/catch for normal flow...
                     if (decodedLength != 0)
@@ -188,7 +190,7 @@ namespace PdfClown.Bytes.Filters
 
                 while (true)
                 {
-                    n = n.walk(ReadBit());
+                    n = n.Walk(ReadBit());
 
                     if (n == null)
                     {
@@ -251,7 +253,7 @@ namespace PdfClown.Bytes.Filters
 
         private int GetNextChangingElement(int a0, bool white)
         {
-            int start = (lastChangingElement & 0xFFFFFFFE) + (white ? 0 : 1);
+            int start = (int)(lastChangingElement & 0xFFFFFFFE) + (white ? 0 : 1);
             if (start > 2)
             {
                 start -= 2;
@@ -278,7 +280,7 @@ namespace PdfClown.Bytes.Filters
         {
             if (optionByteAligned)
             {
-                resetBuffer();
+                ResetBuffer();
             }
             Decode1D();
         }
@@ -287,7 +289,7 @@ namespace PdfClown.Bytes.Filters
         {
             if (optionByteAligned)
             {
-                resetBuffer();
+                ResetBuffer();
             }
         sof: while (true)
             {
@@ -296,7 +298,7 @@ namespace PdfClown.Bytes.Filters
 
                 while (true)
                 {
-                    n = n.walk(ReadBit());
+                    n = n.Walk(ReadBit());
 
                     if (n == null)
                     {
@@ -324,7 +326,7 @@ namespace PdfClown.Bytes.Filters
         {
             if (optionByteAligned)
             {
-                resetBuffer();
+                ResetBuffer();
             }
             Decode2D();
         }
@@ -368,14 +370,14 @@ namespace PdfClown.Bytes.Filters
 
                 while (index % 8 != 0 && (nextChange - index) > 0)
                 {
-                    decodedRow[byteIndex] |= (white ? 0 : 1 << (7 - ((index) % 8)));
+                    decodedRow[byteIndex] = (byte)(decodedRow[byteIndex] | (white ? 0 : 1 << (7 - ((index) % 8))));
                     index++;
                 }
 
                 if (index % 8 == 0)
                 {
                     byteIndex = index / 8;
-                    const byte value = (byte)(white ? 0x00 : 0xff);
+                    byte value = (byte)(white ? 0x00 : 0xff);
 
                     while ((nextChange - index) > 7)
                     {
@@ -392,7 +394,7 @@ namespace PdfClown.Bytes.Filters
                         decodedRow[byteIndex] = 0;
                     }
 
-                    decodedRow[byteIndex] |= (white ? 0 : 1 << (7 - ((index) % 8)));
+                    decodedRow[byteIndex] = (byte)(decodedRow[byteIndex] | (white ? 0 : 1 << (7 - ((index) % 8))));
                     index++;
                 }
 
@@ -401,7 +403,7 @@ namespace PdfClown.Bytes.Filters
 
             if (index != columns)
             {
-                throw new IOException("Sum of run-lengths does not equal scan line width: " + index + " > " + columns);
+                throw new Exception("Sum of run-lengths does not equal scan line width: " + index + " > " + columns);
             }
 
             decodedLength = (index + 7) / 8;
@@ -416,11 +418,11 @@ namespace PdfClown.Bytes.Filters
             while (true)
             {
                 bool bit = ReadBit();
-                n = n.walk(bit);
+                n = n.Walk(bit);
 
                 if (n == null)
                 {
-                    throw new IOException("Unknown code in Huffman RLE stream");
+                    throw new Exception("Unknown code in Huffman RLE stream");
                 }
 
                 if (n.isLeaf)
@@ -438,7 +440,7 @@ namespace PdfClown.Bytes.Filters
             }
         }
 
-        private void resetBuffer()
+        private void ResetBuffer()
         {
             bufferPos = -1;
         }
@@ -454,7 +456,7 @@ namespace PdfClown.Bytes.Filters
 
                 if (buffer == -1)
                 {
-                    throw new EOFException("Unexpected end of Huffman RLE stream");
+                    throw new Exception("Unexpected end of Huffman RLE stream");
                 }
 
                 bufferPos = 0;
@@ -507,8 +509,8 @@ namespace PdfClown.Bytes.Filters
         {
             if (decodedLength < 0)
             {
-                //TODO better? Math.min(off + len, b.length)
-                Arrays.fill(b, off, off + len, (byte)0x0);
+                //TODO better? Math.Min(off + len, b.Length)
+                b.Fill(off, len, (byte)0x0);
                 return len;
             }
 
@@ -518,21 +520,22 @@ namespace PdfClown.Bytes.Filters
 
                 if (decodedLength < 0)
                 {
-                    Arrays.fill(b, off, off + len, (byte)0x0);
+                    b.Fill(off, len, (byte)0x0);
                     return len;
                 }
             }
 
-            int read = Math.min(decodedLength - decodedPos, len);
-            System.arraycopy(decodedRow, decodedPos, b, off, read);
+            int read = Math.Min(decodedLength - decodedPos, len);
+            Array.Copy(decodedRow, decodedPos, b, off, read);
             decodedPos += read;
 
             return read;
         }
 
 
-        public override long Skip(long n)
+        public long Skip(long n)
         {
+
             if (decodedLength < 0)
             {
                 return -1;
@@ -548,35 +551,35 @@ namespace PdfClown.Bytes.Filters
                 }
             }
 
-            int skipped = (int)Math.min(decodedLength - decodedPos, n);
+            int skipped = (int)Math.Min(decodedLength - decodedPos, n);
             decodedPos += skipped;
 
             return skipped;
         }
 
 
-        public override bool MarkSupported()
+        public bool MarkSupported()
         {
             return false;
         }
 
 
-        public override void Reset()
+        public void Reset()
         {
-            throw new IOException("mark/reset not supported");
+            throw new Exception("mark/reset not supported");
         }
 
-        private readonly class Node
+        private sealed class Node
         {
-            Node left;
-            Node right;
+            internal Node left;
+            internal Node right;
 
-            int value; // > 63 non term.
+            internal int value; // > 63 non term.
 
-            bool canBeFill = false;
-            bool isLeaf = false;
+            internal bool canBeFill = false;
+            internal bool isLeaf = false;
 
-            void set(bool next, Node node)
+            public void Set(bool next, Node node)
             {
                 if (!next)
                 {
@@ -588,23 +591,23 @@ namespace PdfClown.Bytes.Filters
                 }
             }
 
-            Node walk(bool next)
+            public Node Walk(bool next)
             {
                 return next ? right : left;
             }
 
-            override
-                public String toString()
+
+            public override string ToString()
             {
                 return "[leaf=" + isLeaf + ", value=" + value + ", canBeFill=" + canBeFill + "]";
             }
         }
 
-        private readonly class Tree
+        private sealed class Tree
         {
-            readonly Node root = new Node();
+            readonly internal Node root = new Node();
 
-            void fill(int depth, int path, int value)
+            public void Fill(int depth, int path, int value)
             {
                 Node current = root;
 
@@ -612,7 +615,7 @@ namespace PdfClown.Bytes.Filters
                 {
                     int bitPos = depth - 1 - i;
                     bool isSet = ((path >> bitPos) & 1) == 1;
-                    Node next = current.walk(isSet);
+                    Node next = current.Walk(isSet);
 
                     if (next == null)
                     {
@@ -629,13 +632,13 @@ namespace PdfClown.Bytes.Filters
                             next.canBeFill = true;
                         }
 
-                        current.set(isSet, next);
+                        current.Set(isSet, next);
                     }
                     else
                     {
                         if (next.isLeaf)
                         {
-                            throw new IOException("node is leaf, no other following");
+                            throw new Exception("node is leaf, no other following");
                         }
                     }
 
@@ -643,7 +646,7 @@ namespace PdfClown.Bytes.Filters
                 }
             }
 
-            void fill(int depth, int path, Node node)
+            public void Fill(int depth, int path, Node node)
             {
                 Node current = root;
 
@@ -651,7 +654,7 @@ namespace PdfClown.Bytes.Filters
                 {
                     int bitPos = depth - 1 - i;
                     bool isSet = ((path >> bitPos) & 1) == 1;
-                    Node next = current.walk(isSet);
+                    Node next = current.Walk(isSet);
 
                     if (next == null)
                     {
@@ -669,13 +672,13 @@ namespace PdfClown.Bytes.Filters
                             next.canBeFill = true;
                         }
 
-                        current.set(isSet, next);
+                        current.Set(isSet, next);
                     }
                     else
                     {
                         if (next.isLeaf)
                         {
-                            throw new IOException("node is leaf, no other following");
+                            throw new Exception("node is leaf, no other following");
                         }
                     }
 
@@ -684,150 +687,151 @@ namespace PdfClown.Bytes.Filters
             }
         }
 
-        static readonly short[][] BLACK_CODES = {
-            { // 2 bits
+        public static readonly short[][] BLACK_CODES = new short[][] {
+            new short[]{ // 2 bits
               0x2, 0x3,
               },
-            { // 3 bits
+            new short[]{ // 3 bits
               0x2, 0x3,
               },
-            { // 4 bits
+            new short[]{ // 4 bits
               0x2, 0x3,
               },
-            { // 5 bits
+            new short[]{ // 5 bits
               0x3,
               },
-            { // 6 bits
+            new short[]{ // 6 bits
               0x4, 0x5,
               },
-            { // 7 bits
+            new short[]{ // 7 bits
               0x4, 0x5, 0x7,
               },
-            { // 8 bits
+            new short[]{ // 8 bits
               0x4, 0x7,
               },
-            { // 9 bits
+            new short[]{ // 9 bits
               0x18,
               },
-            { // 10 bits
+            new short[]{ // 10 bits
               0x17, 0x18, 0x37, 0x8, 0xf,
               },
-            { // 11 bits
+            new short[]{ // 11 bits
               0x17, 0x18, 0x28, 0x37, 0x67, 0x68, 0x6c, 0x8, 0xc, 0xd,
               },
-            { // 12 bits
+            new short[]{ // 12 bits
               0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f, 0x24, 0x27, 0x28, 0x2b, 0x2c, 0x33,
               0x34, 0x35, 0x37, 0x38, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x64, 0x65,
               0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xd2, 0xd3,
               0xd4, 0xd5, 0xd6, 0xd7, 0xda, 0xdb,
               },
-            { // 13 bits
+            new short[]{ // 13 bits
               0x4a, 0x4b, 0x4c, 0x4d, 0x52, 0x53, 0x54, 0x55, 0x5a, 0x5b, 0x64, 0x65, 0x6c, 0x6d, 0x72, 0x73,
               0x74, 0x75, 0x76, 0x77,
               }
-    };
-        static readonly short[][] BLACK_RUN_LENGTHS = {
-            { // 2 bits
+        };
+
+        public static readonly short[][] BLACK_RUN_LENGTHS = new short[][]{
+            new short[]{ // 2 bits
               3, 2,
               },
-            { // 3 bits
+            new short[]{ // 3 bits
               1, 4,
               },
-            { // 4 bits
+            new short[]{ // 4 bits
               6, 5,
               },
-            { // 5 bits
+            new short[]{ // 5 bits
               7,
               },
-            { // 6 bits
+            new short[]{ // 6 bits
               9, 8,
               },
-            { // 7 bits
+            new short[]{ // 7 bits
               10, 11, 12,
               },
-            { // 8 bits
+            new short[]{ // 8 bits
               13, 14,
               },
-            { // 9 bits
+            new short[]{ // 9 bits
               15,
               },
-            { // 10 bits
+            new short[]{ // 10 bits
               16, 17, 0, 18, 64,
               },
-            { // 11 bits
+            new short[]{ // 11 bits
               24, 25, 23, 22, 19, 20, 21, 1792, 1856, 1920,
               },
-            { // 12 bits
+            new short[]{ // 12 bits
               1984, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 2560, 52, 55, 56, 59, 60, 320, 384, 448, 53,
               54, 50, 51, 44, 45, 46, 47, 57, 58, 61, 256, 48, 49, 62, 63, 30, 31, 32, 33, 40, 41, 128, 192, 26,
               27, 28, 29, 34, 35, 36, 37, 38, 39, 42, 43,
               },
-            { // 13 bits
+            new short[]{ // 13 bits
               640, 704, 768, 832, 1280, 1344, 1408, 1472, 1536, 1600, 1664, 1728, 512, 576, 896, 960, 1024, 1088,
               1152, 1216,
               }
-    };
+        };
 
-        public static readonly short[][] WHITE_CODES = {
-            { // 4 bits
+        public static readonly short[][] WHITE_CODES = new short[][]{
+            new short[]{ // 4 bits
               0x7, 0x8, 0xb, 0xc, 0xe, 0xf,
               },
-            { // 5 bits
+            new short[]{ // 5 bits
               0x12, 0x13, 0x14, 0x1b, 0x7, 0x8,
               },
-            { // 6 bits
+            new short[]{ // 6 bits
               0x17, 0x18, 0x2a, 0x2b, 0x3, 0x34, 0x35, 0x7, 0x8,
               },
-            { // 7 bits
+            new short[]{ // 7 bits
               0x13, 0x17, 0x18, 0x24, 0x27, 0x28, 0x2b, 0x3, 0x37, 0x4, 0x8, 0xc,
               },
-            { // 8 bits
+            new short[]{ // 8 bits
               0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1a, 0x1b, 0x2, 0x24, 0x25, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d,
               0x3, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x4, 0x4a, 0x4b, 0x5, 0x52, 0x53, 0x54, 0x55, 0x58, 0x59,
               0x5a, 0x5b, 0x64, 0x65, 0x67, 0x68, 0xa, 0xb,
               },
-            { // 9 bits
+            new short[]{ // 9 bits
               0x98, 0x99, 0x9a, 0x9b, 0xcc, 0xcd, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xdb,
               },
-            { // 10 bits
+            new short[]{ // 10 bits
             },
-            { // 11 bits
+            new short[]{ // 11 bits
               0x8, 0xc, 0xd,
               },
-            { // 12 bits
+            new short[]{ // 12 bits
               0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x1c, 0x1d, 0x1e, 0x1f,
               }
-    };
+        };
 
-        public static readonly short[][] WHITE_RUN_LENGTHS = {
-            { // 4 bits
+        public static readonly short[][] WHITE_RUN_LENGTHS = new short[][]{
+            new short[]{ // 4 bits
               2, 3, 4, 5, 6, 7,
               },
-            { // 5 bits
+            new short[]{ // 5 bits
               128, 8, 9, 64, 10, 11,
               },
-            { // 6 bits
+            new short[]{ // 6 bits
               192, 1664, 16, 17, 13, 14, 15, 1, 12,
               },
-            { // 7 bits
+            new short[]{ // 7 bits
               26, 21, 28, 27, 18, 24, 25, 22, 256, 23, 20, 19,
               },
-            { // 8 bits
+            new short[]{ // 8 bits
               33, 34, 35, 36, 37, 38, 31, 32, 29, 53, 54, 39, 40, 41, 42, 43, 44, 30, 61, 62, 63, 0, 320, 384, 45,
               59, 60, 46, 49, 50, 51, 52, 55, 56, 57, 58, 448, 512, 640, 576, 47, 48,
               },
-            { // 9 bits
+            new short[]{ // 9 bits
               1472, 1536, 1600, 1728, 704, 768, 832, 896, 960, 1024, 1088, 1152, 1216, 1280, 1344, 1408,
               },
-            { // 10 bits
+            new short[]{ // 10 bits
             },
-            { // 11 bits
+            new short[]{ // 11 bits
               1792, 1856, 1920,
               },
-            { // 12 bits
+            new short[]{ // 12 bits
               1984, 2048, 2112, 2176, 2240, 2304, 2368, 2432, 2496, 2560,
               }
-    };
+        };
 
         readonly static Node EOL;
         readonly static Node FILL;
@@ -836,10 +840,10 @@ namespace PdfClown.Bytes.Filters
         readonly static Tree eolOnlyTree;
         readonly static Tree codeTree;
 
-        readonly static int VALUE_EOL = -2000;
-        readonly static int VALUE_FILL = -1000;
-        readonly static int VALUE_PASSMODE = -3000;
-        readonly static int VALUE_HMODE = -4000;
+        const int VALUE_EOL = -2000;
+        const int VALUE_FILL = -1000;
+        const int VALUE_PASSMODE = -3000;
+        const int VALUE_HMODE = -4000;
 
         static CCITTFaxDecoderStream()
         {
@@ -854,67 +858,67 @@ namespace PdfClown.Bytes.Filters
             eolOnlyTree = new Tree();
             try
             {
-                eolOnlyTree.fill(12, 0, FILL);
-                eolOnlyTree.fill(12, 1, EOL);
+                eolOnlyTree.Fill(12, 0, FILL);
+                eolOnlyTree.Fill(12, 1, EOL);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                throw new AssertionError(e);
+                throw new InvalidOperationException("", e);
             }
 
             blackRunTree = new Tree();
             try
             {
-                for (int i = 0; i < BLACK_CODES.length; i++)
+                for (int i = 0; i < BLACK_CODES.Length; i++)
                 {
-                    for (int j = 0; j < BLACK_CODES[i].length; j++)
+                    for (int j = 0; j < BLACK_CODES[i].Length; j++)
                     {
-                        blackRunTree.fill(i + 2, BLACK_CODES[i][j], BLACK_RUN_LENGTHS[i][j]);
+                        blackRunTree.Fill(i + 2, BLACK_CODES[i][j], BLACK_RUN_LENGTHS[i][j]);
                     }
                 }
-                blackRunTree.fill(12, 0, FILL);
-                blackRunTree.fill(12, 1, EOL);
+                blackRunTree.Fill(12, 0, FILL);
+                blackRunTree.Fill(12, 1, EOL);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                throw new AssertionError(e);
+                throw new InvalidOperationException("", e);
             }
 
             whiteRunTree = new Tree();
             try
             {
-                for (int i = 0; i < WHITE_CODES.length; i++)
+                for (int i = 0; i < WHITE_CODES.Length; i++)
                 {
-                    for (int j = 0; j < WHITE_CODES[i].length; j++)
+                    for (int j = 0; j < WHITE_CODES[i].Length; j++)
                     {
-                        whiteRunTree.fill(i + 4, WHITE_CODES[i][j], WHITE_RUN_LENGTHS[i][j]);
+                        whiteRunTree.Fill(i + 4, WHITE_CODES[i][j], WHITE_RUN_LENGTHS[i][j]);
                     }
                 }
 
-                whiteRunTree.fill(12, 0, FILL);
-                whiteRunTree.fill(12, 1, EOL);
+                whiteRunTree.Fill(12, 0, FILL);
+                whiteRunTree.Fill(12, 1, EOL);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                throw new AssertionError(e);
+                throw new InvalidOperationException("", e);
             }
 
             codeTree = new Tree();
             try
             {
-                codeTree.fill(4, 1, VALUE_PASSMODE); // pass mode
-                codeTree.fill(3, 1, VALUE_HMODE); // H mode
-                codeTree.fill(1, 1, 0); // V(0)
-                codeTree.fill(3, 3, 1); // V_R(1)
-                codeTree.fill(6, 3, 2); // V_R(2)
-                codeTree.fill(7, 3, 3); // V_R(3)
-                codeTree.fill(3, 2, -1); // V_L(1)
-                codeTree.fill(6, 2, -2); // V_L(2)
-                codeTree.fill(7, 2, -3); // V_L(3)
+                codeTree.Fill(4, 1, VALUE_PASSMODE); // pass mode
+                codeTree.Fill(3, 1, VALUE_HMODE); // H mode
+                codeTree.Fill(1, 1, 0); // V(0)
+                codeTree.Fill(3, 3, 1); // V_R(1)
+                codeTree.Fill(6, 3, 2); // V_R(2)
+                codeTree.Fill(7, 3, 3); // V_R(3)
+                codeTree.Fill(3, 2, -1); // V_L(1)
+                codeTree.Fill(6, 2, -2); // V_L(2)
+                codeTree.Fill(7, 2, -3); // V_L(3)
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                throw new AssertionError(e);
+                throw new InvalidOperationException("", e);
             }
         }
     }

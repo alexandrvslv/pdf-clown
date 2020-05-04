@@ -573,7 +573,22 @@ namespace PdfClown.Documents.Contents.Fonts
                 }
                 else
                 {
-                    // proceed as normal
+                    //TODO Check latest changes
+                    //if (code < 256 && !(this is PdfType0Font))
+                    //{
+                    //    var encoding = EncodingData;
+                    //    var isIdentity = encoding is PdfName encodingName
+                    //        && encodingName.StringValue.StartsWith("Identity", StringComparison.Ordinal);
+                    //    if (encoding != null && !isIdentity)
+                    //    {
+                    //        // due to the conversion to an int it is no longer possible to determine
+                    //        // if the code is based on a one or two byte value. We should consider to
+                    //        // refactor that part of the code.
+                    //        // However simple fonts with an encoding are using one byte codes so that
+                    //        // we can limit the CMap mappings to one byte codes by passing the origin length
+                    //        return toUnicodeCMap.ToUnicode(code, 1);
+                    //    }
+                    //}
                     return toUnicodeCMap.ToUnicode(code);
                 }
             }

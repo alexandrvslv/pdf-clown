@@ -16,6 +16,7 @@
  */
 using PdfClown.Objects;
 using System;
+using System.IO;
 
 namespace PdfClown.Bytes.Filters
 {
@@ -30,15 +31,15 @@ namespace PdfClown.Bytes.Filters
     public class CCITTFaxFilter : Filter
     {
 
-        public override byte[] Вecode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
+        public override byte[] Decode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
             // get decode parameters
             PdfDictionary decodeParms = parameters as PdfDictionary;
 
             // parse dimensions
-            int cols = decodeParms.getInt(PdfName.Columns, 1728);
-            int rows = decodeParms.getInt(PdfName.Rows, 0);
-            int height = ((PdfInteger)(header[PdfName.Height] ?? header[PdfName.H]))?.IntValue ?? 0;
+            int cols = ((IPdfNumber)decodeParms[PdfName.Columns])?.IntValue ?? 1728;
+            int rows = ((IPdfNumber)decodeParms[PdfName.Rows])?.IntValue ?? 0;
+            int height = ((IPdfNumber)(header[PdfName.Height] ?? header[PdfName.H]))?.IntValue ?? 0;
             if (rows > 0 && height > 0)
             {
                 // PDFBOX-771, PDFBOX-3727: rows in DecodeParms sometimes contains an incorrect value
@@ -47,17 +48,15 @@ namespace PdfClown.Bytes.Filters
             else
             {
                 // at least one of the values has to have a valid value
-                rows = Math.max(rows, height);
+                rows = Math.Max(rows, height);
             }
 
             // decompress data
-            int k = decodeParms.getInt(PdfName.K, 0);
-            bool encodedByteAlign = decodeParms.getBoolean(PdfName.ENCODED_BYTE_ALIGN, false);
+            int k = ((IPdfNumber)decodeParms[PdfName.K])?.IntValue ?? 0;
+            bool encodedByteAlign = ((PdfBoolean)decodeParms[PdfName.EncodedByteAlign])?.BooleanValue ?? false;
             int arraySize = (cols + 7) / 8 * rows;
             // TODO possible options??
-            byte[]
-        decompressed = new byte[arraySize];
-            CCITTFaxDecoderStream s;
+            byte[] decompressed = new byte[arraySize];
             int type;
             long tiffOptions;
             if (k == 0)
@@ -80,58 +79,65 @@ namespace PdfClown.Bytes.Filters
                     type = TIFFExtension.COMPRESSION_CCITT_T6;
                 }
             }
-            s = new CCITTFaxDecoderStream(encoded, cols, type, TIFFExtension.FILL_LEFT_TO_RIGHT, tiffOptions);
-            readFromDecoderStream(s, decompressed);
+            using (var encoded = new MemoryStream(data))
+            using (var s = new CCITTFaxDecoderStream(encoded, cols, type, TIFFExtension.FILL_LEFT_TO_RIGHT, tiffOptions))
+                ReadFromDecoderStream(s, decompressed);
 
             // invert bitmap
-            bool blackIsOne = decodeParms.getBoolean(PdfName.BLACK_IS_1, false);
+            bool blackIsOne = ((PdfBoolean)decodeParms[PdfName.BlackIs1])?.BooleanValue ?? false;
             if (!blackIsOne)
             {
                 // Inverting the bitmap
                 // Note the previous approach with starting from an IndexColorModel didn't work
                 // reliably. In some cases the image wouldn't be painted for some reason.
                 // So a safe but slower approach was taken.
-                invertBitmap(decompressed);
+                InvertBitmap(decompressed);
             }
 
-            decoded.write(decompressed);
-            return new DecodeResult(parameters);
+            return decompressed;
         }
 
-        void readFromDecoderStream(CCITTFaxDecoderStream decoderStream, byte[] result)
-
+        private void ReadFromDecoderStream(CCITTFaxDecoderStream decoderStream, byte[] result)
         {
             int pos = 0;
             int read;
-            while ((read = decoderStream.read(result, pos, result.length - pos)) > -1)
+            while ((read = decoderStream.Read(result, pos, result.Length - pos)) > -1)
             {
                 pos += read;
-                if (pos >= result.length)
+                if (pos >= result.Length)
                 {
                     break;
                 }
             }
-            decoderStream.close();
+            decoderStream.Close();
         }
 
-        private void invertBitmap(byte[] bufferData)
+        private void InvertBitmap(byte[] bufferData)
         {
-            for (int i = 0, c = bufferData.length; i < c; i++)
+            for (int i = 0, c = bufferData.Length; i < c; i++)
             {
                 bufferData[i] = (byte)(~bufferData[i] & 0xFF);
             }
         }
 
-        override
-            protected void encode(InputStream input, OutputStream encoded, PdfDictionary parameters)
 
+        public override byte[] Encode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
-            int cols = parameters.getInt(PdfName.COLUMNS);
-            int rows = parameters.getInt(PdfName.ROWS);
-            CCITTFaxEncoderStream ccittFaxEncoderStream =
-                        new CCITTFaxEncoderStream(encoded, cols, rows, TIFFExtension.FILL_LEFT_TO_RIGHT);
-            IOUtils.copy(input, ccittFaxEncoderStream);
-            input.close();
+            PdfDictionary decodeParms = parameters as PdfDictionary;
+            int cols = ((IPdfNumber)decodeParms[PdfName.Columns]).IntValue;
+            int rows = ((IPdfNumber)decodeParms[PdfName.Rows]).IntValue;
+
+            using (var encoded = new MemoryStream(data))
+            using (var ccittFaxEncoderStream = new CCITTFaxEncoderStream(encoded, cols, rows, TIFFExtension.FILL_LEFT_TO_RIGHT))
+            {
+
+                foreach (var value in data)
+                {
+                    ccittFaxEncoderStream.Write(value);
+                }
+                return encoded.ToArray();
+            }
+
         }
     }
 }
