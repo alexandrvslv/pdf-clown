@@ -452,7 +452,7 @@ namespace PdfClown.Bytes.Filters
         {
             if (bufferPos < 0 || bufferPos > 7)
             {
-                buffer = base.Read();
+                buffer = base.ReadByte();
 
                 if (buffer == -1)
                 {

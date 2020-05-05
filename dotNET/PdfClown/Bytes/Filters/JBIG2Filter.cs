@@ -22,7 +22,6 @@
   this list of conditions.
 */
 
-using BitMiracle.LibTiff.Classic;
 using PdfClown.Objects;
 
 using System;
@@ -43,41 +42,7 @@ namespace PdfClown.Bytes.Filters
         #region public
         public override byte[] Decode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
         {
-            var imageParams = header;
-            const short TIFF_BIGENDIAN = 0x4d4d;
-            const short TIFF_LITTLEENDIAN = 0x4949;
-            const int ifd_length = 10;
-            const int header_length = 10 + (ifd_length * 12 + 4);
-            var width = imageParams.Resolve(PdfName.Width) as PdfInteger;
-            var height = imageParams.Resolve(PdfName.Height) as PdfInteger;
-            var bpp = imageParams.Resolve(PdfName.BitsPerComponent) as PdfInteger;
-            var flag = imageParams.Resolve(PdfName.ImageMask) as PdfBoolean;
-            using (MemoryStream output = new MemoryStream())
-            {
-                output.Write(BitConverter.GetBytes(BitConverter.IsLittleEndian ? TIFF_LITTLEENDIAN : TIFF_BIGENDIAN), 0, 2); // tiff_magic (big/little endianness)
-                output.Write(BitConverter.GetBytes((uint)42), 0, 2);         // tiff_version
-                output.Write(BitConverter.GetBytes((uint)8), 0, 4);          // first_ifd (Image file directory) / offset
-                output.Write(BitConverter.GetBytes((uint)ifd_length), 0, 2); // ifd_length, number of tags (ifd entries)
-
-                // Dictionary should be in order based on the TiffTag value
-                WriteTiffTag(output, TiffTag.SUBFILETYPE, TiffType.LONG, 1, 0);
-                WriteTiffTag(output, TiffTag.IMAGEWIDTH, TiffType.LONG, 1, (uint)width.RawValue);
-                WriteTiffTag(output, TiffTag.IMAGELENGTH, TiffType.LONG, 1, (uint)height.RawValue);
-                WriteTiffTag(output, TiffTag.BITSPERSAMPLE, TiffType.SHORT, 1, (uint)bpp.RawValue);
-                WriteTiffTag(output, TiffTag.COMPRESSION, TiffType.SHORT, 1, (uint)Compression.JBIG); // CCITT Group 4 fax encoding.
-                WriteTiffTag(output, TiffTag.PHOTOMETRIC, TiffType.SHORT, 1, flag?.BooleanValue ?? false
-                    ? (uint)(int)Photometric.MINISWHITE : (uint)(int)Photometric.MINISBLACK); // WhiteIsZero
-                WriteTiffTag(output, TiffTag.STRIPOFFSETS, TiffType.LONG, 1, header_length);
-                WriteTiffTag(output, TiffTag.SAMPLESPERPIXEL, TiffType.SHORT, 1, 1);
-                WriteTiffTag(output, TiffTag.ROWSPERSTRIP, TiffType.LONG, 1, (uint)height.RawValue);
-                WriteTiffTag(output, TiffTag.STRIPBYTECOUNTS, TiffType.LONG, 1, (uint)length);
-
-                // Next IFD Offset
-                output.Write(BitConverter.GetBytes((uint)0), 0, 4);
-
-                output.Write(data, offset, length);
-                return output.ToArray();
-            }
+            return data;
         }
 
         public override byte[] Encode(byte[] data, int offset, int length, PdfDirectObject parameters, PdfDictionary header)
@@ -87,17 +52,6 @@ namespace PdfClown.Bytes.Filters
         #endregion
 
         #region private
-        private static void WriteTiffTag(System.IO.Stream stream, TiffTag tag, TiffType type, uint count, uint value)
-        {
-            if (stream == null) return;
-
-            stream.Write(BitConverter.GetBytes((uint)tag), 0, 2);
-            stream.Write(BitConverter.GetBytes((uint)type), 0, 2);
-            stream.Write(BitConverter.GetBytes(count), 0, 4);
-            stream.Write(BitConverter.GetBytes(value), 0, 4);
-        }
-
-
         #endregion
         #endregion
         #endregion

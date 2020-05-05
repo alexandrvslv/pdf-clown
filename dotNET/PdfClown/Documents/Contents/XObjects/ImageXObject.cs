@@ -32,7 +32,6 @@ using System;
 using SkiaSharp;
 using System.IO;
 using System.Text;
-using BitMiracle.LibTiff.Classic;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using PdfClown.Bytes;

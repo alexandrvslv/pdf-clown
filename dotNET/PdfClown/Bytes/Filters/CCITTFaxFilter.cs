@@ -84,15 +84,15 @@ namespace PdfClown.Bytes.Filters
                 ReadFromDecoderStream(s, decompressed);
 
             // invert bitmap
-            bool blackIsOne = ((PdfBoolean)decodeParms[PdfName.BlackIs1])?.BooleanValue ?? false;
-            if (!blackIsOne)
-            {
-                // Inverting the bitmap
-                // Note the previous approach with starting from an IndexColorModel didn't work
-                // reliably. In some cases the image wouldn't be painted for some reason.
-                // So a safe but slower approach was taken.
-                InvertBitmap(decompressed);
-            }
+            //bool blackIsOne = ((PdfBoolean)decodeParms[PdfName.BlackIs1])?.BooleanValue ?? false;
+            //if (!blackIsOne)
+            //{
+            //    // Inverting the bitmap
+            //    // Note the previous approach with starting from an IndexColorModel didn't work
+            //    // reliably. In some cases the image wouldn't be painted for some reason.
+            //    // So a safe but slower approach was taken.
+            //    InvertBitmap(decompressed);
+            //}
 
             return decompressed;
         }
