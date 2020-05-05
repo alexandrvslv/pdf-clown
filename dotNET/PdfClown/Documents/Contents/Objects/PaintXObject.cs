@@ -96,10 +96,11 @@ namespace PdfClown.Documents.Contents.Objects
             var canvas = scanner.RenderContext;
             if (canvas == null)
                 return;
+            var xObject = GetXObject(scanner.ContentContext);
+
             try
             {
                 canvas.Save();
-                var xObject = GetXObject(scanner.ContentContext);
                 if (xObject is xObjects.ImageXObject imageObject)
                 {
                     var image = imageObject.LoadImage(state);
@@ -156,6 +157,10 @@ namespace PdfClown.Documents.Contents.Objects
                         scanner.ContentContext.Strings.Add(TextString.Transform(textString, ctm, scanner.ContentContext));
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Some ({ex}) trouble with {xObject}");
             }
             finally
             {

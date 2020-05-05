@@ -494,19 +494,19 @@ namespace PdfClown.Documents.Contents.Fonts
         public CMap CMap => toUnicodeCMap;
 
         /**
-      * Returns the displacement vector (w0, w1) in text space, for the given character.
-      * For horizontal text only the x component is used, for vertical text only the y component.
-      *
-      * @param code character code
-      * @return displacement vector
-      * @throws IOException
-      */
+         * Returns the displacement vector (w0, w1) in text space, for the given character.
+         * For horizontal text only the x component is used, for vertical text only the y component.
+         *
+         * @param code character code
+         * @return displacement vector
+         * @throws IOException
+         */
         public virtual SKPoint GetDisplacement(int code)
         {
             return new SKPoint(GetWidth(code) / 1000, 0);
         }
 
-        public virtual void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes, ref SKMatrix parameters)
+        public virtual void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes)
         {
             var path = GetNormalizedPath(code);
             if (path == null)
@@ -514,23 +514,18 @@ namespace PdfClown.Documents.Contents.Fonts
                 Debug.WriteLine($"info: no Glyph for Code: {code}  Char: '{textChar}'");
                 return;
             }
-            context.Save();
-            var m = FontMatrix;
 
-            if (!IsEmbedded && !IsVertical && !IsStandard14 && HasExplicitWidth(code))
-            {
-                var w = GetDisplacement(code);
-                float fontWidth = GetWidthFromFont(code);
-                if (fontWidth > 0 && // ignore spaces
-                        Math.Abs(fontWidth - w.X * 1000) > 0.0001)
-                {
-                    float pdfWidth = w.X * 1000;
-                    SKMatrix.PostConcat(ref m, SKMatrix.MakeScale(pdfWidth / fontWidth, 1));
-                }
-            }
-
-            SKMatrix.PreConcat(ref m, parameters);
-            context.Concat(ref m);
+            //if (!IsEmbedded && !IsVertical && !IsStandard14 && HasExplicitWidth(code))
+            //{
+            //    var w = GetDisplacement(code);
+            //    float fontWidth = GetWidthFromFont(code);
+            //    if (fontWidth > 0 && // ignore spaces
+            //            Math.Abs(fontWidth - w.X * 1000) > 0.0001)
+            //    {
+            //        float pdfWidth = w.X * 1000;
+            //        SKMatrix.PostConcat(ref m, SKMatrix.MakeScale(pdfWidth / fontWidth, 1));
+            //    }
+            //}
 
             if (fill != null)
             {
@@ -541,7 +536,6 @@ namespace PdfClown.Documents.Contents.Fonts
             {
                 context.DrawPath(path, stroke);
             }
-            context.Restore();
         }
 
         public virtual int ToUnicode(int code, GlyphMapping customGlyphList)

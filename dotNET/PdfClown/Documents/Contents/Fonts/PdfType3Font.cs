@@ -339,7 +339,7 @@ namespace PdfClown.Documents.Contents.Fonts
             return PdfType3CharProc.Wrap(baseObject, this);
         }
 
-        public override void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes, ref SKMatrix parameters)
+        public override void DrawChar(SKCanvas context, SKPaint fill, SKPaint stroke, char textChar, int code, byte[] codeBytes)
         {
             var proc = GetCharProc(code);
             if (proc == null)
@@ -347,24 +347,8 @@ namespace PdfClown.Documents.Contents.Fonts
                 Debug.WriteLine($"info: no Glyph for Code: {code}  Char: '{textChar}'");
                 return;
             }
-            context.Save();
-            var m = FontMatrix;
-
-            //SKMatrix.PreConcat(ref m,parameters );
-            context.Concat(ref m);
-
-            if (fill != null)
-            {
-                var picture = proc.Render();
-                context.DrawPicture(picture, fill);
-            }
-
-            if (stroke != null)
-            {
-                var picture = proc.Render();
-                context.DrawPicture(picture, stroke);
-            }
-            context.Restore();
+            var picture = proc.Render();
+            context.DrawPicture(picture, fill ?? stroke);
         }
         #endregion
         #endregion
