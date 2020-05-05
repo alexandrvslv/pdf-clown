@@ -122,7 +122,7 @@ namespace PdfClown.Tokens
                     if (Token is DateTime)
                         return PdfDate.Get((DateTime)Token);
                     else
-                        return new PdfTextString(Encoding.Pdf.Encode((string)Token));
+                        return new PdfTextString(Token == null ? null : Encoding.Pdf.Encode((string)Token));
                 case TokenTypeEnum.Hex:
                     return new PdfTextString((string)Token, PdfString.SerializationModeEnum.Hex);
                 case TokenTypeEnum.Real:
