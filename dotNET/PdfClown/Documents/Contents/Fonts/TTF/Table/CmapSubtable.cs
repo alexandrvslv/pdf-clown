@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System;
 using PdfClown.Documents.Contents.Fonts.Type1;
+using PdfClown.Util.Collections.Generic;
 
 namespace PdfClown.Documents.Contents.Fonts.TTF
 {

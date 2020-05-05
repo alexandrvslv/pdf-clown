@@ -17,6 +17,7 @@
  */
 
 using PdfClown.Documents.Contents.Fonts.Type1;
+using PdfClown.Util.Collections.Generic;
 using System;
 using System.Collections.Generic;
 
