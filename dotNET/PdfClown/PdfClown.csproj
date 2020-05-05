@@ -515,9 +515,8 @@
     <RestoreSources>../FreeImage.NETCore/Package;$(RestoreSources);</RestoreSources>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="1.68.1.1" />
-    <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="1.68.1.1" />
+    <PackageReference Include="SkiaSharp" Version="1.68.2.1" />
+    <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />    
     <PackageReference Include="FreeImage.NETCore" Version="4.3.7" />
   </ItemGroup>
   <!--<ItemGroup>
