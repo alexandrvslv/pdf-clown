@@ -161,11 +161,12 @@ namespace PdfClown.Documents.Contents
         private IImageObject image;
         private ColorSpace colorSpace;
         private ICCBasedColorSpace iccColorSpace;
-        private int bitPerComponent;
+        private int bitsPerComponent;
         private PdfArray matte;
         private SKSize size;
         private bool indexed;
         private int componentsCount;
+        private int padding;
         private double maximum;
         private double min;
         private double max;
@@ -203,9 +204,9 @@ namespace PdfClown.Documents.Contents
             decode = image.Decode;
             matte = image.Matte;
             size = image.Size;
-            bitPerComponent = image.BitsPerComponent;
+            bitsPerComponent = image.BitsPerComponent;
 
-            maximum = Math.Pow(2, bitPerComponent) - 1;
+            maximum = Math.Pow(2, bitsPerComponent) - 1;
             min = 0D;
             max = indexed ? maximum : 1D;
             interpolateConst = (max - min) / maximum;
@@ -225,6 +226,13 @@ namespace PdfClown.Documents.Contents
             {
                 indexed = true;
                 iccColorSpace = indexedColorSpace.BaseSpace as ICCBasedColorSpace;
+            }
+
+            // calculate row padding
+            padding = 0;
+            if ((size.Width * componentsCount * bitsPerComponent) % 8 > 0)
+            {
+                padding = 8 - (int)((size.Width * componentsCount * bitsPerComponent) % 8);
             }
         }
 
@@ -252,22 +260,37 @@ namespace PdfClown.Documents.Contents
         public void GetColor(int index, ref double[] components)
         {
             var componentIndex = index * componentsCount;
-            if (bitPerComponent == 1)
+            if (bitsPerComponent == 1)
             {
                 for (int i = 0; i < componentsCount; i++)
                 {
                     var byteIndex = componentIndex / 8;
+                    var byteValue = buffer[byteIndex];
                     //if (emptyBytes)
                     //    byteIndex += y;
                     var bitIndex = 7 - index % 8;
-                    var byteValue = buffer[byteIndex];
-                    var value = (byteValue & (1 << bitIndex)) == 0 ? (byte)0 : (byte)1;
+                    var value = ((byteValue >> bitIndex) & 1) == 0 ? (byte)0 : (byte)1;
                     var interpolate = indexed ? value : min + (value * (interpolateConst));
                     components[i] = interpolate;
                     componentIndex++;
                 }
             }
-            else
+            else if (bitsPerComponent == 2)
+            {
+                for (int i = 0; i < componentsCount; i++)
+                {
+                    var byteIndex = componentIndex / 4;
+                    var byteValue = buffer[byteIndex];
+                    //if (emptyBytes)
+                    //    byteIndex += y;
+                    var bitIndex = 3 - index % 4;
+                    var value = ((byteValue >> bitIndex) & 0b11);
+                    var interpolate = indexed ? value : min + (value * (interpolateConst));
+                    components[i] = interpolate;
+                    componentIndex++;
+                }
+            }
+            else if (bitsPerComponent == 8)
             {
                 for (int i = 0; i < componentsCount; i++)
                 {
@@ -348,7 +371,7 @@ namespace PdfClown.Documents.Contents
                 {
                     var index = (y * info.Width + x);
                     byte value = 0;
-                    if (bitPerComponent == 1)
+                    if (bitsPerComponent == 1)
                     {
                         var byteIndex = index / 8;
                         //if (emptyBytes)
