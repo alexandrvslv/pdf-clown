@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using text = System.Text;
 
 namespace PdfClown.Tokens

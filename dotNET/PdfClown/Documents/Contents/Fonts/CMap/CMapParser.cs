@@ -343,7 +343,7 @@ namespace PdfClown.Documents.Contents.Fonts
             switch (TokenType)
             {
                 case TokenTypeEnum.Hex: // Character code in hexadecimal format.
-                    return Int32.Parse((string)Token, NumberStyles.HexNumber);
+                    return int.TryParse((string)Token, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var result) ? result : -1;
                 case TokenTypeEnum.Integer: // Character code in plain format.
                     return (int)Token;
                 case TokenTypeEnum.Name: // Character name.

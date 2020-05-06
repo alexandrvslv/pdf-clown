@@ -136,8 +136,7 @@ namespace PdfClown.Documents.Files
         public virtual bytes::IInputStream GetInputStream()
         {
             return new bytes::Stream(
-              new io::FileStream(GetAbsolutePath(), io::FileMode.Open, io::FileAccess.Read)
-              );
+              new io::FileStream(GetAbsolutePath(), io::FileMode.Open, io::FileAccess.Read, io::FileShare.ReadWrite));
         }
 
         /**
@@ -146,8 +145,7 @@ namespace PdfClown.Documents.Files
         public virtual bytes::IOutputStream GetOutputStream()
         {
             return new bytes::Stream(
-              new io::FileStream(GetAbsolutePath(), io::FileMode.Create, io::FileAccess.Write)
-              );
+              new io::FileStream(GetAbsolutePath(), io::FileMode.Create, io::FileAccess.Write, io::FileShare.ReadWrite));
         }
 
         /**

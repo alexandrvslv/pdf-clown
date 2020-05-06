@@ -68,7 +68,7 @@ namespace PdfClown.Documents.Contents.Fonts.TTF
          */
         public TrueTypeFont Parse(string ttfFile)
         {
-            return Parse(new FileStream(ttfFile, FileMode.Open, FileAccess.Read));
+            return Parse(new FileStream(ttfFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
         }
 
         /**

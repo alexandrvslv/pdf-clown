@@ -44,7 +44,26 @@ namespace PdfClown.Documents.Contents.Fonts
 
         #region interface
         public static Encoding Get(PdfName name)
-        { return Encodings[name]; }
+        {
+            if (!Encodings.TryGetValue(name, out var encoding))
+            {
+                if (name == PdfName.Identity)
+                    encoding = IdentityEncoding.Instance;
+                else if (name == PdfName.MacExpertEncoding)
+                    encoding = MacExpertEncoding.Instance;
+                else if (name == PdfName.MacRomanEncoding)
+                    encoding = MacRomanEncoding.Instance;
+                else if (name == PdfName.StandardEncoding)
+                    encoding = StandardEncoding.Instance;
+                else if (name == PdfName.Symbol)
+                    encoding = SymbolEncoding.Instance;
+                else if (name == PdfName.WinAnsiEncoding)
+                    encoding = WinAnsiEncoding.Instance;
+                else if (name == PdfName.ZapfDingbats)
+                    encoding = ZapfDingbatsEncoding.Instance;
+            }
+            return encoding;
+        }
         #endregion
         #endregion
         public Encoding()

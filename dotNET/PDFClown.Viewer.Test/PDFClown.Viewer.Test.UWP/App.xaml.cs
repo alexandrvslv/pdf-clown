@@ -46,9 +46,10 @@ namespace PdfClown.Viewer.Test.UWP
             // just ensure that the window is active
             if (rootFrame == null)
             {
+                System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
-
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
                 Xamarin.Forms.Forms.Init(e, new[] {

@@ -21,25 +21,29 @@ namespace PdfClown.Documents.Contents.Fonts.Autodetect
 {
 
 
-	/**
+    /**
      * FontFinder for native Windows platforms. This class is based on a class provided by Apache FOP. see
      * org.apache.fop.fonts.autodetect.WindowsFontDirFinder
      */
-	public class WindowsFontDirFinder : NativeFontDirFinder
-	{
+    public class WindowsFontDirFinder : NativeFontDirFinder
+    {
 
-		/**
+        /**
          * Some guesses at possible unix font directory locations.
          * 
          * @return a list of possible font locations
          */
 
-		protected override string[] GetSearchableDirectories()
-		{
-			string fontsfolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-			return new string[] {
-				fontsfolder, // user               
+        protected override string[] GetSearchableDirectories()
+        {
+            string fontsfolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+            if (string.IsNullOrEmpty(fontsfolder))
+            {
+                fontsfolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts");
+            }
+            return new string[] {
+                fontsfolder, // user               
             };
-		}
-	}
+        }
+    }
 }

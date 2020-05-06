@@ -50,7 +50,7 @@ namespace PdfClown.Documents.Files
         {
             return new EmbeddedFile(
               context,
-              new Bytes.Stream(new FileStream(path, FileMode.Open, FileAccess.Read))
+              new Bytes.Stream(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
               );
         }
 

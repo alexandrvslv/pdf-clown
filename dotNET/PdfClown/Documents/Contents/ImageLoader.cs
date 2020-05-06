@@ -18,8 +18,7 @@ namespace PdfClown.Documents.Contents
     {
         public static SKBitmap Load(IImageObject imageObject, GraphicsState state)
         {
-            var buffer = imageObject.Data;
-            var data = buffer.GetBuffer();
+            var data = imageObject.Data;
             var image = (SKBitmap)null;
             var filter = imageObject.Filter;
             if (filter is PdfArray filterArray)
@@ -29,62 +28,70 @@ namespace PdfClown.Documents.Contents
                 {
                     var filterItem = (PdfName)filterArray[i];
                     var parameterItem = parameterArray?[i];
-                    image = LoadImage(imageObject, data, filterItem, parameterItem, imageObject.Header);
-                    if (image == null)
+                    var temp = LoadImage(imageObject, data, filterItem, parameterItem, imageObject.Header);
+                    if (temp is IBuffer tempBuffer)
                     {
-                        buffer = Bytes.Buffer.Extract(buffer, filterItem, parameterItem, imageObject.Header);
-                        data = buffer.GetBuffer();
+                        data = tempBuffer;
+                    }
+                    else if (temp is SKBitmap tempImage)
+                    {
+                        image = tempImage;
+                        break;
                     }
                 }
             }
             else if (filter != null)
             {
                 var filterItem = (PdfName)filter;
-                image = LoadImage(imageObject, data, filterItem, imageObject.Parameters, imageObject.Header);
-                if (image == null)
+                var temp = LoadImage(imageObject, data, filterItem, imageObject.Parameters, imageObject.Header);
+                if (temp is IBuffer tempBuffer)
                 {
-                    buffer = Bytes.Buffer.Extract(buffer, filter, imageObject.Parameters, imageObject.Header);
-                    data = buffer.GetBuffer();
-                    image = SKBitmap.Decode(data);
+                    data = tempBuffer;
+                }
+                else if (temp is SKBitmap tempImage)
+                {
+                    image = tempImage;
                 }
             }
 
             if (image == null)
             {
-                var imageLoader = new ImageLoader(imageObject, data, state);
+                var imageLoader = new ImageLoader(imageObject, data.GetBuffer(), state);
                 image = imageLoader.Load();
             }
             return image;
         }
 
-        public static SKBitmap LoadImage(IImageObject imageObject, byte[] data, PdfName filterItem, PdfDirectObject parameterItem, PdfDictionary header)
+        public static object LoadImage(IImageObject imageObject, IBuffer data, PdfName filterItem, PdfDirectObject parameterItem, PdfDictionary header)
         {
-            SKBitmap image = null;
             if (filterItem.Equals(PdfName.DCTDecode)
                 || filterItem.Equals(PdfName.DCT))
             {
-                image = SKBitmap.Decode(data);
+                return SKBitmap.Decode(data.GetBuffer());
+            }
+            else if (filterItem.Equals(PdfName.JPXDecode))
+            {
+                return LoadJPEG2000(data, parameterItem, imageObject.Header);
+            }
+            else if (filterItem.Equals(PdfName.JBIG2Decode))
+            {
+                return LoadJBIG(data, parameterItem, imageObject.Header);
             }
             else if (filterItem.Equals(PdfName.CCITTFaxDecode)
                 || filterItem.Equals(PdfName.CCF))
             {
-                //image = LoadTiff(data, parameterItem, imageObject.Header);
+                return Bytes.Buffer.Extract(data, filterItem, parameterItem, imageObject.Header);
             }
-            else if (filterItem.Equals(PdfName.JPXDecode))
+            else if (filterItem != null)
             {
-                image = LoadJPEG2000(data, parameterItem, imageObject.Header);
-            }
-            else if (filterItem.Equals(PdfName.JBIG2Decode))
-            {
-                image = LoadJBIG(data, parameterItem, imageObject.Header);
+                return Bytes.Buffer.Extract(data, filterItem, parameterItem, imageObject.Header);
             }
 
-            return image;
+            return data;
         }
 
-        private static SKBitmap LoadJBIG(byte[] data, PdfDirectObject parameters, PdfDictionary header)
+        private static SKBitmap LoadJBIG(IBuffer data, PdfDirectObject parameters, PdfDictionary header)
         {
-
             var imageParams = header;
             var width = imageParams.Resolve(PdfName.Width) as PdfInteger;
             var height = imageParams.Resolve(PdfName.Height) as PdfInteger;
@@ -106,7 +113,7 @@ namespace PdfClown.Documents.Contents
                         input.Write(bodyBuffer, 0, bodyBuffer.Length);
                     }
                 }
-                input.Write(data, 0, data.Length);
+                input.Write(data.GetBuffer(), 0, (int)data.Length);
                 input.Write(new byte[] { 0X00, 0x00, 0x00, 0x03, 0x31, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00 }, 0, 11);
                 input.Write(new byte[] { 0X00, 0x00, 0x00, 0x04, 0x33, 0x01, 0x00, 0x00, 0x00, 0x00 }, 0, 10);
                 input.Flush();
@@ -126,7 +133,7 @@ namespace PdfClown.Documents.Contents
             }
         }
 
-        public static SKBitmap LoadJPEG2000(byte[] jpegStream, PdfDirectObject parameters, PdfDictionary header)
+        public static SKBitmap LoadJPEG2000(IBuffer jpegStream, PdfDirectObject parameters, PdfDictionary header)
         {
             var imageParams = header;
             var width = imageParams.Resolve(PdfName.Width) as PdfInteger;
@@ -135,9 +142,8 @@ namespace PdfClown.Documents.Contents
             var flag = imageParams.Resolve(PdfName.ImageMask) as PdfBoolean;
 
             using (var output = new MemoryStream())
-            using (var input = new MemoryStream(jpegStream))
+            using (var input = new MemoryStream(jpegStream.GetBuffer()))
             {
-
                 var bmp = FreeImage.LoadFromStream(input);
                 if (bmp.IsNull)
                 {

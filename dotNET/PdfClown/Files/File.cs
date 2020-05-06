@@ -84,7 +84,7 @@ namespace PdfClown.Files
         }
 
         public File(string path)
-            : this(new Bytes.Stream(new FileStream(path, FileMode.Open, FileAccess.Read)))
+            : this(new Bytes.Stream(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
         { this.path = path; }
 
         public File(byte[] data) : this(new Bytes.Buffer(data))
@@ -112,7 +112,7 @@ namespace PdfClown.Files
                 {
                     var encript = trailer.Resolve(PdfName.Encrypt);
                     throw new NotImplementedException("Encrypted files are currently not supported.");
-                   
+
                 }
             }
             catch (Exception)
@@ -218,7 +218,7 @@ namespace PdfClown.Files
         */
         public void Save(string path, SerializationModeEnum mode)
         {
-            using (var outputStream = new System.IO.FileStream(path, FileMode.Create, FileAccess.Write))
+            using (var outputStream = new System.IO.FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
             { Save(new Bytes.Stream(outputStream), mode); }
         }
 
