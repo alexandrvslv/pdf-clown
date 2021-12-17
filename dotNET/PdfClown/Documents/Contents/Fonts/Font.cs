@@ -519,7 +519,8 @@ namespace PdfClown.Documents.Contents.Fonts
             var path = GetNormalizedPath(code);
             if (path == null)
             {
-                Debug.WriteLine($"info: no Glyph for Code: {code}  Char: '{textChar}'");
+                if(textChar != ' ')
+                    Debug.WriteLine($"info: no Glyph for Code: {code}  Char: '{textChar}'");
                 return null;
             }
 

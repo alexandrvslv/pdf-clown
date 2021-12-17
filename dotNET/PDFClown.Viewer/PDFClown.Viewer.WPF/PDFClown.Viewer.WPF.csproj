@@ -8,7 +8,9 @@
     <OutputType>library</OutputType>
     <AssemblyName>PdfClown.Viewer.WPF</AssemblyName> 
     <RootNamespace>PdfClown.Viewer.WPF</RootNamespace>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>    
@@ -20,24 +22,15 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="3.1.3" />
-    <PackageReference Include="SkiaSharp.Views.Forms.WPF" Version="2.80.2" />
-    <PackageReference Include="Xamarin.Forms.Platform.WPF" Version="4.8.0.1364" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="WindowsFormsIntegration" />
-  </ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.1" />
+    <PackageReference Include="SkiaSharp.Views.Forms.WPF" Version="2.88.0-preview.178" />
+    <PackageReference Include="Xamarin.Forms.Platform.WPF" Version="5.0.0.2291" />
+  </ItemGroup> 
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
     <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DependentUpon="Resources.resx" DesignTime="True" />
     <None Update="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="Settings.Designer.cs" />
-    <Compile Update="Properties\Settings.Designer.cs" AutoGen="True" DependentUpon="Settings.settings" />
-    <None Include="OpenTK.dll.config" />
+    <Compile Update="Properties\Settings.Designer.cs" AutoGen="True" DependentUpon="Settings.settings" />    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PdfClown.Viewer\PdfClown.Viewer.csproj" />
