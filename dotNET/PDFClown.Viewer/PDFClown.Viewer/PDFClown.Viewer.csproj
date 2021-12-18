@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp.Views.Forms" Version="2.88.0-preview.178" />
+    <PackageReference Include="SkiaSharp.Views.Forms" Version="2.88.0-preview.179" />
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2291" />
   </ItemGroup>
 
