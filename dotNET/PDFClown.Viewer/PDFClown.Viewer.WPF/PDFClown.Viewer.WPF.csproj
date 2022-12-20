@@ -24,7 +24,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.1" />
     <PackageReference Include="SkiaSharp.Views.Forms.WPF" Version="2.88.0-preview.179" />
-    <PackageReference Include="Xamarin.Forms.Platform.WPF" Version="5.0.0.2291" />
+    <PackageReference Include="Xamarin.Forms.Platform.WPF" Version="5.0.0.2337" />
   </ItemGroup> 
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
