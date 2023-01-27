@@ -52,7 +52,9 @@ namespace PdfClown.Util.Parsers
             ArrayEnd,
             DictionaryBegin,
             DictionaryEnd,
-            Null
+            Null,
+            Reference,
+            InderectObject
         }
         #endregion
 

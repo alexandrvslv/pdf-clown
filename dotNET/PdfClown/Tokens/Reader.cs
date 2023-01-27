@@ -168,7 +168,8 @@ namespace PdfClown.Tokens
                     }
                     else // XRef-stream section.
                     {
-                        XRefStream stream = (XRefStream)parser.ParsePdfObject(3); // Gets the xref stream skipping the indirect-object header.
+                        //skipping the indirect - object header.
+                        XRefStream stream = (XRefStream)parser.ParsePdfObject(1); // Gets the xref stream 
                                                                                   // XRef-stream subsection entries.
                         foreach (XRefEntry xrefEntry in stream.Values)
                         {

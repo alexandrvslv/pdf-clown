@@ -112,9 +112,19 @@ namespace PdfClown.Tokens
                                 int generationNumber = (int)Token;
                                 // 3. Reference keyword.
                                 base.MoveNext();
-                                if (TokenType == TokenTypeEnum.Keyword
-                                  && string.Equals(Token.ToString(), Keyword.Reference, StringComparison.Ordinal))
-                                { Token = new Reference(objectNumber, generationNumber); }
+                                if (TokenType == TokenTypeEnum.Keyword)
+                                {
+                                    if (string.Equals(Token.ToString(), Keyword.Reference, StringComparison.Ordinal))
+                                    {
+                                        TokenType = TokenTypeEnum.Reference;
+                                        Token = new Reference(objectNumber, generationNumber);
+                                    }
+                                    else if (string.Equals(Token.ToString(), Keyword.BeginIndirectObject, StringComparison.Ordinal))
+                                    {
+                                        TokenType = TokenTypeEnum.InderectObject;
+                                        Token = new Reference(objectNumber, generationNumber);
+                                    }
+                                }
                             }
                             if (!(Token is Reference))
                             {
@@ -134,10 +144,9 @@ namespace PdfClown.Tokens
         {
             switch (TokenType)
             {
-                case TokenTypeEnum.Keyword:
-                    if (Token is Reference)
+                case TokenTypeEnum.Reference:
+                    if (Token is Reference reference)
                     {
-                        Reference reference = (Reference)Token;
                         return new PdfReference(reference.ObjectNumber, reference.GenerationNumber, file);
                     }
                     break;
@@ -209,17 +218,8 @@ namespace PdfClown.Tokens
             // Go to the beginning of the indirect object!
             Seek(xrefEntry.Offset);
             // Skip the indirect-object header!
-            for (int i = 0; i < 4; i++)
-            {
-                MoveNext();
-                if (TokenType == TokenTypeEnum.Keyword
-                    && string.Equals(Token.ToString(), Keyword.BeginIndirectObject, StringComparison.Ordinal))
-                {
-                    MoveNext();
-                    break;
-                }
-            }
-
+            MoveNext();
+            MoveNext();
             // Empty indirect object?
             if (TokenType == TokenTypeEnum.Keyword
                 && string.Equals(Token.ToString(), Keyword.EndIndirectObject, StringComparison.Ordinal))
@@ -256,52 +256,60 @@ namespace PdfClown.Tokens
         {
             // [FIX:69] 'startxref' keyword not found (file was corrupted by alien data in the tail).
             IInputStream stream = Stream;
-            long streamLength = stream.Length;
-            long position = streamLength;
-            int chunkSize = (int)Math.Min(streamLength, EOFMarkerChunkSize);
+            var streamLength = stream.Length;
+
+            long position = SeekRevers(stream, streamLength, Keyword.StartXRef);
+            if (position < 0)
+                throw new PostScriptParseException("'" + Keyword.StartXRef + "' keyword not found.", this);
+
+            // Go past the 'startxref' keyword!
+            stream.Seek(position); MoveNext();
+
+            // Get the xref offset!
+            MoveNext();
+            if (TokenType != TokenTypeEnum.Integer)
+                throw new PostScriptParseException("'" + Keyword.StartXRef + "' value invalid.", this);
+            long xrefPosition = (int)Token;
+
+            stream.Seek(xrefPosition);
+            MoveNext();
+            //Repair 
+            if (xrefPosition > streamLength
+                || (TokenType == TokenTypeEnum.Keyword && !string.Equals(Token?.ToString(), Keyword.XRef, StringComparison.Ordinal))
+                || (TokenType != TokenTypeEnum.InderectObject && TokenType != TokenTypeEnum.Keyword))
+            {
+                xrefPosition = SeekRevers(stream, streamLength, "\n" + Keyword.XRef);
+                if (xrefPosition >= 0)
+                    xrefPosition++;
+
+            }
+            return xrefPosition;
+        }
+
+        private static long SeekRevers(IInputStream stream, long startPosition, string keyWord)
+        {
             string text = null;
+            long streamLength = stream.Length;
+            long position = startPosition;
+            int chunkSize = (int)Math.Min(streamLength, EOFMarkerChunkSize);
             int index = -1;
+
             while (index < 0 && position > 0)
             {
                 /*
                   NOTE: This condition prevents the keyword from being split by the chunk boundary.
                 */
                 if (position < streamLength)
-                { position += Keyword.StartXRef.Length; }
+                { position += keyWord.Length; }
                 position -= chunkSize;
                 if (position < 0)
                 { position = 0; }
                 stream.Seek(position);
 
-                // Get 'startxref' keyword position!
                 text = stream.ReadString(chunkSize);
-                index = text.LastIndexOf(Keyword.StartXRef, StringComparison.Ordinal);
+                index = text.LastIndexOf(keyWord, StringComparison.Ordinal);
             }
-            if (index < 0)
-                throw new PostScriptParseException("'" + Keyword.StartXRef + "' keyword not found.", this);
-
-            // Go past the 'startxref' keyword!
-            stream.Seek(position + index); MoveNext();
-
-            // Get the xref offset!
-            MoveNext();
-            if (TokenType != TokenTypeEnum.Integer)
-                throw new PostScriptParseException("'" + Keyword.StartXRef + "' value invalid.", this);
-            var xrefPosition = (int)Token;
-
-            //TODO Coplete Repair
-            stream.Seek(xrefPosition);
-            MoveNext();
-            //Repair
-            if (xrefPosition > streamLength
-                || TokenType != TokenTypeEnum.Keyword
-                || !string.Equals(Token?.ToString(), Keyword.XRef, StringComparison.Ordinal))
-            {
-                var refIndex = text.LastIndexOf("\n" + Keyword.XRef, StringComparison.Ordinal);
-                if (refIndex > 0)
-                    xrefPosition = (int)position + refIndex;
-            }
-            return xrefPosition;
+            return index < 0 ? -1 : position + index;
         }
 
         /**
