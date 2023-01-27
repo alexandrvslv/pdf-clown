@@ -398,10 +398,6 @@ namespace PdfClown.Documents.Encryption
 		 */
         public void Decrypt(PdfObject obj, long objNum, long genNum)
         {
-            if (!(obj is PdfString || obj is PdfDictionary || obj is PdfArray || obj is PdfStream))
-            {
-                return;
-            }
             // PDFBOX-4477: only cache strings and streams, this improves speed and memory footprint
             if (obj is PdfString pdfString)
             {
@@ -428,7 +424,7 @@ namespace PdfClown.Documents.Encryption
             else if (obj is PdfArray array)
             {
                 DecryptArray(array, objNum, genNum);
-            }
+            }            
         }
 
         /**
