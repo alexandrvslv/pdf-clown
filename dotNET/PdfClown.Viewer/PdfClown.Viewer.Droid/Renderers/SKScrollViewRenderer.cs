@@ -15,7 +15,7 @@ namespace PdfClown.Viewer.Droid
 {
     public class SKScrollViewRenderer : SKCanvasViewRenderer
     {
-        private bool pressed;
+        //private bool pressed;
         private ScaleGestureDetector _scaleDetector;
         public SKScrollViewRenderer(Context context) : base(context)
         {

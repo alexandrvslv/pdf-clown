@@ -1,6 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.companyname.PdfClown.Viewer.Test">
-    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
-    <application android:label="PdfClown.Viewer.Test.Droid"></application>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          android:versionCode="1" 
+          android:versionName="1.0" 
+          package="com.companyname.PdfClown.Viewer.Test">
+  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="33" />
+  <application android:allowBackup="true" 
+               android:icon="@mipmap/icon" 
+               android:label="@string/app_name" 
+               android:roundIcon="@mipmap/icon_round" 
+               android:supportsRtl="true"
+               android:theme="@style/MainTheme">
+  </application>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
