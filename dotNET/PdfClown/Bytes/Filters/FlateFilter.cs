@@ -29,7 +29,6 @@
 */
 
 using PdfClown.Objects;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,11 +52,10 @@ namespace PdfClown.Bytes.Filters
         #region public
         public override byte[] Decode(Bytes.Buffer data, PdfDirectObject parameters, IDictionary<PdfName, PdfDirectObject> header)
         {
-            using (MemoryStream outputStream = new MemoryStream())
-            using (MemoryStream inputStream = new MemoryStream(data.GetBuffer(), 0, (int)data.Length))
-            using (DeflateStream inputFilter = new DeflateStream(inputStream, CompressionMode.Decompress))
+            using (var outputStream = new MemoryStream())
+            using (var inputStream = new MemoryStream(data.GetBuffer(), 0, (int)data.Length))
+            using (var inputFilter = new ICSharpCode.SharpZipLib.Zip.Compression.Streams.InflaterInputStream(inputStream))
             {
-                inputStream.Position = 2; // Skips zlib's 2-byte header [RFC 1950] [FIX:0.0.8:JCT].
                 Transform(inputFilter, outputStream);
                 inputFilter.Close();
                 return DecodePredictor(outputStream.ToArray(), parameters, header);
@@ -66,13 +64,13 @@ namespace PdfClown.Bytes.Filters
 
         public override byte[] Encode(Bytes.Buffer data, PdfDirectObject parameters, IDictionary<PdfName, PdfDirectObject> header)
         {
-            using (MemoryStream inputStream = new MemoryStream(data.GetBuffer(), 0, (int)data.Length))
-            using (MemoryStream outputStream = new MemoryStream())
-            using (DeflateStream outputFilter = new DeflateStream(outputStream, CompressionMode.Compress, true))
+            using (var inputStream = new MemoryStream(data.GetBuffer(), 0, (int)data.Length))
+            using (var outputStream = new MemoryStream())
+            using (var outputFilter = new ICSharpCode.SharpZipLib.Zip.Compression.Streams.DeflaterOutputStream(outputStream))
             {
                 // Add zlib's 2-byte header [RFC 1950] [FIX:0.0.8:JCT]!
-                outputStream.WriteByte(0x78); // CMF = {CINFO (bits 7-4) = 7; CM (bits 3-0) = 8} = 0x78.
-                outputStream.WriteByte(0xDA); // FLG = {FLEVEL (bits 7-6) = 3; FDICT (bit 5) = 0; FCHECK (bits 4-0) = {31 - ((CMF * 256 + FLG - FCHECK) Mod 31)} = 26} = 0xDA.
+                //outputStream.WriteByte(0x78); // CMF = {CINFO (bits 7-4) = 7; CM (bits 3-0) = 8} = 0x78.
+                //outputStream.WriteByte(0xDA); // FLG = {FLEVEL (bits 7-6) = 3; FDICT (bit 5) = 0; FCHECK (bits 4-0) = {31 - ((CMF * 256 + FLG - FCHECK) Mod 31)} = 26} = 0xDA.
                 Transform(inputStream, outputFilter);
                 outputFilter.Close();
                 return outputStream.ToArray();
