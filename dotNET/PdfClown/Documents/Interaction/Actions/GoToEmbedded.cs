@@ -94,9 +94,11 @@ namespace PdfClown.Documents.Interaction.Actions
             */
             private static RelationEnum ToRelationEnum(IPdfString value)
             {
+                if (value == null)
+                    new Exception("'null' doesn't represent a valid relation.");
                 foreach (KeyValuePair<RelationEnum, PdfName> relation in RelationEnumCodes)
                 {
-                    if (string.Equals(relation.Value.StringValue, value?.StringValue, StringComparison.Ordinal))
+                    if (string.Equals(relation.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                         return relation.Key;
                 }
                 throw new Exception("'" + value?.StringValue + "' doesn't represent a valid relation.");

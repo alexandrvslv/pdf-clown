@@ -152,11 +152,13 @@ namespace PdfClown.Documents
         /**
           <summary>Gets the tab order corresponding to the given value.</summary>
         */
-        private static TabOrderEnum ToTabOrderEnum(PdfName value)
+        private static TabOrderEnum ToTabOrderEnum(IPdfString value)
         {
+            if (value == null)
+                return TabOrderEnum.Row;
             foreach (KeyValuePair<TabOrderEnum, PdfName> tabOrder in TabOrderEnumCodes)
             {
-                if (tabOrder.Value.Equals(value))
+                if (string.Equals(tabOrder.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return tabOrder.Key;
             }
             return TabOrderEnum.Row;
@@ -390,7 +392,7 @@ namespace PdfClown.Documents
         [PDF(VersionEnum.PDF15)]
         public TabOrderEnum TabOrder
         {
-            get => ToTabOrderEnum((PdfName)BaseDataObject[PdfName.Tabs]);
+            get => ToTabOrderEnum((IPdfString)BaseDataObject[PdfName.Tabs]);
             set => BaseDataObject[PdfName.Tabs] = ToCode(value);
         }
 

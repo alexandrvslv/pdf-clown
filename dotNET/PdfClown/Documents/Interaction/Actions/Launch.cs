@@ -98,7 +98,7 @@ namespace PdfClown.Documents.Interaction.Actions
                     return OperationEnum.Open;
                 foreach (KeyValuePair<OperationEnum, PdfString> operation in OperationEnumCodes)
                 {
-                    if (string.Equals(operation.Value.StringValue, value?.StringValue, StringComparison.Ordinal))
+                    if (string.Equals(operation.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                         return operation.Key;
                 }
                 return OperationEnum.Open;

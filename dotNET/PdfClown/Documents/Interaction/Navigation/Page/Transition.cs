@@ -294,9 +294,11 @@ namespace PdfClown.Documents.Interaction.Navigation
         */
         private static StyleEnum ToStyleEnum(IPdfString value)
         {
+            if (value == null)
+                return DefaultStyle;
             foreach (KeyValuePair<StyleEnum, PdfName> style in StyleEnumCodes)
             {
-                if (string.Equals(style.Value.StringValue, value?.StringValue, StringComparison.Ordinal))
+                if (string.Equals(style.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return style.Key;
             }
             return DefaultStyle;
@@ -437,7 +439,7 @@ namespace PdfClown.Documents.Interaction.Navigation
         */
         public StyleEnum Style
         {
-            get => ToStyleEnum((PdfName)BaseDataObject[PdfName.S]);
+            get => ToStyleEnum((IPdfString)BaseDataObject[PdfName.S]);
             set
             {
                 if (value == DefaultStyle)
