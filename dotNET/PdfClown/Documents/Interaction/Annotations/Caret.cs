@@ -86,11 +86,13 @@ namespace PdfClown.Documents.Interaction.Annotations
         /**
           <summary>Gets the symbol type corresponding to the given value.</summary>
         */
-        private static SymbolTypeEnum ToSymbolTypeEnum(PdfName value)
+        private static SymbolTypeEnum ToSymbolTypeEnum(IPdfString value)
         {
+            if (value == null)
+                return DefaultSymbolType;
             foreach (KeyValuePair<SymbolTypeEnum, PdfName> symbolType in SymbolTypeEnumCodes)
             {
-                if (symbolType.Value.Equals(value))
+                if (string.Equals(symbolType.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return symbolType.Key;
             }
             return DefaultSymbolType;
@@ -115,7 +117,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         */
         public SymbolTypeEnum SymbolType
         {
-            get => ToSymbolTypeEnum((PdfName)BaseDataObject[PdfName.Sy]);
+            get => ToSymbolTypeEnum((IPdfString)BaseDataObject[PdfName.Sy]);
             set => BaseDataObject[PdfName.Sy] = value != DefaultSymbolType ? ToCode(value) : null;
         }
         #endregion

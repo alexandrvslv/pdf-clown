@@ -76,11 +76,13 @@ namespace PdfClown.Documents.Interaction.Annotations
         /**
           <summary>Gets the icon type corresponding to the given value.</summary>
         */
-        private static FileAttachmentImageType ToImageTypeEnum(PdfName value)
+        private static FileAttachmentImageType ToImageTypeEnum(IPdfString value)
         {
+            if (value == null)
+                return DefaultIconType;
             foreach (KeyValuePair<FileAttachmentImageType, PdfName> iconType in IconTypeEnumCodes)
             {
-                if (iconType.Value.Equals(value))
+                if (string.Equals(iconType.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return iconType.Key;
             }
             return DefaultIconType;
@@ -109,7 +111,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         */
         public FileAttachmentImageType AttachmentName
         {
-            get => ToImageTypeEnum((PdfName)BaseDataObject[PdfName.Name]);
+            get => ToImageTypeEnum((IPdfString)BaseDataObject[PdfName.Name]);
             set
             {
                 var oldvalue = AttachmentName;

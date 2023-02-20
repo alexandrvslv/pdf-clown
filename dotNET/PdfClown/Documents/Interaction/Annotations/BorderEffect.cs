@@ -73,11 +73,13 @@ namespace PdfClown.Documents.Interaction.Annotations
         /**
           <summary>Gets the style corresponding to the given value.</summary>
         */
-        private static BorderEffectType ToTypeEnum(PdfName value)
+        private static BorderEffectType ToTypeEnum(IPdfString value)
         {
+            if (value == null)
+                return DefaultType;
             foreach (KeyValuePair<BorderEffectType, PdfName> type in TypeEnumCodes)
             {
-                if (type.Value.Equals(value))
+                if (string.Equals(type.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return type.Key;
             }
             return DefaultType;
@@ -135,7 +137,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         */
         public BorderEffectType Type
         {
-            get => ToTypeEnum((PdfName)BaseDataObject[PdfName.S]);
+            get => ToTypeEnum((IPdfString)BaseDataObject[PdfName.S]);
             set => BaseDataObject[PdfName.S] = value != DefaultType ? ToCode(value) : null;
         }
 

@@ -101,11 +101,13 @@ namespace PdfClown.Documents.Interaction.Annotations
         /**
           <summary>Gets the highlighting mode corresponding to the given value.</summary>
         */
-        private static HighlightModeEnum ToHighlightModeEnum(PdfName value)
+        private static HighlightModeEnum ToHighlightModeEnum(IPdfString value)
         {
+            if (value == null)
+                return HighlightModeEnum.Invert;
             foreach (KeyValuePair<HighlightModeEnum, PdfName> mode in HighlightModeEnumCodes)
             {
-                if (mode.Value.Equals(value))
+                if (string.Equals(mode.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return mode.Key;
             }
             return HighlightModeEnum.Invert;
@@ -168,7 +170,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         */
         public HighlightModeEnum HighlightMode
         {
-            get => ToHighlightModeEnum((PdfName)BaseDataObject[PdfName.H]);
+            get => ToHighlightModeEnum((IPdfString)BaseDataObject[PdfName.H]);
             set => BaseDataObject[PdfName.H] = ToCode(value);
         }
 

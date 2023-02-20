@@ -60,6 +60,9 @@ namespace PdfClown.Documents.Interaction.Actions
                 */
                 Print
             };
+
+            private const string ConstOpen = "open";
+            private const string ConstPrint = "print";
             #endregion
 
             #region static
@@ -72,8 +75,8 @@ namespace PdfClown.Documents.Interaction.Actions
             {
                 OperationEnumCodes = new Dictionary<OperationEnum, PdfString>
                 {
-                    [OperationEnum.Open] = new PdfString("open"),
-                    [OperationEnum.Print] = new PdfString("print")
+                    [OperationEnum.Open] = new PdfString(ConstOpen),
+                    [OperationEnum.Print] = new PdfString(ConstPrint)
                 };
             }
             #endregion
@@ -89,11 +92,13 @@ namespace PdfClown.Documents.Interaction.Actions
             /**
               <summary>Gets the operation corresponding to the given value.</summary>
             */
-            private static OperationEnum ToOperationEnum(PdfString value)
+            private static OperationEnum ToOperationEnum(IPdfString value)
             {
+                if(value == null)
+                    return OperationEnum.Open;
                 foreach (KeyValuePair<OperationEnum, PdfString> operation in OperationEnumCodes)
                 {
-                    if (operation.Value.Equals(value))
+                    if (string.Equals(operation.Value.StringValue, value?.StringValue, StringComparison.Ordinal))
                         return operation.Key;
                 }
                 return OperationEnum.Open;
@@ -151,7 +156,7 @@ namespace PdfClown.Documents.Interaction.Actions
             */
             public OperationEnum Operation
             {
-                get => ToOperationEnum((PdfString)BaseDataObject[PdfName.O]);
+                get => ToOperationEnum((IPdfString)BaseDataObject[PdfName.O]);
                 set => BaseDataObject[PdfName.O] = ToCode(value);
             }
 

@@ -79,11 +79,13 @@ namespace PdfClown.Documents.Interaction.Annotations
         /**
           <summary>Gets the markup type corresponding to the given value.</summary>
         */
-        private static TextMarkupType ToMarkupTypeEnum(PdfName value)
+        private static TextMarkupType ToMarkupTypeEnum(IPdfString value)
         {
+            if (value == null)
+                throw new Exception("Invalid markup type.");
             foreach (KeyValuePair<TextMarkupType, PdfName> markupType in MarkupTypeEnumCodes)
             {
-                if (markupType.Value.Equals(value))
+                if (string.Equals(markupType.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return markupType.Key;
             }
             throw new Exception("Invalid markup type.");
@@ -261,7 +263,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         */
         public TextMarkupType MarkupType
         {
-            get => ToMarkupTypeEnum((PdfName)BaseDataObject[PdfName.Subtype]);
+            get => ToMarkupTypeEnum((IPdfString)BaseDataObject[PdfName.Subtype]);
             set
             {
                 BaseDataObject[PdfName.Subtype] = ToCode(value);

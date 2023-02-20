@@ -92,14 +92,14 @@ namespace PdfClown.Documents.Interaction.Actions
             /**
               <summary>Gets the relation corresponding to the given value.</summary>
             */
-            private static RelationEnum ToRelationEnum(PdfName value)
+            private static RelationEnum ToRelationEnum(IPdfString value)
             {
                 foreach (KeyValuePair<RelationEnum, PdfName> relation in RelationEnumCodes)
                 {
-                    if (relation.Value.Equals(value))
+                    if (string.Equals(relation.Value.StringValue, value?.StringValue, StringComparison.Ordinal))
                         return relation.Key;
                 }
-                throw new Exception("'" + value.Value + "' doesn't represent a valid relation.");
+                throw new Exception("'" + value?.StringValue + "' doesn't represent a valid relation.");
             }
             #endregion
             #endregion
@@ -251,7 +251,7 @@ namespace PdfClown.Documents.Interaction.Actions
             */
             public RelationEnum Relation
             {
-                get => ToRelationEnum((PdfName)BaseDataObject[PdfName.R]);
+                get => ToRelationEnum((IPdfString)BaseDataObject[PdfName.R]);
                 set => BaseDataObject[PdfName.R] = ToCode(value);
             }
 

@@ -122,11 +122,13 @@ namespace PdfClown.Documents.Interaction.Annotations
             /**
               <summary>Gets the scaling mode corresponding to the given value.</summary>
             */
-            private static ScaleModeEnum ToScaleModeEnum(PdfName value)
+            private static ScaleModeEnum ToScaleModeEnum(IPdfString value)
             {
+                if(value == null)
+                    return ScaleModeEnum.Always;
                 foreach (KeyValuePair<ScaleModeEnum, PdfName> scaleMode in ScaleModeEnumCodes)
                 {
-                    if (scaleMode.Value.Equals(value))
+                    if (string.Equals(scaleMode.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                         return scaleMode.Key;
                 }
                 return ScaleModeEnum.Always;
@@ -135,11 +137,13 @@ namespace PdfClown.Documents.Interaction.Annotations
             /**
               <summary>Gets the scaling type corresponding to the given value.</summary>
             */
-            private static ScaleTypeEnum ToScaleTypeEnum(PdfName value)
+            private static ScaleTypeEnum ToScaleTypeEnum(IPdfString value)
             {
+                if (value == null)
+                    return ScaleTypeEnum.Proportional;
                 foreach (KeyValuePair<ScaleTypeEnum, PdfName> scaleType in ScaleTypeEnumCodes)
                 {
-                    if (scaleType.Value.Equals(value))
+                    if (string.Equals(scaleType.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                         return scaleType.Key;
                 }
                 return ScaleTypeEnum.Proportional;
@@ -171,7 +175,7 @@ namespace PdfClown.Documents.Interaction.Annotations
             */
             public ScaleModeEnum ScaleMode
             {
-                get => ToScaleModeEnum((PdfName)BaseDataObject[PdfName.SW]);
+                get => ToScaleModeEnum((IPdfString)BaseDataObject[PdfName.SW]);
                 set => BaseDataObject[PdfName.SW] = ToCode(value);
             }
 
@@ -180,7 +184,7 @@ namespace PdfClown.Documents.Interaction.Annotations
             */
             public ScaleTypeEnum ScaleType
             {
-                get => ToScaleTypeEnum((PdfName)BaseDataObject[PdfName.S]);
+                get => ToScaleTypeEnum((IPdfString)BaseDataObject[PdfName.S]);
                 set => BaseDataObject[PdfName.S] = ToCode(value);
             }
 

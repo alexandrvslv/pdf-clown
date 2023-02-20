@@ -280,11 +280,13 @@ namespace PdfClown.Documents.Interaction.Annotations
             };
         }
 
-        public static StandardStampEnum? Get(PdfName name)
+        public static StandardStampEnum? Get(IPdfString name)
         {
+            if (name == null)
+                return null;
             foreach (KeyValuePair<StandardStampEnum, TypeItem> entry in codes)
             {
-                if (entry.Value.Code.Equals(name))
+                if (string.Equals(entry.Value.Code.StringValue, name.StringValue, StringComparison.Ordinal))
                     return entry.Key;
             }
             return null;

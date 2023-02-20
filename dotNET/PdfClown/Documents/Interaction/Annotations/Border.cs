@@ -81,13 +81,13 @@ namespace PdfClown.Documents.Interaction.Annotations
         /**
           <summary>Gets the style corresponding to the given value.</summary>
         */
-        private static BorderStyleType ToStyleEnum(PdfName value)
+        private static BorderStyleType ToStyleEnum(IPdfString value)
         {
             if (value == null)
                 return DefaultStyle;
             foreach (KeyValuePair<BorderStyleType, PdfName> style in StyleEnumCodes)
             {
-                if (style.Value.Equals(value))
+                if (string.Equals(style.Value.StringValue, value.StringValue, StringComparison.Ordinal))
                     return style.Key;
             }
             return DefaultStyle;
@@ -176,7 +176,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         */
         public BorderStyleType Style
         {
-            get => ToStyleEnum((PdfName)BaseDataObject[PdfName.S]);
+            get => ToStyleEnum((IPdfString)BaseDataObject[PdfName.S]);
             set => BaseDataObject[PdfName.S] = value != DefaultStyle ? ToCode(value) : null;
         }
 

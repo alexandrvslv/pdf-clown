@@ -46,7 +46,7 @@ namespace PdfClown.Objects
         </list>
       </remarks>
     */
-    public class PdfString : PdfSimpleObject<byte[]>, IDataWrapper
+    public class PdfString : PdfSimpleObject<byte[]>, IDataWrapper, IPdfString
     {
         /*
           NOTE: String objects are internally represented as unescaped sequences of bytes.

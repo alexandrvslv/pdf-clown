@@ -37,7 +37,7 @@ namespace PdfClown.Objects
     /**
       <summary>PDF name object [PDF:1.6:3.2.4].</summary>
     */
-    public sealed class PdfName : PdfSimpleObject<string>
+    public sealed class PdfName : PdfSimpleObject<string>, IPdfString
     {
         /*
           NOTE: As name objects are simple symbols uniquely defined by sequences of characters,
