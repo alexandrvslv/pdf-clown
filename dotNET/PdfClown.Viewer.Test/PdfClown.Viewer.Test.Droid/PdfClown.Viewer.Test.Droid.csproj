@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net7.0-android</TargetFrameworks>
-    <SupportedOSPlatformVersion>33</SupportedOSPlatformVersion>
+    <TargetFrameworks>net6.0-android</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <ApplicationId>com.companyname.PdfClown.Viewer.Test</ApplicationId>
-    <ApplicationVersion>1</ApplicationVersion>
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AssemblyTitle>PdfClown.Viewer.Test.Droid</AssemblyTitle>
     <Product>PdfClown.Viewer.Test.Droid</Product>
   </PropertyGroup>
@@ -14,14 +10,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
-    <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.5.1.1" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Standard.pdf" />
     <EmbeddedResource Include="eastman.pdf" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
-    <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PdfClown.Viewer\PdfClown.Viewer.Droid\PdfClown.Viewer.Droid.csproj" />

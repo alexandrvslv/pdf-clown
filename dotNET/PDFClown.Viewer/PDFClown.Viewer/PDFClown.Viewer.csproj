@@ -1,15 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Remove="Assets\caret-down.svg" />
     <None Remove="Assets\caret-left.svg" />
@@ -26,8 +19,8 @@
 
   <ItemGroup>
     <PackageReference Include="SkiaSharp.Views.Forms" Version="2.88.3" />
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2545" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.4" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2578" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.5" />
   </ItemGroup>
 
   <ItemGroup>

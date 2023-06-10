@@ -1,56 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FCF8C99B-7FDC-4018-991C-EE0DC002E4B9}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>PdfClown.Viewer.Test.WPF</RootNamespace>
     <AssemblyName>PdfClown.Viewer.Test.WPF</AssemblyName>
-    <TargetFramework>net462</TargetFramework>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugType>pdbonly</DebugType>
+    <UseWpf>true</UseWpf>
+    <TargetFramework>net6.0-windows</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="3.1.3" />
     <PackageReference Include="SkiaSharp.Views.Forms.WPF" Version="2.88.3" />
-    <PackageReference Include="Xamarin.Forms.Platform.WPF" Version="5.0.0.2545" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+    <PackageReference Include="Xamarin.Forms.Platform.WPF" Version="5.0.0.2578" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PdfClown.Viewer\PdfClown.Viewer.WPF\PdfClown.Viewer.WPF.csproj" />
     <ProjectReference Include="..\PdfClown.Viewer.Test\PdfClown.Viewer.Test.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
-    <Compile Update="Properties\Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
-    <None Update="Properties\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="Settings.Designer.cs" />
-    <Compile Update="Properties\Settings.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Settings.settings" />
-
-    <ApplicationDefinition Include="App.xaml" Generator="MSBuild:Compile" />
-    <Page Include="**\*.xaml" Exclude="App.xaml" SubType="Designer" Generator="MSBuild:Compile" />
-    <Compile Update="**\*.xaml.cs" SubType="Designer" DependentUpon="%(Filename)" />
-
     <EmbeddedResource Remove="**\*.xaml" />
   </ItemGroup>
-
-
-  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
 </Project>

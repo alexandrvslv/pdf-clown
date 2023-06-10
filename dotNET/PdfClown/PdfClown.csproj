@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <OutputType>Library</OutputType>
     <AssemblyName>PdfClown</AssemblyName>
     <RootNamespace>PdfClown</RootNamespace>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <ProjectGuid>{DBED0809-EE4C-45B0-92FA-E4789ECC2AEC}</ProjectGuid>
     <Version>0.2.2.0</Version>
     <Company>Stefano Chizzolini</Company>
     <Product>PDF Clown for .NET Core</Product>
@@ -16,13 +14,6 @@
     <Copyright>Copyright 2006-2015 Stefano Chizzolini</Copyright>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Remove="Assets\Comment.svg" />
     <None Remove="Assets\comments.svg" />
@@ -513,8 +504,8 @@
     <EmbeddedResource Include="Assets\Tag.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7" />
-    <PackageReference Include="SharpZipLib" Version="1.4.1" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="SkiaSharp" Version="2.88.3" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
   </ItemGroup>

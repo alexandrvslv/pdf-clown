@@ -1,24 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platforms>AnyCPU</Platforms>
     <Version>0.2.1.0</Version>
-    <ProjectGuid>{BDBDC0A1-6937-4BB6-964D-DDC62CE2832F}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>PdfClown.Samples.CLI</RootNamespace>
     <StartupObject>PdfClown.Samples.CLI.SampleLoader</StartupObject>
     <AssemblyName>PdfClownCLISamples</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PdfClown\PdfClown.csproj" />

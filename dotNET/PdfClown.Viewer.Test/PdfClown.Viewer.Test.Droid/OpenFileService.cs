@@ -15,9 +15,9 @@ namespace PdfClown.Viewer.Test.Droid
         public Task<(Stream Stream, string FileName)> OpenFileDialog()
         {
             var assembly = typeof(OpenFileService).Assembly;
-            var keyName = $"{assembly.GetName().Name}.Standard.pdf";
+            var keyName = $"{assembly.GetName().Name}.eastman.pdf";
             var names = assembly.GetManifestResourceNames();
-            return Task.FromResult<(Stream, string)>((assembly.GetManifestResourceStream(keyName), "Standard.pdf"));
+            return Task.FromResult<(Stream, string)>((assembly.GetManifestResourceStream(keyName), "eastman.pdf"));
         }
 
     }

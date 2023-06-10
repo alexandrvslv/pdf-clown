@@ -32,15 +32,12 @@ namespace PdfClown.Tokens
       <summary>Encoding for text strings in a PDF document outside the document's content streams
       [PDF:1.7:D].</summary>
     */
-    public sealed class PdfDocEncoding
-      : LatinEncoding
+    public sealed class PdfDocEncoding : LatinEncoding
     {
         #region types
-        private class Chars
-          : BiDictionary<int, char>
+        private class Chars : BiDictionary<int, char>
         {
-            internal Chars(
-              )
+            internal Chars()
             {
                 this[0x80] = '\u2022';
                 this[0x81] = '\u2020';
@@ -76,25 +73,19 @@ namespace PdfClown.Tokens
                 this[0xA0] = '\u20AC';
             }
 
-            private bool IsIdentity(
-              int code
-              )
+            private bool IsIdentity(int code)
             { return code < 128 || (code > 160 && code < 256); }
 
             public override int Count => 256;
 
-            public override int GetKey(
-              char value
-              )
+            public override int GetKey(char value)
             {
                 return IsIdentity(value)
                   ? (int)value
                   : base.GetKey(value);
             }
 
-            public override char this[
-              int key
-              ]
+            public override char this[int key]
             {
                 get
                 {
@@ -112,16 +103,14 @@ namespace PdfClown.Tokens
         #endregion
 
         #region interface
-        public static PdfDocEncoding Get(
-          )
+        public static PdfDocEncoding Get()
         { return instance; }
         #endregion
         #endregion
 
         #region dynamic
         #region constructors
-        private PdfDocEncoding(
-          )
+        private PdfDocEncoding()
         { chars = new Chars(); }
         #endregion
         #endregion
