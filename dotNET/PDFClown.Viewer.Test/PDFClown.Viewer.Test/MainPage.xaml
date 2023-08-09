@@ -1,26 +1,82 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:pdf="clr-namespace:PdfClown.Viewer;assembly=PdfClown.Viewer"
-             mc:Ignorable="d"
-             x:Class="PdfClown.Viewer.Test.MainPage" 
-             Title="PDF Viewer!">
-    <Grid Padding="5" RowSpacing="4" BackgroundColor="#393939" >
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pdf="clr-namespace:PdfClown.Viewer;assembly=PdfClown.Viewer"
+    mc:Ignorable="d"
+    x:Class="PdfClown.Viewer.Test.MainPage"
+    Title="PDF Viewer!">
+    <Grid
+        Padding="5"
+        RowSpacing="4"
+        BackgroundColor="#393939">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition
+                Height="Auto" />
+            <RowDefinition
+                Height="*" />
         </Grid.RowDefinitions>
-        <StackLayout Orientation="Horizontal" BackgroundColor="#484848" Padding="3">
-            <Label Text="Show Chars Bound"  TextColor="WhiteSmoke" VerticalOptions="Center"/>
-            <Switch IsToggled="{Binding ShowCharBound, Source={Reference viewer}}" HorizontalOptions="Start" VerticalOptions="Center"/>
-            <Label Text="Scale"  TextColor="WhiteSmoke" VerticalOptions="Center"/>
-            <Entry Text="{Binding ScaleContent, Source={Reference viewer}, Converter={StaticResource PercentConverter}}" WidthRequest="80" VerticalOptions="Center"/>
-            <Label x:Name="label" Text="Welcome to PDF Viewer!" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" TextColor="WhiteSmoke"/>
-            <Button Text="Open File..." HorizontalOptions="End" VerticalOptions="CenterAndExpand" Clicked="OnOpenFileClicked" />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition
+                Width="40*" />
+            <ColumnDefinition
+                Width="60*" />
+        </Grid.ColumnDefinitions>
+        <StackLayout
+            Grid.ColumnSpan="2"
+            Orientation="Horizontal"
+            BackgroundColor="#484848"
+            Padding="3">
+            <Label
+                Text="Show Chars Bound"
+                TextColor="WhiteSmoke"
+                VerticalOptions="Center" />
+            <Switch
+                IsToggled="{Binding ShowCharBound, Source={Reference viewer}}"
+                HorizontalOptions="Start"
+                VerticalOptions="Center" />
+            <Label
+                Text="Scale"
+                TextColor="WhiteSmoke"
+                VerticalOptions="Center" />
+            <Entry
+                Text="{Binding ScaleContent, Source={Reference viewer}, Converter={StaticResource PercentConverter}}"
+                WidthRequest="80"
+                VerticalOptions="Center" />
+            <Label
+                x:Name="label"
+                Text="Welcome to PDF Viewer!"
+                HorizontalOptions="CenterAndExpand"
+                VerticalOptions="CenterAndExpand"
+                TextColor="WhiteSmoke" />
+            <Button
+                Text="Open File..."
+                HorizontalOptions="End"
+                VerticalOptions="CenterAndExpand"
+                Clicked="OnOpenFileClicked" />
         </StackLayout>
-        <pdf:PdfView x:Name="viewer" Grid.Row="1" BackgroundColor="#484848"/>
+        <ListView
+            x:Name="list"
+            BackgroundColor="#484848"
+            Grid.Column="0"
+            Grid.Row="1">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Label
+                            FontSize="10"
+                            Text="{Binding .}" />
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <pdf:PdfView
+            x:Name="viewer"
+            Grid.Column="1"
+            Grid.Row="1"
+            BackgroundColor="#484848" />
 
     </Grid>
 </ContentPage>

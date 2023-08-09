@@ -72,9 +72,9 @@ namespace PdfClown.Objects
         public static bool Equal(object obj1, object obj2)
         {
             if (!(obj1 is IPdfNumber))
-                throw new ArgumentException("obj1 MUST implement IPdfNumber");
+                return false;
             if (!(obj2 is IPdfNumber))
-                throw new ArgumentException("obj2 MUST implement IPdfNumber");
+                return false;
 
             return ((IPdfNumber)obj1).RawValue.Equals(((IPdfNumber)obj2).RawValue);
         }
