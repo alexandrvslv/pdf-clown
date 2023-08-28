@@ -36,8 +36,7 @@ namespace PdfClown.Documents.Interaction.Forms
       <summary>Signature field [PDF:1.6:8.6.3].</summary>
     */
     [PDF(VersionEnum.PDF13)]
-    public sealed class SignatureField
-      : Field
+    public sealed class SignatureField : Field
     {
         //TODO
         #region dynamic
@@ -46,19 +45,10 @@ namespace PdfClown.Documents.Interaction.Forms
           <summary>Creates a new signature field within the given document context.</summary>
         */
         //TODO:dictionary mandatory items (if any)!!!
-        public SignatureField(
-          string name,
-          Widget widget
-          ) : base(
-            PdfName.Sig,
-            name,
-            widget
-            )
+        public SignatureField(string name, Widget widget) : base(PdfName.Sig, name, widget)
         { }
 
-        internal SignatureField(
-          PdfDirectObject baseObject
-          ) : base(baseObject)
+        internal SignatureField(PdfDirectObject baseObject) : base(baseObject)
         { }
         #endregion
 

@@ -317,9 +317,7 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
             appearance.Normal[null] = normalAppearanceState;
         }
 
-        private void Apply(
-          ComboBox field
-          )
+        private void Apply(ComboBox field)
         {
             Document document = field.Document;
             Widget widget = field.Widgets[0];
@@ -362,9 +360,7 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
             appearance.Normal[null] = normalAppearanceState;
         }
 
-        private void Apply(
-          ListBox field
-          )
+        private void Apply(ListBox field)
         {
             Document document = field.Document;
             Widget widget = field.Widgets[0];
@@ -374,15 +370,11 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
                 PdfDictionary widgetDataObject = widget.BaseDataObject;
                 widgetDataObject[PdfName.DA] = new PdfString("/Helv " + FontSize + " Tf 0 0 0 rg");
                 widgetDataObject[PdfName.MK] = new PdfDictionary(
-                  new PdfName[]
-                  {
-            PdfName.BG,
-            PdfName.BC
-                  },
+                  new PdfName[] { PdfName.BG, PdfName.BC },
                   new PdfDirectObject[]
                   {
-            new PdfArray(new PdfDirectObject[]{PdfReal.Get(.9), PdfReal.Get(.9), PdfReal.Get(.9)}),
-            new PdfArray(new PdfDirectObject[]{PdfInteger.Default, PdfInteger.Default, PdfInteger.Default})
+                      new PdfArray(new PdfDirectObject[]{PdfReal.Get(.9), PdfReal.Get(.9), PdfReal.Get(.9)}),
+                      new PdfArray(new PdfDirectObject[]{PdfInteger.Default, PdfInteger.Default, PdfInteger.Default})
                   }
                   );
             }

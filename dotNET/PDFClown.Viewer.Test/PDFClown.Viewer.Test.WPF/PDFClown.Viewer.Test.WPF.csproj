@@ -8,7 +8,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SkiaSharp.Views.Forms.WPF" Version="2.88.3" />
+    <PackageReference Include="SkiaSharp.Views.Forms.WPF" Version="2.88.5" />
     <PackageReference Include="Xamarin.Forms.Platform.WPF" Version="5.0.0.2612" />
   </ItemGroup>
   <ItemGroup>
