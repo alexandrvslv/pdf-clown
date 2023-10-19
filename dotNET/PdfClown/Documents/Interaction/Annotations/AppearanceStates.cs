@@ -45,7 +45,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         {
             var baseObject = appearance.BaseDataObject[statesKey];
             return baseObject != null
-                ? (baseObject.AlternateWrapper as AppearanceStates ?? new AppearanceStates(statesKey, appearance))
+                ? (AppearanceStates)(baseObject.AlternateWrapper ??= new AppearanceStates(statesKey, appearance))
             : new AppearanceStates(statesKey, appearance);
         }
         #region dynamic
@@ -59,8 +59,6 @@ namespace PdfClown.Documents.Interaction.Annotations
         public AppearanceStates(PdfName statesKey, Appearance appearance)
         {
             BaseObject = appearance.BaseDataObject[statesKey];
-            if (BaseObject != null)
-                BaseObject.AlternateWrapper = this;
             this.appearance = appearance;
             this.statesKey = statesKey;
         }

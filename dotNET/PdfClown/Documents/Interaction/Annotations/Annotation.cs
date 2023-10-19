@@ -388,7 +388,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         [PDF(VersionEnum.PDF14)]
         public virtual string Name
         {
-            get => name ?? (name = BaseDataObject.GetText(PdfName.NM) ?? string.Empty);
+            get => name ?? (name = BaseDataObject.GetString(PdfName.NM) ?? string.Empty);
             set
             {
                 var oldValue = Name;
@@ -460,7 +460,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         */
         public virtual string Contents
         {
-            get => BaseDataObject.GetText(PdfName.Contents);
+            get => BaseDataObject.GetString(PdfName.Contents);
             set
             {
                 var oldValue = Contents;
@@ -478,7 +478,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         [PDF(VersionEnum.PDF15)]
         public virtual string Subject
         {
-            get => BaseDataObject.GetText(PdfName.Subj);
+            get => BaseDataObject.GetString(PdfName.Subj);
             set
             {
                 var oldValue = Subject;

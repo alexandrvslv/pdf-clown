@@ -70,7 +70,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         [PDF(VersionEnum.PDF11)]
         public override string Author
         {
-            get => BaseDataObject.GetText(PdfName.T);
+            get => BaseDataObject.GetString(PdfName.T);
             set
             {
                 var oldValue = Author;
@@ -167,7 +167,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         [PDF(VersionEnum.PDF15)]
         public string RichContents
         {
-            get => BaseDataObject.GetText(PdfName.RC);
+            get => BaseDataObject.GetString(PdfName.RC);
             set
             {
                 var oldValue = RichContents;
@@ -181,7 +181,7 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public string DefaultStyle
         {
-            get => BaseDataObject.GetText(PdfName.DS);
+            get => BaseDataObject.GetString(PdfName.DS);
             set
             {
                 var oldValue = DefaultStyle;

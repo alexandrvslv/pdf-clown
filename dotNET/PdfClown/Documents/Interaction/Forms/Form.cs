@@ -68,6 +68,11 @@ namespace PdfClown.Documents.Interaction.Forms
             get => Wrap<Resources>(BaseDataObject.Get<PdfDictionary>(PdfName.DR));
             set => BaseDataObject[PdfName.DR] = value.BaseObject;
         }
+
+        public void RefreshCache()
+        {
+            
+        }
         #endregion
         #endregion
         #endregion

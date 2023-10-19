@@ -50,6 +50,7 @@ namespace PdfClown.Objects
         private File file;
         private PdfObject parent;
         private bool updated;
+        private string id;
         #endregion
 
         #region constructors
@@ -83,13 +84,13 @@ namespace PdfClown.Objects
           <summary>Gets the object identifier.</summary>
           <remarks>This corresponds to the serialized representation of an object identifier within a PDF file.</remarks>
         */
-        public string Id => ("" + ObjectNumber + Symbol.Space + GenerationNumber);
+        public string Id => id ??= $"{ObjectNumber}{Symbol.Space}{GenerationNumber}";
 
         /**
           <summary>Gets the object reference.</summary>
           <remarks>This corresponds to the serialized representation of a reference within a PDF file.</remarks>
         */
-        public string IndirectReference => (Id + Symbol.Space + Symbol.CapitalR);
+        public string IndirectReference => ($"{Id}{Symbol.Space}{Symbol.CapitalR}");
 
         /**
           <summary>Gets the object number.</summary>
@@ -133,7 +134,7 @@ NOTE: Fail fast if the referenced indirect object is undefined.
         /**
           <returns><code>null</code>, if the indirect object is undefined.</returns>
         */
-        public override PdfIndirectObject IndirectObject => indirectObject ?? (indirectObject = file.IndirectObjects[objectNumber]);
+        public override PdfIndirectObject IndirectObject => indirectObject ??= file.IndirectObjects[objectNumber];
 
         public override PdfReference Reference => this;
         #endregion

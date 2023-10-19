@@ -24,6 +24,7 @@
 */
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace PdfClown.Util
 {
@@ -35,19 +36,15 @@ namespace PdfClown.Util
         #region static
         #region interface
         #region public
-        public static T Mask<T>(
-          T map,
-          T key,
-          bool enabled
-          ) where T : struct
+        public static T Mask<T>(T map, T key, bool enabled) where T : Enum
         {
-            int mapValue = (int)(object)map;
-            int keyValue = (int)(object)key;
+            int mapValue = Unsafe.As<T, int>(ref map);
+            int keyValue = Unsafe.As<T, int>(ref key); 
             if (enabled)
             { mapValue |= keyValue; }
             else
             { mapValue ^= keyValue; }
-            return (T)(object)mapValue;
+            return Unsafe.As<int, T>(ref mapValue);
         }
         #endregion
         #endregion

@@ -191,6 +191,14 @@ namespace PdfClown.Documents.Interaction.Annotations
                 return null; // NOTE: It MUST NOT happen (on-state should always be defined).
             }
         }
+
+        public string DefaultAppearence
+        {
+            get => ((IPdfString)BaseDataObject[PdfName.DA]).StringValue;
+            set => BaseDataObject[PdfName.DA] = new PdfString(value);
+        }
+
+        public Field Field { get; internal set; }
         #endregion
         #endregion
         #endregion

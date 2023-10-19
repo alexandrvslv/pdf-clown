@@ -6,6 +6,7 @@
     <RootNamespace>PdfClown</RootNamespace>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <Version>0.2.2.0</Version>
+    <LangVersion>9</LangVersion>
     <Company>Stefano Chizzolini</Company>
     <Product>PDF Clown for .NET Core</Product>
     <PackageId>PDFClown.NETCore</PackageId>

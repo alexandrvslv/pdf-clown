@@ -47,13 +47,13 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public string Registry
         {
-            get => Dictionary.GetText(PdfName.Registry);
+            get => Dictionary.GetString(PdfName.Registry);
             set => Dictionary[PdfName.Registry] = new PdfString(registry = value);
         }
 
         public string Ordering
         {
-            get => Dictionary.GetText(PdfName.Ordering);
+            get => Dictionary.GetString(PdfName.Ordering);
             set => Dictionary[PdfName.Ordering] = new PdfString(value);
         }
 

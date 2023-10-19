@@ -50,10 +50,7 @@ namespace PdfClown.Documents.Contents.Composition
         private UnitModeEnum unitMode;
         private double value;
 
-        public Length(
-          double value,
-          UnitModeEnum unitMode
-          )
+        public Length(double value, UnitModeEnum unitMode)
         {
             this.value = value;
             this.unitMode = unitMode;
@@ -65,9 +62,7 @@ namespace PdfClown.Documents.Contents.Composition
           to the specified base value.</remarks>
           <param name="baseValue">Value used to resolve relative values.</param>
         */
-        public double GetValue(
-          double baseValue
-          )
+        public double GetValue(double baseValue)
         {
             switch (unitMode)
             {
@@ -80,9 +75,8 @@ namespace PdfClown.Documents.Contents.Composition
             }
         }
 
-        public override string ToString(
-          )
-        { return value + " (" + unitMode + ")"; }
+        public override string ToString()
+        { return $"{value} ({unitMode})"; }
 
         /**
           <summary>Gets/Sets the measurement mode applied to the distance value.</summary>

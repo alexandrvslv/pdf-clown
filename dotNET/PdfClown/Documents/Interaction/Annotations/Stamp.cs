@@ -119,8 +119,7 @@ namespace PdfClown.Documents.Interaction.Annotations
         {
             get
             {
-                PdfName typeNameObject = (PdfName)BaseDataObject[PdfName.Name];
-                return typeNameObject != null ? typeNameObject.StringValue : DefaultType.GetName().StringValue;
+                return BaseDataObject.GetString(PdfName.Name, DefaultType.GetName().StringValue);
             }
             set
             {

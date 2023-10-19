@@ -42,32 +42,32 @@ namespace PdfClown.Documents.Contents.Fonts
 
         public string FontName
         {
-            get => ((PdfName)Dictionary[PdfName.FontName])?.StringValue;
-            set => Dictionary[PdfName.FontName] = new PdfName(value);
+            get => Dictionary.GetString(PdfName.FontName);
+            set => Dictionary.SetName(PdfName.FontName, value);
         }
 
         public string FontFamily
         {
-            get => ((PdfString)Dictionary[PdfName.FontFamily])?.StringValue;
-            set => Dictionary[PdfName.FontFamily] = new PdfString(value);
+            get => Dictionary.GetString(PdfName.FontFamily);
+            set => Dictionary.SetString(PdfName.FontFamily, value);
         }
 
         public float? FontStretch
         {
-            get => ((PdfReal)Dictionary[PdfName.FontStretch])?.FloatValue;
-            set => Dictionary[PdfName.FontStretch] = value.HasValue ? new PdfReal((float)value) : null;
+            get => Dictionary.GetFloat(PdfName.FontStretch);
+            set => Dictionary.SetFloat(PdfName.FontStretch, value);
         }
 
         public float? FontWeight
         {
-            get => ((PdfReal)Dictionary[PdfName.FontWeight])?.FloatValue;
-            set => Dictionary[PdfName.FontWeight] = value.HasValue ? new PdfReal((float)value) : null;
+            get => Dictionary.GetFloat(PdfName.FontWeight);
+            set => Dictionary.SetFloat(PdfName.FontWeight, value);
         }
 
         public FlagsEnum Flags
         {
-            get => (FlagsEnum)(((PdfInteger)Dictionary[PdfName.Flags])?.IntValue ?? 0);
-            set => Dictionary[PdfName.Flags] = new PdfInteger((int)value);
+            get => (FlagsEnum)Dictionary.GetInt(PdfName.Flags);
+            set => Dictionary.SetInt(PdfName.Flags, (int)value);
         }
 
         public bool NonSymbolic

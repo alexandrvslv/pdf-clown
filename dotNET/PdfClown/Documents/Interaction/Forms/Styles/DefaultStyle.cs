@@ -51,18 +51,23 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
         #region public
         public override void Apply(Field field)
         {
-            if (field is PushButton)
-            { Apply((PushButton)field); }
-            else if (field is CheckBox)
-            { Apply((CheckBox)field); }
-            else if (field is TextField)
-            { Apply((TextField)field); }
-            else if (field is ComboBox)
-            { Apply((ComboBox)field); }
-            else if (field is ListBox)
-            { Apply((ListBox)field); }
-            else if (field is RadioButton)
-            { Apply((RadioButton)field); }
+            switch (field)
+            {
+                case PushButton pushButton:
+                    Apply(pushButton); break;
+                case CheckBox checkBox:
+                    Apply(checkBox); break;
+                case TextField textField:
+                    Apply(textField); break;
+                case ComboBox comboBox:
+                    Apply(comboBox); break;
+                case ListBox listBox:
+                    Apply(listBox); break;
+                case RadioButton:
+                    Apply((RadioButton)field); break;
+                case SignatureField:
+                    Apply((SignatureField)field); break;
+            }
         }
 
         private void Apply(CheckBox field)
@@ -274,6 +279,48 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
             appearance.Normal[null] = normalAppearanceState;
         }
 
+        private void Apply(SignatureField field)
+        {
+            var document = field.Document;
+            var widget = field.Widgets[0];
+            var size = widget.Box.Size;
+            var signatureName = field.SignatureName;
+            var appearance = widget.Appearance;
+            widget.DefaultAppearence = "/Helv " + FontSize + " Tf 0 0 0 rg";
+
+            FormXObject normalAppearanceState = new FormXObject(document, size);
+            {
+                var composer = new PrimitiveComposer(normalAppearanceState);
+
+                float lineWidth = 1;
+                SKRect frame = SKRect.Create(lineWidth / 2, lineWidth / 2, size.Width - lineWidth, size.Height - lineWidth);
+                if (GraphicsVisibile)
+                {
+                    composer.BeginLocalState();
+                    composer.SetLineWidth(lineWidth);
+                    composer.SetFillColor(BackColor);
+                    composer.SetStrokeColor(ForeColor);
+                    composer.DrawRectangle(frame, 5);
+                    composer.FillStroke();
+                    composer.End();
+                }
+
+                composer.BeginMarkedContent(PdfName.Tx);
+                composer.SetFont(PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Courier, true, false), 20);
+                composer.ShowText(
+                  (string)signatureName,
+                  new SKPoint(0, size.Height / 2),
+                  XAlignmentEnum.Left,
+                  YAlignmentEnum.Middle,
+                  0
+                  );
+                composer.End();
+
+                composer.Flush();
+            }
+            appearance.Normal[null] = normalAppearanceState;
+        }
+
         private void Apply(TextField field)
         {
             Document document = field.Document;
@@ -405,17 +452,11 @@ namespace PdfClown.Documents.Interaction.Forms.Styles
                     composer.Clip(); // Ensures that the visible content is clipped within the rounded frame.
                 }
                 composer.BeginMarkedContent(PdfName.Tx);
-                composer.SetFont(
-                  PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Helvetica, false, false),
-                  FontSize
-                  );
+                composer.SetFont(PdfType1Font.Load(document, PdfType1Font.FamilyEnum.Helvetica, false, false), FontSize);
                 double y = 3;
                 foreach (ChoiceItem item in field.Items)
                 {
-                    composer.ShowText(
-                      item.Text,
-                      new SKPoint(0, (float)y)
-                      );
+                    composer.ShowText(item.Text, new SKPoint(0, (float)y));
                     y += FontSize * 1.175;
                     if (y > size.Height)
                         break;

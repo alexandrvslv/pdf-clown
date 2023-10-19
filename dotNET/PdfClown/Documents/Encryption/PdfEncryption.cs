@@ -124,7 +124,7 @@ namespace PdfClown.Documents.Encryption
 		 */
         public string Filter
         {
-            get => Dictionary.GetName(PdfName.Filter);
+            get => Dictionary.GetString(PdfName.Filter);
             set => Dictionary.SetName(PdfName.Filter, value);
 
         }
@@ -135,7 +135,7 @@ namespace PdfClown.Documents.Encryption
 		 */
         public string SubFilter
         {
-            get => Dictionary.GetName(PdfName.SubFilter);
+            get => Dictionary.GetString(PdfName.SubFilter);
             set => Dictionary.SetName(PdfName.SubFilter, value);
         }
 

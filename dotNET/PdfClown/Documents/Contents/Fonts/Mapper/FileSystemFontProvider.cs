@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.Security;
 using PdfClown.Tokens;
 using PdfClown.Util.Collections.Generic;
+using System.Linq;
 
 namespace PdfClown.Documents.Contents.Fonts
 {
@@ -284,20 +285,15 @@ namespace PdfClown.Documents.Contents.Fonts
                 Debug.WriteLine("trace: Will search the local system for fonts");
 #endif
                 // scan the local system for font files
-                List<FileInfo> files = new List<FileInfo>();
-                FontFileFinder fontFileFinder = new FontFileFinder();
+                var fontFileFinder = new FontFileFinder();
                 List<FileInfo> fonts = fontFileFinder.Find();
-                foreach (var font in fonts)
-                {
-                    files.Add(font);
-                }
 
 #if TRACE
-                Debug.WriteLine($"trace: Found {files.Count} fonts on the local system");
+                Debug.WriteLine($"trace: Found {fonts.Count} fonts on the local system");
 #endif
 
                 // load cached FontInfo objects
-                List<FSFontInfo> cachedInfos = LoadDiskCache(files);
+                List<FSFontInfo> cachedInfos = LoadDiskCache(fonts);
                 if (cachedInfos != null && cachedInfos.Count > 0)
                 {
                     fontInfoList.AddAll(cachedInfos);
@@ -305,7 +301,7 @@ namespace PdfClown.Documents.Contents.Fonts
                 else
                 {
                     Debug.WriteLine("warn: Building on-disk font cache, this may take a while");
-                    ScanFonts(files);
+                    ScanFonts(fonts);
                     SaveDiskCache();
                     Debug.WriteLine($"warn: Finished building on-disk font cache, found {fontInfoList.Count} fonts");
                 }
@@ -430,12 +426,7 @@ namespace PdfClown.Documents.Contents.Fonts
 		 */
         private List<FSFontInfo> LoadDiskCache(List<FileInfo> files)
         {
-            ISet<string> pending = new HashSet<string>(StringComparer.Ordinal);
-            foreach (var fileInfo in files)
-            {
-                pending.Add(fileInfo.FullName);
-            }
-
+            ISet<string> pending = new HashSet<string>(files.Select(x => x.FullName), StringComparer.Ordinal);
             List<FSFontInfo> results = new List<FSFontInfo>();
 
             // Get the disk cache
@@ -469,7 +460,7 @@ namespace PdfClown.Documents.Contents.Fonts
                             if (!string.IsNullOrWhiteSpace(cidSystemInfoText))
                             {
                                 string[] ros = cidSystemInfoText.Split('-');
-                                cidSystemInfo = new CIDSystemInfo(null, ros[0], ros[1], int.Parse(ros[2]));
+                                cidSystemInfo = new CIDSystemInfo(null, ros[0], ros[1], int.TryParse(ros[2], out var intValue) ? intValue : 0);
                             }
                             int usWeightClass = reader.ReadInt32();
                             int sFamilyClass = reader.ReadInt32();
@@ -484,27 +475,35 @@ namespace PdfClown.Documents.Contents.Fonts
                                 reader.Read(panose, 0, 10);
                             }
 
-                            FileInfo fontFile = new FileInfo(reader.ReadString());
+                            var fullpath = reader.ReadString();
                             reader.ReadByte();
-                            if (fontFile.Exists)
+
+                            if (!string.IsNullOrEmpty(fullpath))
                             {
-                                FSFontInfo info = new FSFontInfo(fontFile, format, postScriptName,
-                                        cidSystemInfo, usWeightClass, sFamilyClass, ulCodePageRange1,
-                                        ulCodePageRange2, macStyle, panose, this);
-                                results.Add(info);
+                                FileInfo fontFile = new FileInfo(fullpath);
+                                if (fontFile.Exists)
+                                {
+                                    FSFontInfo info = new FSFontInfo(fontFile, format, postScriptName,
+                                            cidSystemInfo, usWeightClass, sFamilyClass, ulCodePageRange1,
+                                            ulCodePageRange2, macStyle, panose, this);
+                                    results.Add(info);
+                                }
+                                else
+                                {
+                                    Debug.WriteLine($"debug: Font file {fullpath} not found, skipped");
+                                }
                             }
                             else
                             {
-                                Debug.WriteLine($"debug: Font file {fontFile.FullName} not found, skipped");
+                                Debug.WriteLine($"debug: Font file {fullpath} not found, skipped");
                             }
-                            pending.Remove(fontFile.FullName);
+                            pending.Remove(fullpath);
                         }
                     }
                 }
-                catch (IOException e)
+                catch (Exception e)
                 {
                     Debug.WriteLine($"eror: Error loading font cache, will be re-built {e}");
-                    return null;
                 }
             }
 

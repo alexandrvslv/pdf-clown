@@ -1,5 +1,6 @@
 ﻿using PdfClown.Documents;
 using PdfClown.Documents.Interaction.Annotations;
+using PdfClown.Documents.Interaction.Forms;
 using PdfClown.Files;
 using SkiaSharp;
 using System;
@@ -33,6 +34,7 @@ namespace PdfClown.Viewer
         private readonly List<PdfPageView> pageViews = new List<PdfPageView>();
         private readonly Dictionary<int, PdfPageView> pagesIndex = new Dictionary<int, PdfPageView>();
         private readonly float indent = 10;
+        private Fields fields;
 
         public Files.File File { get; private set; }
 
@@ -47,6 +49,7 @@ namespace PdfClown.Viewer
         public string TempFilePath { get; set; }
 
         public SKSize Size { get; private set; }
+
         public float AvgHeigth { get; private set; }
 
         public PdfPageView this[int index]
@@ -178,17 +181,71 @@ namespace PdfClown.Viewer
                 stream = new FileStream(TempFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
             }
             File = new Files.File(stream);
+            fields = null;
             LoadPages();
         }
 
         public void Save(SerializationModeEnum mode = SerializationModeEnum.Standard)
         {
-            File.Save(FilePath, mode);
+            var path = FilePath;
+            var tempPath = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".tmp~");
+            Save(tempPath, mode);
+            System.IO.File.Copy(tempPath, path, true);
+        }
+
+        public void Save(string path, SerializationModeEnum mode = SerializationModeEnum.Standard)
+        {
+            File.Save(path, mode);
         }
 
         public void SaveTo(Stream stream, SerializationModeEnum mode = SerializationModeEnum.Standard)
         {
             File.Save(stream, mode);
+        }
+
+        public void OnEndOperation(object result)
+        {
+            EndOperation?.Invoke(this, new OperationEventArgs(result));
+        }
+
+        public Field GetField(string name)
+        {
+            return Fields[name];
+        }
+
+        public Fields Fields
+        {
+            get
+            {
+                if (fields == null || fields != Document.Form.Fields)
+                {
+                    LockObject.Wait();
+                    try
+                    {
+                        LockObject.Reset();
+                        Document.Form.RefreshCache();
+                        fields = Document.Form.Fields;
+                    }
+                    finally
+                    {
+                        LockObject.Set();
+                    }
+                }
+                return fields;
+            }
+        }
+
+        public Field AddField(Field field)
+        {
+            if (string.IsNullOrEmpty(field.Name))
+            {
+                field.Name = Fields.GenerateName(field.GetType());
+            }
+            if (!Fields.ContainsKey(field.Name))
+            {
+                Fields.Add(field);
+            }
+            return field;
         }
 
         public IEnumerable<Annotation> GetAllAnnotations()
@@ -222,11 +279,6 @@ namespace PdfClown.Viewer
             return null;
         }
 
-        public void OnEndOperation(object result)
-        {
-            EndOperation?.Invoke(this, new OperationEventArgs(result));
-        }
-
         public List<Annotation> AddAnnotation(Annotation annotation)
         {
             return AddAnnotation(annotation.Page, annotation);
@@ -238,7 +290,12 @@ namespace PdfClown.Viewer
             if (page != null)
             {
                 annotation.Page = page;
-                if (!page.Annotations.Contains(annotation))
+                if (annotation is Widget widget && widget.Field != null)
+                {
+                    AddField(widget.Field);
+                    list.Add(annotation);
+                }
+                else if (!page.Annotations.Contains(annotation))
                 {
                     page.Annotations.Add(annotation);
                     list.Add(annotation);
@@ -276,7 +333,13 @@ namespace PdfClown.Viewer
                     }
                 }
             }
+            if (annotation is Widget widget && widget.Field != null)
+            {
+                Fields.Remove(widget.Field);
+            }
+
             annotation.Remove();
+
             AnnotationRemoved?.Invoke(this, new AnnotationEventArgs(annotation));
             if (annotation is Popup popup)
             {

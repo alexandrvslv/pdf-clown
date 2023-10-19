@@ -146,13 +146,13 @@ namespace PdfClown.Documents.Interaction.Annotations
         [PDF(VersionEnum.PDF15)]
         public MarkupState? State
         {
-            get => MarkupStateExtension.Get((PdfName)BaseDataObject[PdfName.State]);
+            get => MarkupStateExtension.Get(BaseDataObject.GetString(PdfName.State));
             set
             {
                 var oldValue = State;
                 if (oldValue != value)
                 {
-                    BaseDataObject[PdfName.State] = MarkupStateExtension.GetCode(value);
+                    BaseDataObject.SetName(PdfName.State, MarkupStateExtension.GetCode(value));
                     OnPropertyChanged(oldValue, value);
                 }
             }
@@ -160,13 +160,13 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public MarkupStateModel? StateModel
         {
-            get => MarkupStateModelExtension.Get((PdfName)BaseDataObject[PdfName.State]);
+            get => MarkupStateModelExtension.Get(BaseDataObject.GetString(PdfName.StateModel));
             set
             {
                 var oldValue = StateModel;
                 if (oldValue != value)
                 {
-                    BaseDataObject[PdfName.State] = MarkupStateModelExtension.GetCode(value);
+                    BaseDataObject.SetName(PdfName.StateModel, MarkupStateModelExtension.GetCode(value));
                     OnPropertyChanged(oldValue, value);
                 }
             }
@@ -217,22 +217,30 @@ namespace PdfClown.Documents.Interaction.Annotations
     }
     internal static class MarkupStateExtension
     {
-        private static readonly BiDictionary<MarkupState, PdfName> codes;
+        private static readonly BiDictionary<MarkupState, string> codes;
 
         static MarkupStateExtension()
         {
-            codes = new BiDictionary<MarkupState, PdfName>
+            codes = new BiDictionary<MarkupState, string>
             {
-                [MarkupState.None] = PdfName.None,
-                [MarkupState.Unmarked] = PdfName.Unmarked,
-                [MarkupState.Accepted] = PdfName.Accepted,
-                [MarkupState.Rejected] = PdfName.Rejected,
-                [MarkupState.Cancelled] = PdfName.Cancelled,
-                [MarkupState.Completed] = PdfName.Completed,
+                [MarkupState.None] = PdfName.None.StringValue,
+                [MarkupState.Unmarked] = PdfName.Unmarked.StringValue,
+                [MarkupState.Accepted] = PdfName.Accepted.StringValue,
+                [MarkupState.Rejected] = PdfName.Rejected.StringValue,
+                [MarkupState.Cancelled] = PdfName.Cancelled.StringValue,
+                [MarkupState.Completed] = PdfName.Completed.StringValue,
             };
         }
 
-        public static MarkupState? Get(PdfName name)
+        public static MarkupState? Get(IPdfString name)
+        {
+            if (name == null)
+                return null;
+
+            return Get(name.StringValue);
+        }
+
+        public static MarkupState? Get(string name)
         {
             if (name == null)
                 return null;
@@ -240,7 +248,7 @@ namespace PdfClown.Documents.Interaction.Annotations
             return codes.GetKey(name);
         }
 
-        public static PdfName GetCode(this MarkupState? intent)
+        public static string GetCode(this MarkupState? intent)
         {
             return intent == null ? null : codes[intent.Value];
         }
@@ -248,18 +256,26 @@ namespace PdfClown.Documents.Interaction.Annotations
 
     internal static class MarkupStateModelExtension
     {
-        private static readonly BiDictionary<MarkupStateModel, PdfName> codes;
+        private static readonly BiDictionary<MarkupStateModel, string> codes;
 
         static MarkupStateModelExtension()
         {
-            codes = new BiDictionary<MarkupStateModel, PdfName>
+            codes = new BiDictionary<MarkupStateModel, string>
             {
-                [MarkupStateModel.Marked] = PdfName.Marked,
-                [MarkupStateModel.Review] = PdfName.Review
+                [MarkupStateModel.Marked] = PdfName.Marked.StringValue,
+                [MarkupStateModel.Review] = PdfName.Review.StringValue
             };
         }
 
-        public static MarkupStateModel? Get(PdfName name)
+        public static MarkupStateModel? Get(IPdfString name)
+        {
+            if (name == null)
+                return null;
+
+            return Get(name.StringValue);
+        }
+
+        public static MarkupStateModel? Get(string name)
         {
             if (name == null)
                 return null;
@@ -267,7 +283,7 @@ namespace PdfClown.Documents.Interaction.Annotations
             return codes.GetKey(name);
         }
 
-        public static PdfName GetCode(this MarkupStateModel? intent)
+        public static string GetCode(this MarkupStateModel? intent)
         {
             return intent == null ? null : codes[intent.Value];
         }

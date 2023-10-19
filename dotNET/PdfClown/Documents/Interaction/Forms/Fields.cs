@@ -32,6 +32,7 @@ using PdfClown.Objects;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PdfClown.Documents.Interaction.Forms
 {
@@ -39,7 +40,7 @@ namespace PdfClown.Documents.Interaction.Forms
       <summary>Interactive form fields [PDF:1.6:8.6.1].</summary>
     */
     [PDF(VersionEnum.PDF12)]
-    public sealed class Fields : PdfObjectWrapper<PdfArray>, IDictionary<string, Field>
+    public sealed class Fields : PdfObjectWrapper<PdfArray>, IDictionary<string, Field>, IEnumerable<Field>
     {
         #region dynamic
         #region constructors
@@ -70,7 +71,11 @@ namespace PdfClown.Documents.Interaction.Forms
             Field field = this[key];
             if (field == null)
                 return false;
+            return Remove(field);
+        }
 
+        public bool Remove(Field field)
+        {
             PdfArray fieldObjects;
             {
                 PdfReference fieldParentReference = (PdfReference)field.BaseDataObject[PdfName.Parent];
@@ -167,11 +172,32 @@ namespace PdfClown.Documents.Interaction.Forms
 
         #region IEnumerable<KeyValuePair<string,Field>>
         IEnumerator<KeyValuePair<string, Field>> IEnumerable<KeyValuePair<string, Field>>.GetEnumerator()
-        { throw new NotImplementedException(); }
+        {
+            IEnumerator<PdfDirectObject> fieldObjectsIterator = BaseDataObject.GetEnumerator();
+            while (fieldObjectsIterator.MoveNext())
+            {
+                PdfReference fieldReference = (PdfReference)fieldObjectsIterator.Current;
+                var field = Field.Wrap(fieldReference);
+                yield return new KeyValuePair<string, Field>(field.Name, field);
+            }
+        }
+
+        public IEnumerator<Field> GetEnumerator()
+        {
+            IEnumerator<PdfDirectObject> fieldObjectsIterator = BaseDataObject.GetEnumerator();
+            while (fieldObjectsIterator.MoveNext())
+            {
+                PdfReference fieldReference = (PdfReference)fieldObjectsIterator.Current;
+                var field = Field.Wrap(fieldReference);
+                yield return field;
+            }
+        }
 
         #region IEnumerable
         IEnumerator IEnumerable.GetEnumerator()
-        { return ((IEnumerable<KeyValuePair<string, Field>>)this).GetEnumerator(); }
+        {
+            return GetEnumerator();
+        }
         #endregion
         #endregion
         #endregion
@@ -198,6 +224,11 @@ namespace PdfClown.Documents.Interaction.Forms
                 else // Non-terminal field.
                 { RetrieveValues(kidReferences, values); }
             }
+        }
+
+        public string GenerateName(Type type)
+        {
+            return type.Name + ((IEnumerable<Field>)this).Count(x => type.IsAssignableFrom(x.GetType()));
         }
         #endregion
         #endregion

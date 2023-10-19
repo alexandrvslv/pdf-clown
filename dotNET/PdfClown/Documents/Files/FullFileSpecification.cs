@@ -98,7 +98,7 @@ namespace PdfClown.Documents.Files
 
         public override string Path
         {
-            get => BaseDictionary.GetText(PdfName.F);
+            get => BaseDictionary.GetString(PdfName.F);
             set => BaseDictionary.SetString(PdfName.F, value);
         }
 
@@ -116,7 +116,7 @@ namespace PdfClown.Documents.Files
         */
         public string Description
         {
-            get => BaseDictionary.GetText(PdfName.Desc);
+            get => BaseDictionary.GetString(PdfName.Desc);
             set => BaseDictionary.SetText(PdfName.Desc, value);
         }
 

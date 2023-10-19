@@ -59,16 +59,53 @@ namespace PdfClown.Documents.Interaction.Forms
         */
         public override object Value
         {
-            get => BaseDataObject.Resolve(PdfName.V);
+            get => ValueDictionary;
             set
             {
                 if (!(value == null
                     || value is PdfDictionary))
                     throw new ArgumentException("Value MUST be a PdfDictionary");
 
-                BaseDataObject[PdfName.V] = (PdfDictionary)value;
+                ValueDictionary = (PdfDictionary)value;
             }
         }
+
+        private PdfDictionary ValueDictionary
+        {
+            get => BaseDataObject.Resolve<PdfDictionary>(PdfName.V);
+            set => BaseDataObject[PdfName.V] = value;
+        }
+
+        public PdfArray ByteRange
+        {
+            get => ValueDictionary.Resolve<PdfArray>(PdfName.ByteRange);
+            set => ValueDictionary[PdfName.ByteRange] = value;
+        }
+
+        public PdfObject Contents
+        {
+            get => ValueDictionary.Resolve(PdfName.Contents);
+            set => ValueDictionary[PdfName.Contents] = (PdfDirectObject)value;
+        }
+
+        public string Filter
+        {
+            get => ((IPdfString)ValueDictionary[PdfName.Filter])?.StringValue;
+            set => ValueDictionary[PdfName.Filter] = new PdfName(value);
+        }
+
+        public DateTime? DateM
+        {
+            get => ((PdfDate)ValueDictionary[PdfName.M])?.DateValue;
+            set => ValueDictionary[PdfName.M] = value is DateTime notNullValue ? new PdfDate(notNullValue) : null;
+        }
+
+        public string SignatureName
+        {
+            get => ((IPdfString)ValueDictionary[PdfName.Name]).StringValue;
+            set=> ValueDictionary[PdfName.Name] = new PdfString(value);
+        }
+
         #endregion
         #endregion
         #endregion

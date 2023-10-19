@@ -146,9 +146,9 @@ namespace PdfClown.Objects
             this[index] = PdfBoolean.Get(value);
         }
 
-        public string GetName(int index, string def = null)
+        public string GetString(int index, string def = null)
         {
-            return ((PdfName)Resolve(index))?.StringValue ?? def;
+            return ((IPdfString)Resolve(index))?.StringValue ?? def;
         }
 
         public void SetName(int index, string value)

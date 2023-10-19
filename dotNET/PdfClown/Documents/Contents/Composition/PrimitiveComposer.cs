@@ -105,6 +105,11 @@ namespace PdfClown.Documents.Contents.Composition
             Add(new objects::ModifyCTM(a, b, c, d, e, f));
         }
 
+        public void ApplyMatrix(SKMatrix matrix)
+        {
+            Add(new objects::ModifyCTM(matrix));
+        }
+
         /**
           <summary>Applies the specified state parameters [PDF:1.6:4.3.4].</summary>
           <param name="name">Resource identifier of the state parameters object.</param>
@@ -662,6 +667,14 @@ namespace PdfClown.Documents.Contents.Composition
             Add(objects::ModifyCTM.GetResetCTM(State));
             // Apply the transformation!
             Add(new objects::ModifyCTM(a, b, c, d, e, f));
+        }
+
+        public void SetMatrix(SKMatrix matrix)
+        {
+            // Reset the CTM!
+            Add(objects::ModifyCTM.GetResetCTM(State));
+            // Apply the transformation!
+            Add(new objects::ModifyCTM(matrix));
         }
 
         /**

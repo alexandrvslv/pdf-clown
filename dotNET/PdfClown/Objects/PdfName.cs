@@ -214,6 +214,7 @@ namespace PdfClown.Objects
         public static readonly PdfName DR = new PdfName("DR");
         public static readonly PdfName Draft = new PdfName("Draft");
         public static readonly PdfName DS = new PdfName("DS");
+        public static readonly PdfName DSS = new PdfName("DSS");
         public static readonly PdfName Duplex = new PdfName("Duplex");
         public static readonly PdfName DuplexFlipLongEdge = new PdfName("DuplexFlipLongEdge");
         public static readonly PdfName DuplexFlipShortEdge = new PdfName("DuplexFlipShortEdge");
@@ -580,6 +581,7 @@ namespace PdfClown.Objects
         public static readonly PdfName Stamp = new PdfName("Stamp");
         public static readonly PdfName StandardEncoding = new PdfName("StandardEncoding");
         public static readonly PdfName State = new PdfName("State");
+        public static readonly PdfName StateModel = new PdfName("StateModel");
         public static readonly PdfName StdCF = new PdfName("StdCF");
         public static readonly PdfName StemV = new PdfName("StemV");
         public static readonly PdfName StemH = new PdfName("StemH");

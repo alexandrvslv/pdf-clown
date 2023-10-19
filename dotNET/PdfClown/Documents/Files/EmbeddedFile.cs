@@ -107,7 +107,7 @@ namespace PdfClown.Documents.Files
         */
         public string MimeType
         {
-            get => Header.GetName(PdfName.Subtype);
+            get => Header.GetString(PdfName.Subtype);
             set => Header.SetName(PdfName.Subtype, value);
         }
 

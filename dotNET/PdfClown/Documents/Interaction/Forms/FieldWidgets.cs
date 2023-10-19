@@ -42,7 +42,11 @@ namespace PdfClown.Documents.Interaction.Forms
     public sealed class FieldWidgets : PdfObjectWrapper<PdfDataObject>, IList<Widget>
     {
         public static FieldWidgets Wrap(PdfDirectObject baseObject, Field field)
-        { return baseObject != null ? (baseObject.AlternateWrapper as FieldWidgets ?? new FieldWidgets(baseObject, field)) : null; }
+        {
+            return baseObject != null 
+                ? (FieldWidgets)(baseObject.AlternateWrapper ??= new FieldWidgets(baseObject, field)) 
+                : null;
+        }
         /*
           NOTE: Widget annotations may be singular (either merged to their field or within an array)
           or multiple (within an array).
@@ -59,10 +63,6 @@ namespace PdfClown.Documents.Interaction.Forms
         {
             BaseObject = baseObject;
             this.field = field;
-            if (baseObject != null)
-            {
-                baseObject.AlternateWrapper = this;
-            }
         }
         #endregion
 
@@ -79,7 +79,7 @@ namespace PdfClown.Documents.Interaction.Forms
         #region IList
         public int IndexOf(Widget value)
         {
-            PdfDataObject baseDataObject = BaseDataObject;
+            var baseDataObject = BaseDataObject;
             if (baseDataObject is PdfDictionary) // Single annotation.
             {
                 if (value.BaseObject.Equals(BaseObject))

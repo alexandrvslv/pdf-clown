@@ -40,6 +40,7 @@ namespace PdfClown.Objects
         #region static
         #region fields
         private const string FormatString = "yyyyMMddHHmmsszzz";
+        private DateTime? date;
         #endregion
 
         #region interface
@@ -58,6 +59,8 @@ namespace PdfClown.Objects
         */
         public static DateTime? ToDate(string value)
         {
+            if (string.IsNullOrEmpty(value))
+                return null;
             value = value.Trim();
             if (string.Equals(value, "D:", StringComparison.Ordinal))
                 return null;
@@ -134,8 +137,20 @@ namespace PdfClown.Objects
 
         public override object Value
         {
-            get => ToDate((string)base.Value);
-            protected set => RawValue = tokens::Encoding.Pdf.Encode(Format((DateTime)value));
+            get => DateValue;
+            protected set
+            {
+                if (value is DateTime dateTimeValue)
+                {
+                    RawValue = tokens::Encoding.Pdf.Encode(Format(dateTimeValue));
+                    date = dateTimeValue;
+                }
+            }
+        }
+
+        public DateTime? DateValue
+        {
+            get => date ??= ToDate((string)base.Value);
         }
         #endregion
         #endregion

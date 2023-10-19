@@ -311,6 +311,8 @@ namespace PdfClown.Viewer
 
         public event EventHandler<EventArgs> DragComplete;
 
+        public event EventHandler<EventArgs> SizeComplete;
+
         public event EventHandler<AnnotationEventArgs> SelectedAnnotationChanged;
 
         private PdfPageView GetCenterPage()
@@ -475,18 +477,20 @@ namespace PdfClown.Viewer
                         break;
                 }
             }
+            if (oldValue == OperationType.AnnotationDrag)
+            {
+                DragComplete?.Invoke(this, new AnnotationEventArgs(selectedAnnotation));
+            }
+            if (oldValue == OperationType.AnnotationSize)
+            {
+                SizeComplete?.Invoke(this, new AnnotationEventArgs(selectedAnnotation));
+            }
             if (newValue != OperationType.None)
             {
                 if (selectedAnnotation == null)
                 {
                     throw new InvalidOperationException("SelectedAnnotation is not specified!");
                 }
-
-                if (oldValue == OperationType.AnnotationDrag)
-                {
-                    DragComplete?.Invoke(this, new AnnotationEventArgs(selectedAnnotation));
-                }
-
             }
             switch (newValue)
             {
@@ -494,6 +498,10 @@ namespace PdfClown.Viewer
                     if (!selectedAnnotation.IsNew)
                     {
                         BeginOperation(selectedAnnotation, newValue, "Box");
+                    }
+                    else
+                    {
+                        Cursor = CursorType.Cross;
                     }
                     break;
                 case OperationType.AnnotationSize:
@@ -665,29 +673,35 @@ namespace PdfClown.Viewer
 
         private void OnPaintAnnotations(PdfViewEventArgs state)
         {
+            state.DrawAnnotation = null;
             foreach (var annotation in state.PageView.GetAnnotations())
             {
                 if (annotation != null && annotation.Visible)
                 {
-                    annotation.Draw(state.Canvas);
                     if (annotation == selectedAnnotation)
                     {
                         state.DrawAnnotation = annotation;
                         OnPaintSelectedAnnotation(state);
                     }
+                    else
+                    {
+                        annotation.Draw(state.Canvas);
+                    }
                 }
             }
-            //if (Dragging != null && !stage.PageView.GetAnnotations().Contains(Dragging))
-            //{
-            //    Dragging.Draw(canvas);
-            //}
+            if (selectedAnnotation != null && state.DrawAnnotation == null)
+            {
+                state.DrawAnnotation = selectedAnnotation;
+                OnPaintSelectedAnnotation(state);
+            }
             OnPaintAnnotationToolTip(state);
         }
 
         private void OnPaintSelectedAnnotation(PdfViewEventArgs state)
         {
-            if (CurrentOperation == OperationType.None
-            && state.DrawAnnotation != selectedPoint?.Annotation)
+            state.DrawAnnotation.Draw(state.Canvas);
+            //if (CurrentOperation == OperationType.None
+            //&& state.DrawAnnotation != selectedPoint?.Annotation)
             {
                 var bounds = state.DrawAnnotation.Box;
                 if (state.DrawAnnotation is StickyNote stick)
@@ -813,7 +827,8 @@ namespace PdfClown.Viewer
                     return;
                 }
             }
-            Cursor = CursorType.Arrow;
+            if (CurrentOperation != OperationType.AnnotationDrag)
+                Cursor = CursorType.Arrow;
             state.PageView = null;
         }
 
@@ -1250,8 +1265,16 @@ namespace PdfClown.Viewer
 
         public void Save()
         {
+            if (Document == null)
+                return;
+
+            Save(Document.FilePath);
+        }
+
+        public void Save(string filePath)
+        {
             ClearOperations();
-            Document?.Save();
+            Document?.Save(filePath);
         }
 
         public void SaveTo(Stream stream)
@@ -1518,6 +1541,11 @@ namespace PdfClown.Viewer
             { }
         }
 
+        public IEnumerable<EditorOperation> GetOperations()
+        {
+            return operations.Select(x => x);
+        }
+
         public void ClearOperations()
         {
             operations.Clear();
@@ -1583,5 +1611,6 @@ namespace PdfClown.Viewer
             }
             return true;
         }
+
     }
 }

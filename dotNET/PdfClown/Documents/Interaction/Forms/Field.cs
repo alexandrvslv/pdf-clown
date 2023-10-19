@@ -189,6 +189,7 @@ namespace PdfClown.Documents.Interaction.Forms
             else // Unknown.
                 throw new NotSupportedException("Unknown field type: " + fieldType);
         }
+
         #endregion
 
         #region private
@@ -222,6 +223,7 @@ namespace PdfClown.Documents.Interaction.Forms
         */
         protected Field(PdfName fieldType, string name, Widget widget) : this(widget.BaseObject)
         {
+            widget.Field = this;
             PdfDictionary baseDataObject = BaseDataObject;
             baseDataObject[PdfName.FT] = fieldType;
             baseDataObject[PdfName.T] = new PdfTextString(name);
@@ -292,6 +294,12 @@ namespace PdfClown.Documents.Interaction.Forms
             set => BaseDataObject[PdfName.Ff] = PdfInteger.Get((int)value);
         }
 
+        //public Field Parent
+        //{
+        //    get => Wrap((PdfReference)BaseDataObject[PdfName.Parent]);
+        //    set => BaseDataObject[PdfName.Parent] = value?.BaseObject;
+        //}
+
         /**
           <summary>Gets the fully-qualified field name.</summary>
         */
@@ -327,8 +335,9 @@ namespace PdfClown.Documents.Interaction.Forms
         */
         public string Name
         {
-            get => (string)((PdfTextString)GetInheritableAttribute(PdfName.T)).Value;  // NOTE: Despite the field name is not a canonical 'inheritable' attribute, sometimes it's not expressed at leaf level.
-            set => BaseDataObject[PdfName.T] = new PdfTextString(value);
+            // NOTE: Despite the field name is not a canonical 'inheritable' attribute, sometimes it's not expressed at leaf level.
+            get => ((IPdfString)GetInheritableAttribute(PdfName.T)).StringValue;
+            set => BaseDataObject.SetText(PdfName.T, value);
         }
 
         /**

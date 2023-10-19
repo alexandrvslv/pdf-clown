@@ -268,19 +268,14 @@ namespace PdfClown.Objects
             this[key] = PdfBoolean.Get(value);
         }
 
-        public string GetName(PdfName key, string def = null)
+        public string GetString(PdfName key, string def = null)
         {
-            return ((PdfName)Resolve(key))?.StringValue ?? def;
+            return ((IPdfString)Resolve(key))?.StringValue ?? def;
         }
 
         public void SetName(PdfName key, string value)
         {
             this[key] = PdfName.Get(value);
-        }
-
-        public string GetText(PdfName key)
-        {
-            return ((PdfString)Resolve(key))?.StringValue;
         }
 
         public void SetText(PdfName key, string value)
@@ -295,7 +290,7 @@ namespace PdfClown.Objects
 
         public DateTime? GetDate(PdfName key)
         {
-            return Resolve(key) is PdfDate date ? (DateTime?)date.Value : null;
+            return Resolve(key) is PdfDate date ? date.DateValue : null;
         }
 
         public void SetDate(PdfName key, DateTime? value)
