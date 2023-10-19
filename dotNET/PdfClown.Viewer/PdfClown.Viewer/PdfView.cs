@@ -1271,6 +1271,11 @@ namespace PdfClown.Viewer
             Save(Document.FilePath);
         }
 
+        public void SaveWithoutClearOperations(string filePath)
+        {
+            Document?.Save(filePath);
+        }
+
         public void Save(string filePath)
         {
             ClearOperations();
