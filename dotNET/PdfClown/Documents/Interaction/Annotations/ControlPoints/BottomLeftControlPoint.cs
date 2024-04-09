@@ -30,10 +30,12 @@ namespace PdfClown.Documents.Interaction.Annotations.ControlPoints
 {
     public class BottomLeftControlPoint : ControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => Annotation.BottomLeftPoint;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => Annotation.BottomLeftPoint;
-            set => Annotation.BottomLeftPoint = value;
+            base.SetPoint(point); 
+            Annotation.BottomLeftPoint = point;
         }
     }
 

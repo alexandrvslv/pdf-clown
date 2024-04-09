@@ -14,5 +14,8 @@ namespace PdfClown
 
         IEnumerable<Annotation> RemoveAnnotation(Annotation annotation);
         void InvalidateSurface();
+
+        void ClearOperations();
+        void RejectOperations();
     }
 }

@@ -263,10 +263,12 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public int Index { get; set; }
 
-        public override SKPoint Point
+        public override SKPoint GetPoint() => VertexShape[Index];
+
+        public override void SetPoint(SKPoint point)
         {
-            get => VertexShape[Index];
-            set => VertexShape[Index] = value;
+            base.SetPoint(point);
+            VertexShape[Index] = point;
         }
     }
 }

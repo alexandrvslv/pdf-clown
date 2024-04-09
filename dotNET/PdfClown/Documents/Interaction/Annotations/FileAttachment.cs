@@ -123,7 +123,7 @@ namespace PdfClown.Documents.Interaction.Annotations
             }
         }
 
-        public override SKRect RestoreAppearance(SKCanvas canvas)
+        public override SKRect RefreshAppearance(SKCanvas canvas)
         {
             var bounds = Box;
             var color = SKColor;

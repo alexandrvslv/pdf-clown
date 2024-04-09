@@ -114,14 +114,14 @@ namespace PdfClown.Documents.Interaction.Annotations
             }
         }
 
-        public override SKRect RestoreAppearance(SKCanvas canvas)
+        public override SKRect RefreshAppearance(SKCanvas canvas)
         {
             //var color = Color == null ? SKColors.Black : DeviceColorSpace.CalcSKColor(Color, Alpha);
             //using (var paint = new SKPaint { Color = color })
             //{
             //    Border?.Apply(paint, null);
             //}
-            return base.RestoreAppearance(canvas);
+            return base.RefreshAppearance(canvas);
         }
 
         protected override FormXObject GenerateAppearance()

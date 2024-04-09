@@ -402,13 +402,15 @@ namespace PdfClown.Documents
             throw new NotImplementedException();
         }
 
-        public bool HasSignatures => GetSignatureDictionaries().Any();
+        public bool HasSignatures => BaseDataObject.ContainsKey(PdfName.AcroForm) && Form.Fields.OfType<SignatureField>().Any();
+
+        public bool HasSignatureDictionaries => GetSignatureDictionaries().Any();
 
         internal IEnumerable<SignatureDictionary> GetSignatureDictionaries()
         {
-            if (!(BaseDataObject.ContainsKey(PdfName.AcroForm)))
+            if (!BaseDataObject.ContainsKey(PdfName.AcroForm))
                 yield break;
-            foreach (var sigField in this.Form.Fields.OfType<SignatureField>())
+            foreach (var sigField in Form.Fields.OfType<SignatureField>())
             {
                 if (sigField.SignatureDictionary != null)
                     yield return sigField.SignatureDictionary;

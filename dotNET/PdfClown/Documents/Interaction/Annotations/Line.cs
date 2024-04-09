@@ -506,23 +506,30 @@ namespace PdfClown.Documents.Interaction.Annotations
         }
     }
 
-    public class LineStartControlPoint : ControlPoint
+    public abstract class LineControlPoint : ControlPoint
     {
         public Line Line => (Line)Annotation;
-        public override SKPoint Point
+    }
+
+    public class LineStartControlPoint : LineControlPoint
+    {
+        
+        public override SKPoint GetPoint() => Line.StartPoint;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => Line.StartPoint;
-            set => Line.StartPoint = value;
+            base.SetPoint(point);
+            Line.StartPoint = point;
         }
     }
 
-    public class LineEndControlPoint : ControlPoint
+    public class LineEndControlPoint : LineControlPoint
     {
-        public Line Line => (Line)Annotation;
-        public override SKPoint Point
+        public override SKPoint GetPoint() => Line.EndPoint;
+        public override void SetPoint(SKPoint point)
         {
-            get => Line.EndPoint;
-            set => Line.EndPoint = value;
+            base.SetPoint(point);
+            Line.EndPoint = point;
         }
     }
 }

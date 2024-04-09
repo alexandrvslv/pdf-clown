@@ -23,21 +23,16 @@
   this list of conditions.
 */
 
-using PdfClown.Bytes;
-using PdfClown.Documents;
+using PdfClown.Documents.Contents.ColorSpaces;
+using PdfClown.Documents.Contents.Composition;
+using PdfClown.Documents.Contents.XObjects;
+using PdfClown.Documents.Interaction.Annotations.ControlPoints;
 using PdfClown.Objects;
-using PdfClown.Util;
 using PdfClown.Util.Math.Geom;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using SkiaSharp;
-using PdfClown.Documents.Interaction.Annotations.ControlPoints;
-using PdfClown.Documents.Contents.Composition;
-using PdfClown.Documents.Contents.Fonts;
-using System.Xml.Linq;
-using PdfClown.Documents.Contents.ColorSpaces;
-using PdfClown.Documents.Contents.XObjects;
-using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace PdfClown.Documents.Interaction.Annotations
 {
@@ -103,8 +98,11 @@ namespace PdfClown.Documents.Interaction.Annotations
                 }
                 set
                 {
-                    SetEnd(value);
-                    FreeText.QueueRefreshAppearance();
+                    if (End != value)
+                    {
+                        SetEnd(value);
+                        FreeText.QueueRefreshAppearance();
+                    }
                 }
             }
 
@@ -137,7 +135,7 @@ namespace PdfClown.Documents.Interaction.Annotations
                     if (Knee != value)
                     {
                         SetKnee(value);
-                        FreeText.GenerateAppearance();
+                        FreeText.QueueRefreshAppearance();
                     }
                 }
             }
@@ -395,9 +393,16 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public override bool ShowToolTip => false;
 
+        protected override void OnPropertyChanged<T>(T oldValue, T newValue, [CallerMemberName] string propertyName = "")
+        {
+            if (propertyName == nameof(Rect))
+            { textBox = null; }
+            base.OnPropertyChanged(oldValue, newValue, propertyName);
+        }
+
         protected override FormXObject GenerateAppearance()
         {
-            if (queueRefresh == RefreshAppearanceState.Move)
+            if ((queueRefresh & RefreshAppearanceState.Move) == RefreshAppearanceState.Move)
                 return null;
 
             var normalAppearance = ResetAppearance(out var matrix);
@@ -469,7 +474,7 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public override void MoveTo(SKRect newBox)
         {
-            queueRefresh = RefreshAppearanceState.Move;
+            queueRefresh |= RefreshAppearanceState.Move;
             try
             {
                 var box = Box;
@@ -503,7 +508,7 @@ namespace PdfClown.Documents.Interaction.Annotations
             }
             finally
             {
-                queueRefresh = RefreshAppearanceState.None;
+                queueRefresh &= ~RefreshAppearanceState.Move;
             }
         }
 
@@ -555,6 +560,8 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public override void RefreshBox()
         {
+            if ((queueRefresh & RefreshAppearanceState.User) != RefreshAppearanceState.User)
+                return;
             var textBox = TextBox;
             CalcLine();
             var box = textBox;
@@ -623,73 +630,89 @@ namespace PdfClown.Documents.Interaction.Annotations
 
     public class TextLineStartControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => FreeText.Line.Start;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.Line.Start;
-            set => FreeText.Line.Start = value;
+            base.SetPoint(point);
+            FreeText.Line.Start = point;
         }
     }
 
     public class TextLineEndControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => FreeText.Line.End;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.Line.End;
-            set => FreeText.Line.End = value;
+            base.SetPoint(point);
+            FreeText.Line.End = point;
         }
     }
 
     public class TextLineKneeControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => FreeText.Line.Knee ?? SKPoint.Empty;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.Line.Knee ?? SKPoint.Empty;
-            set => FreeText.Line.Knee = value;
+            base.SetPoint(point);
+            FreeText.Line.Knee = point;
         }
     }
 
     public class TextTopLeftControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => FreeText.TextTopLeftPoint;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.TextTopLeftPoint;
-            set => FreeText.TextTopLeftPoint = value;
+            base.SetPoint(point);
+            FreeText.TextTopLeftPoint = point;
         }
     }
 
     public class TextTopRightControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => FreeText.TextTopRightPoint;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.TextTopRightPoint;
-            set => FreeText.TextTopRightPoint = value;
+            base.SetPoint(point);
+            FreeText.TextTopRightPoint = point;
         }
     }
 
     public class TextBottomLeftControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint()=> FreeText.TextBottomLeftPoint;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.TextBottomLeftPoint;
-            set => FreeText.TextBottomLeftPoint = value;
+            base.SetPoint(point);
+            FreeText.TextBottomLeftPoint = point;
         }
     }
 
     public class TextBottomRightControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => FreeText.TextBottomRightPoint;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.TextBottomRightPoint;
-            set => FreeText.TextBottomRightPoint = value;
+            base.SetPoint(point);
+            FreeText.TextBottomRightPoint = point;
         }
     }
 
     public class TextMidControlPoint : FreeTextControlPoint
     {
-        public override SKPoint Point
+        public override SKPoint GetPoint() => FreeText.TextMidPoint;
+
+        public override void SetPoint(SKPoint point)
         {
-            get => FreeText.TextMidPoint;
-            set => FreeText.TextMidPoint = value;
+            base.SetPoint(point);
+            FreeText.TextMidPoint = point;
         }
     }
 

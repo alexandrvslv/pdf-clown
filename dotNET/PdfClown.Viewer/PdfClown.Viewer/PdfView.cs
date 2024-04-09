@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Input;
 using Xamarin.Forms;
 
 namespace PdfClown.Viewer
@@ -82,6 +83,11 @@ namespace PdfClown.Viewer
         public PdfView()
         {
             state.Viewer = this;
+
+            UndoCommand = new Command(() => Undo(), () => CanUndo);
+            RedoCommand = new Command(() => Redo(), () => CanRedo);
+            PrevPageCommand = new Command(() => PrevPage());
+            NextPageCommand = new Command(() => NextPage());
         }
 
         public PdfViewFitMode FitMode
@@ -292,11 +298,15 @@ namespace PdfClown.Viewer
             }
         }
 
+        public ICommand NextPageCommand { get; set; }
+
         public void NextPage()
         {
             PageNumber += 1;
             ScrollTo(CurrentPage);
         }
+
+        public ICommand PrevPageCommand { get; set; }
 
         public void PrevPage()
         {
@@ -812,10 +822,12 @@ namespace PdfClown.Viewer
                 if (modifiers == KeyModifiers.Ctrl)
                 {
                     Undo();
+                    return true;
                 }
                 else if (modifiers == (KeyModifiers.Ctrl | KeyModifiers.Shift))
                 {
                     Redo();
+                    return true;
                 }
             }
             return base.OnKeyDown(keyName, modifiers);
@@ -1485,8 +1497,7 @@ namespace PdfClown.Viewer
                 ScaleContent = hScale < vScale ? hScale : vScale;
             }
 
-            var matrix = SKMatrix.CreateIdentity()
-                .PreConcat(SKMatrix.CreateScale(scale, scale));
+            var matrix = SKMatrix.CreateScale(scale, scale);
             var bound = matrix.MapRect(page.Bounds);
             var top = bound.Top - 10;
             var left = bound.Left - 10;
@@ -1600,6 +1611,8 @@ namespace PdfClown.Viewer
             }
         }
 
+        public ICommand RedoCommand { get; set; }
+
         public bool Redo()
         {
             var operationLink = lastOperationLink == null ? operations.First : lastOperationLink?.Next;
@@ -1633,6 +1646,8 @@ namespace PdfClown.Viewer
             }
             return false;
         }
+        
+        public ICommand UndoCommand { get; set; }
 
         public bool Undo()
         {
@@ -1697,6 +1712,8 @@ namespace PdfClown.Viewer
             OnPropertyChanged(nameof(CanUndo));
             OnPropertyChanged(nameof(CanRedo));
             OnPropertyChanged(nameof(IsChanged));
+            ((Command)UndoCommand).ChangeCanExecute();
+            ((Command)RedoCommand).ChangeCanExecute();
         }
 
         private void OnDocumentAnnotationAdded(object sender, AnnotationEventArgs e)

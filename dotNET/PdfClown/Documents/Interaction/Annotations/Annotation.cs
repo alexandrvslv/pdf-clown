@@ -273,11 +273,11 @@ namespace PdfClown.Documents.Interaction.Annotations
             set
             {
                 var oldValue = Box;
-                box = PrimitiveExtensions.Round(value);
-                if (oldValue != box)
+                var newValue = PrimitiveExtensions.Round(value);
+                if (oldValue != newValue)
                 {
-
                     Rect = new Objects.Rectangle(box.Value);
+                    box = newValue;
                     OnPropertyChanged(oldValue, value);
                 }
             }
@@ -291,6 +291,7 @@ namespace PdfClown.Documents.Interaction.Annotations
                 var oldValue = Rect;
                 if (!(oldValue?.Equals(value) ?? value == null))
                 {
+                    box = null;
                     BaseDataObject[PdfName.Rect] = value.BaseDataObject;
                     OnPropertyChanged(oldValue, value);
                 }
@@ -642,12 +643,13 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public SKRect Draw(SKCanvas canvas)
         {
-            if (queueRefresh == RefreshAppearanceState.Queued)
+            if ((queueRefresh & RefreshAppearanceState.Queued) == RefreshAppearanceState.Queued
+                && (queueRefresh & RefreshAppearanceState.Suspend) != RefreshAppearanceState.Suspend)
             {
                 try
                 {
-                    queueRefresh = RefreshAppearanceState.Process;
-                    RestoreAppearance();
+                    queueRefresh |= RefreshAppearanceState.Process;
+                    RefreshAppearance();
                 }
                 finally
                 {
@@ -661,11 +663,11 @@ namespace PdfClown.Documents.Interaction.Annotations
             }
             else
             {
-                return RestoreAppearance(canvas);
+                return RefreshAppearance(canvas);
             }
         }
 
-        public void RestoreAppearance()
+        public void RefreshAppearance()
         {
             RefreshBox();
             GenerateAppearance();
@@ -673,7 +675,7 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         protected abstract FormXObject GenerateAppearance();
 
-        public virtual SKRect RestoreAppearance(SKCanvas canvas)
+        public virtual SKRect RefreshAppearance(SKCanvas canvas)
         {
             var appearance = GenerateAppearance();
             return appearance != null ? DrawAppearance(canvas, appearance) : Box;
@@ -759,8 +761,10 @@ namespace PdfClown.Documents.Interaction.Annotations
 
         public virtual void SetBounds(SKRect value) => MoveTo(InvertPageMatrix.MapRect(value));
 
-        protected void OnPropertyChanged<T>(T oldValue, T newValue, [CallerMemberName] string propertyName = "")
+        protected virtual void OnPropertyChanged<T>(T oldValue, T newValue, [CallerMemberName] string propertyName = "")
         {
+            if ((queueRefresh & RefreshAppearanceState.Suspend) == RefreshAppearanceState.Suspend)
+                return;
             PropertyChanged?.Invoke(this, new DetailedPropertyChangedEventArgs<T>(oldValue, newValue, propertyName));
             if (!string.Equals(propertyName, nameof(ModificationDate), StringComparison.Ordinal))
             {
@@ -806,21 +810,45 @@ namespace PdfClown.Documents.Interaction.Annotations
             yield return cpBottomRight ??= new BottomRightControlPoint { Annotation = this };
         }
 
+        public bool IsQueueRefreshAppearance => (queueRefresh | RefreshAppearanceState.Queued) == RefreshAppearanceState.Queued;
+
         public void QueueRefreshAppearance()
         {
-            if (queueRefresh == RefreshAppearanceState.None)
-                queueRefresh = RefreshAppearanceState.Queued;
+            queueRefresh |= RefreshAppearanceState.Queued;
         }
 
+        public void DequeueRefreshAppearance()
+        {
+            queueRefresh &= ~RefreshAppearanceState.Queued;
+        }
 
+        public void SuspendRefreshAppearance()
+        {
+            queueRefresh |= RefreshAppearanceState.Suspend;
+        }
+
+        public void ResumeRefreshAppearance()
+        {
+            queueRefresh &= ~RefreshAppearanceState.Suspend;
+        }
+
+        public void UserQueueRefreshAppearance()
+        {
+            queueRefresh |= RefreshAppearanceState.User;
+        }
+
+        
     }
 
+    [Flags]
     internal enum RefreshAppearanceState
     {
-        None,
-        Queued,
-        Process,
-        Move,
-        GenerateBox
+        None = 0,
+        Queued = 1,
+        Process = 2,
+        Move = 4,
+        GenerateBox = 8,
+        Suspend = 16,
+        User = 32,
     }
 }

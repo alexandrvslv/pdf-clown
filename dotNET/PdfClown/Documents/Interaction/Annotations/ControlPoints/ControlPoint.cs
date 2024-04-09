@@ -34,12 +34,17 @@ namespace PdfClown.Documents.Interaction.Annotations.ControlPoints
 
         public Annotation Annotation { get; set; }
 
-        public abstract SKPoint Point { get; set; }
+        public abstract SKPoint GetPoint();
+
+        public virtual void SetPoint(SKPoint point)
+        {
+            Annotation.UserQueueRefreshAppearance();
+        }
 
         public SKPoint MappedPoint
         {
-            get => Annotation.PageMatrix.MapPoint(Point);
-            set => Point = Annotation.InvertPageMatrix.MapPoint(value);
+            get => Annotation.PageMatrix.MapPoint(GetPoint());
+            set => SetPoint(Annotation.InvertPageMatrix.MapPoint(value));
         }
 
         public SKRect GetViewBounds(SKMatrix viewMatrix)
@@ -52,7 +57,7 @@ namespace PdfClown.Documents.Interaction.Annotations.ControlPoints
 
         public SKRect GetBounds(SKMatrix viewMatrix)
         {
-            var point = Point;
+            var point = GetPoint();
             float xR = r / viewMatrix.ScaleX;
             float yR = r / viewMatrix.ScaleY;
             return new SKRect(point.X - xR, point.Y - yR, point.X + xR, point.Y + yR);
